@@ -2,7 +2,7 @@ import {NextRequest,NextResponse} from 'next/server';
 import {context} from '@/lib/context';
 import {z} from 'zod';
 const text=z.string().trim().max(300),date=z.iso.date(),id=z.uuid();
-const employee=z.object({action:z.literal('employee'),id:id.optional(),name:text.min(1),email:z.union([z.email(),z.literal('')]),phone:text,job_title:text,birth_date:date.nullable(),start_date:date.nullable(),bank_name:text,account_name:text,account_number:text,branch:text,user_id:id.nullable(),status:z.enum(['active','inactive'])});
+const employee=z.object({action:z.literal('employee'),id:id.optional(),name:text.min(1),email:z.union([z.email(),z.literal('')]),phone:text,job_title:text,department:text.default(''),reports_to:text.default(''),birth_date:date.nullable(),start_date:date.nullable(),bank_name:text,account_name:text,account_number:text,branch:text,user_id:id.nullable(),status:z.enum(['active','inactive'])});
 const schema=z.discriminatedUnion('action',[employee,
  z.object({action:z.literal('salary'),employee_id:id,currency:z.enum(['USD','ZWG','GBP','AUD']),monthly_gross:z.number().min(0).max(100000000),effective_date:date}),
  z.object({action:z.literal('leave'),kind:z.enum(['Annual','Sick','Family','Unpaid','Other']),starts:date,ends:date,reason:z.string().trim().min(1).max(3000)}),

@@ -127,5 +127,158 @@ test('database enforces tenant and client boundaries',async t=>{
   await as(1);assert.equal((await db.query("select has_capability($1,'approve_content') as ok",[uuid(10)])).rows[0].ok,false);
   await as(5);assert.equal((await db.query("select has_capability($1,'approve_content') as ok",[uuid(10)])).rows[0].ok,true);
  });
+
+ await t.test('operations upgrade and exact staff setup preserve existing users',async()=>{
+  await db.exec('reset role');
+  await db.exec(await readFile(new URL('../supabase/upgrade-team-operations.sql',import.meta.url),'utf8'));
+  const setup=await readFile(new URL('../supabase/setup-nxt-team.sql',import.meta.url),'utf8');
+  await assert.rejects(db.exec(setup),/Create these Auth accounts/);await db.exec('rollback');
+  await db.exec(`insert into auth.users values('${uuid(6)}','bridget@nxt-workforce.com'),('${uuid(7)}','michael@nxt-workforce.com'),('${uuid(8)}','tatenda@nxt-workforce.com'),('${uuid(9)}','adrian@nxt-workforce.com');`);
+  await db.exec(setup);await db.exec(setup);
+  assert.equal((await db.query('select * from staff_directory')).rows.length,5);
+  assert.equal((await db.query('select * from employees where user_id is not null')).rows.length,4);
+  await as(6);assert.equal((await db.query("select has_capability($1,'payroll') as ok",[uuid(10)])).rows[0].ok,true);
+  await as(9);assert.equal((await db.query('select * from employees')).rows.length,0);
+  assert.equal((await db.query("select has_capability($1,'payroll') as ok",[uuid(10)])).rows[0].ok,false);
+ });
+ await t.test('assigned staff can update task status but cannot reassign or edit its content',async()=>{
+  await as(7);
+  await db.query('insert into tasks(id,tenant_id,title,client_id,project_id,assignee_id) values($1,$2,$3,$4,$5,$6)',[uuid(101),uuid(10),'Marketing assignment',uuid(20),uuid(30),uuid(8)]);
+  await db.query('insert into tasks(id,tenant_id,title,assignee_id) values($1,$2,$3,$4)',[uuid(102),uuid(10),'IT assignment',uuid(9)]);
+  await as(8);assert.equal((await db.query('select * from tasks')).rows.length,1);
+  assert.ok((await db.query('select * from projects where id=$1',[uuid(30)])).rows.length);
+  await db.query("update tasks set status='in_progress' where id=$1",[uuid(101)]);
+  await assert.rejects(db.query("update tasks set title='tamper' where id=$1",[uuid(101)]),/Only your task status/);
+  await assert.rejects(db.query('update tasks set assignee_id=$1 where id=$2',[uuid(9),uuid(101)]),/Only your task status/);
+  assert.equal((await db.query("update tasks set status='done' where id=$1 returning id",[uuid(102)])).rows.length,0);
+  await as(7);await assert.rejects(db.query('update tasks set assignee_id=$1 where id=$2',[uuid(2),uuid(101)]),/Assign a provisioned staff/);
+ });
+ await t.test('leave uses explicit approvers and never self approval',async()=>{
+  await as(8);const leave=(await db.query('insert into leave_requests(tenant_id,kind,starts,ends,reason) values($1,$2,$3,$4,$5) returning id',[uuid(10),'Annual','2026-11-01','2026-11-02','Time off'])).rows[0].id;
+  await as(7);await assert.rejects(db.query("select review_leave($1,$2,'approved','')",[uuid(10),leave]),/Another leave approver/);
+  await as(6);await db.query("select review_leave($1,$2,'approved','Approved')",[uuid(10),leave]);
+  const own=(await db.query('insert into leave_requests(tenant_id,kind,starts,ends,reason) values($1,$2,$3,$4,$5) returning id',[uuid(10),'Annual','2026-11-01','2026-11-02','Time off'])).rows[0].id;
+  await assert.rejects(db.query("select review_leave($1,$2,'approved','')",[uuid(10),own]),/Another leave approver/);
+  await as(5);await db.query("select review_leave($1,$2,'approved','')",[uuid(10),own]);
+ });
+ await t.test('tickets isolate requester, IT manager and other workspaces',async()=>{
+  await as(8);const ticket=(await db.query("insert into it_tickets(tenant_id,title,description,category) values($1,'Laptop issue','Screen is flickering','Hardware') returning id",[uuid(10)])).rows[0].id;
+  await as(7);assert.equal((await db.query('select * from it_tickets')).rows.length,0);
+  await as(2);assert.equal((await db.query('select * from it_tickets')).rows.length,0);
+  await assert.rejects(db.query("insert into it_tickets(tenant_id,title,description,category) values($1,'bad','bad','Other')",[uuid(10)]),/row-level security/);
+  await as(9);assert.equal((await db.query('select * from it_tickets')).rows.length,1);
+  await db.query("update it_tickets set status='Assigned',assignee_id=$1 where id=$2",[uuid(9),ticket]);
+  await assert.rejects(db.query("update it_tickets set status='Closed' where id=$1",[ticket]),/Add a resolution/);
+  await db.query("insert into it_ticket_comments(tenant_id,ticket_id,body) values($1,$2,'Checking the screen')",[uuid(10),ticket]);
+  await db.query("update it_tickets set status='Resolved',resolution='Replaced cable' where id=$1",[ticket]);
+  await as(8);assert.equal((await db.query('select * from it_ticket_comments')).rows.length,1);
+  assert.equal((await db.query("update it_tickets set status='Closed' returning id")).rows.length,0);
+  await as(3);assert.equal((await db.query('select * from it_tickets')).rows.length,0);
+ });
+ await t.test('archive hides shared work; permanent deletion requires owner and prior archive',async()=>{
+  await as(7);await db.query('update projects set archived_at=now() where id=$1',[uuid(30)]);
+  await as(2);assert.equal((await db.query('select * from projects where id=$1',[uuid(30)])).rows.length,0);
+  await as(7);assert.equal((await db.query('delete from projects where id=$1 returning id',[uuid(30)])).rows.length,0);
+  await as(5);await assert.rejects(db.query('delete from projects where id=$1',[uuid(30)]),/foreign key/);
+  await db.query('update tasks set archived_at=now() where id=$1',[uuid(101)]);
+  assert.equal((await db.query('delete from tasks where id=$1 returning id',[uuid(101)])).rows.length,1);
+  await db.query('update projects set archived_at=null where id=$1',[uuid(30)]);
+ });
+ await t.test('client approval email is explicit opt in and only queues at manager approval',async()=>{
+  await as(5);await db.query("update clients set email='reviewer@example.test',approval_email_enabled=true where id=$1",[uuid(20)]);
+  await as(8);const post=(await db.query("insert into social_posts(tenant_id,title,client_id) values($1,'Review email test',$2) returning id",[uuid(10),uuid(20)])).rows[0].id;
+  await db.query("select review_content($1,$2,'submit')",[uuid(10),post]);
+  await as(5);await db.query("select review_content($1,$2,'approve')",[uuid(10),post]);
+  await db.exec('reset role');assert.equal((await db.query("select * from notification_outbox where recipient='reviewer@example.test'")).rows.length,1);
+  await as(2);await db.query("select review_content($1,$2,'approve')",[uuid(10),post]);
+  await db.exec('reset role');assert.equal((await db.query("select * from notification_outbox where recipient='reviewer@example.test'")).rows.length,1);
+  await as(9);assert.equal((await db.query("update clients set approval_email_enabled=true returning id")).rows.length,0);
+ });
+
+ await t.test('reviewed payslip finalisation is payroll-only and preserves calculated values',async()=>{
+  await db.exec('reset role');
+  const testRules={USD:{verified:true,valid_from:'2026-01-01',valid_to:'2026-12-31',source:'Synthetic test fixture, not statutory rates',nssa_rate:0,nssa_ceiling:0,aids_rate:0,bands:[{from:0,rate:0,deduct:0}]}};
+  await db.query('insert into payroll_rules(tenant_id,rules) values($1,$2)',[uuid(10),JSON.stringify(testRules)]);
+  await as(6);const pay=(await db.query('select * from create_business_item($1,$2,$3)',[uuid(10),'payroll',JSON.stringify({title:'Test employee',currency:'USD',due_date:'2026-10-31',payload:{base:500}})])).rows[0];
+  assert.equal(pay.status,'draft');
+  await as(9);await assert.rejects(db.query("select business_action($1,$2,'finalise')",[uuid(10),pay.id]),/Permission denied/);
+  await as(6);const final=(await db.query("select * from business_action($1,$2,'finalise')",[uuid(10),pay.id])).rows[0];assert.equal(final.status,'finalised');assert.equal(Number(final.total),Number(pay.total));
+  await assert.rejects(db.query("select business_action($1,$2,'finalise')",[uuid(10),pay.id]),/Action unavailable/);
+ });
+
+ await t.test('shared workspace access applies without exposing HR or granting task creation',async()=>{
+  await db.exec('reset role');await db.exec(await readFile(new URL('../supabase/upgrade-finance-access.sql',import.meta.url),'utf8'));await db.exec(await readFile(new URL('../supabase/apply-access-rules.sql',import.meta.url),'utf8'));
+  await as(8);assert.equal((await db.query("select has_capability($1,'finance') as ok",[uuid(10)])).rows[0].ok,true);
+  assert.equal((await db.query('select * from employees')).rows.length,0);
+  await db.query("update tasks set title='Shared update',status='done' where id=$1",[uuid(102)]);
+  await assert.rejects(db.query("insert into tasks(tenant_id,title) values($1,'Not authorised')",[uuid(10)]),/row-level security/);
+  await assert.rejects(db.query('update tasks set assignee_id=$1 where id=$2',[uuid(8),uuid(102)]),/Task administrators/);
+  assert.equal((await db.query('delete from tasks returning id')).rows.length,0);
+  assert.equal((await db.query("update clients set title='CRM tamper' returning id")).rows.length,0);
+  await as(7);await db.query("insert into tasks(tenant_id,title) values($1,'Manager task')",[uuid(10)]);
+  await db.query("update tasks set assignee_id=$1 where id=$2",[uuid(8),uuid(102)]);
+  await as(6);assert.ok((await db.query('select * from employees')).rows.length);
+  await as(9);assert.equal((await db.query('select * from employees')).rows.length,0);
+ });
+ await t.test('all staff see tickets but only Adrian and owner can update or comment',async()=>{
+  await as(7);const ticket=(await db.query("insert into it_tickets(tenant_id,title,description,category) values($1,'Shared ticket','A network issue','Network') returning id",[uuid(10)])).rows[0].id;
+  await as(8);assert.ok((await db.query('select * from it_tickets where id=$1',[ticket])).rows.length);
+  assert.equal((await db.query("update it_tickets set status='Waiting' where id=$1 returning id",[ticket])).rows.length,0);
+  await assert.rejects(db.query("insert into it_ticket_comments(tenant_id,ticket_id,body) values($1,$2,'No access')",[uuid(10),ticket]),/row-level security/);
+  await as(9);await db.query("update it_tickets set status='In progress' where id=$1",[ticket]);
+  await db.query("insert into it_ticket_comments(tenant_id,ticket_id,body) values($1,$2,'Investigating')",[uuid(10),ticket]);
+  await as(2);assert.equal((await db.query('select * from it_tickets')).rows.length,0);
+ });
+ await t.test('subscriptions store trials and due dates; expenses require financial approval and create balanced ledger',async()=>{
+  await as(8);await db.query("insert into finance_records(tenant_id,kind,title,currency,amount,status,due_date) values($1,'subscription','Trial app','USD',0,'free_trial','2026-11-01')",[uuid(10)]);
+  await assert.rejects(db.query("insert into finance_records(tenant_id,kind,title,currency,amount,status) values($1,'subscription','Missing due','USD',5,'active')",[uuid(10)]),/renewal\/trial end/);
+  const expense=(await db.query("insert into finance_records(tenant_id,kind,title,currency,amount) values($1,'expense','Office supplies','USD',100) returning id",[uuid(10)])).rows[0].id;
+  await assert.rejects(db.query("update finance_records set status='approved' where id=$1",[expense]),/Financial administrator/);
+  await as(7);await db.query("update finance_records set status='approved' where id=$1",[expense]);
+  await assert.rejects(db.query('update finance_records set amount=200 where id=$1',[expense]),/locked/);
+  await db.query("update finance_records set status='paid' where id=$1",[expense]);
+  await assert.rejects(db.query("update finance_records set status='approved' where id=$1",[expense]),/Invalid financial status/);
+  assert.equal((await db.query('select * from accounting_journals where source_id=$1',[expense])).rows.length,2);
+  for(const j of (await db.query('select * from accounting_journals where source_id=$1',[expense])).rows){assert.equal(j.lines.reduce((s,l)=>s+Number(l.debit),0),j.lines.reduce((s,l)=>s+Number(l.credit),0));}
+  await as(2);assert.equal((await db.query('select * from finance_records')).rows.length,0);assert.equal((await db.query('select * from accounting_journals')).rows.length,0);
+  await as(3);assert.equal((await db.query('select * from finance_records')).rows.length,0);
+ });
+ await t.test('accounting refuses unbalanced entries, non-admin posting, and editing posted entries',async()=>{
+  const insert=lines=>db.query('insert into accounting_journals(tenant_id,entry_date,currency,description,lines) values($1,$2,$3,$4,$5)',[uuid(10),'2026-10-20','USD','Test opening',JSON.stringify(lines)]);
+  await as(7);await assert.rejects(insert([{account:'1000',debit:100,credit:0},{account:'3000',debit:0,credit:90}]),/must balance/);
+  await insert([{account:'1000',debit:100,credit:0},{account:'3000',debit:0,credit:100}]);
+  await assert.rejects(db.query("update accounting_journals set description='Tamper'"),/permission denied/);
+  await as(8);await assert.rejects(insert([{account:'1000',debit:10,credit:0},{account:'3000',debit:0,credit:10}]),/row-level security/);
+ });
+ await t.test('purchase order authorisation and invoice issue/payment integrate with ledger',async()=>{
+  await as(8);const po=(await db.query("insert into finance_records(tenant_id,kind,title,vendor,currency,amount,order_lines) values($1,'purchase_order','Laptops','Supplier','USD',500,'[{\"description\":\"Laptop\",\"quantity\":1,\"unit_price\":500}]') returning id",[uuid(10)])).rows[0].id;
+  await assert.rejects(db.query("update finance_records set status='issued' where id=$1",[po]),/Financial administrator/);
+  await as(7);await db.query("update finance_records set status='issued' where id=$1",[po]);await db.query("update finance_records set status='received' where id=$1",[po]);
+  await as(8);const invoice=(await db.query('select * from create_business_item($1,$2,$3)',[uuid(10),'invoice',JSON.stringify({title:'Ledger invoice',client_id:uuid(20),currency:'USD',payload:{lines:[{description:'Service',quantity:1,unit_price:100}],tax_rate:15}})])).rows[0];
+  await assert.rejects(db.query("select business_action($1,$2,'issue')",[uuid(10),invoice.id]),/Financial administrator/);
+  await as(7);await db.query("select business_action($1,$2,'issue')",[uuid(10),invoice.id]);
+  await db.query("select business_action($1,$2,'payment',$3)",[uuid(10),invoice.id,JSON.stringify({amount:115,reference:'ledger-bank'})]);
+  const posted=(await db.query('select * from accounting_journals where source_id=$1',[invoice.id])).rows;assert.equal(posted.length,1);assert.equal(Number(posted[0].lines.find(l=>l.account==='2100').credit),15);assert.equal(Number(posted[0].lines.find(l=>l.account==='4000').credit),100);
+  assert.equal((await db.query("select * from accounting_journals where source_type='Invoice payment'")).rows.length,1);
+ });
+ await t.test('device register enforces IT management, tenant links and immutable history',async()=>{
+  await db.exec('reset role');await db.exec(await readFile(new URL('../supabase/upgrade-device-register.sql',import.meta.url),'utf8'));
+  await as(9);const d=(await db.query("insert into devices(tenant_id,asset_tag,name,assigned_to,status) values($1,'NXT-001','Laptop',$2,'Assigned') returning id",[uuid(10),uuid(8)])).rows[0].id;
+  await db.query("update devices set status='Under repair',notes='Screen repair' where id=$1",[d]);
+  assert.equal((await db.query('select * from device_history where device_id=$1',[d])).rows.length,2);
+  await assert.rejects(db.query("insert into devices(tenant_id,asset_tag,name) values($1,'NXT-001','Duplicate')",[uuid(10)]),/unique/);
+  await as(8);assert.equal((await db.query('select * from devices')).rows.length,1);
+  assert.equal((await db.query("update devices set name='Tampered' returning id")).rows.length,0);
+  await assert.rejects(db.query("insert into devices(tenant_id,asset_tag,name) values($1,'NXT-002','No access')",[uuid(10)]),/row-level security/);
+  await assert.rejects(db.query("insert into device_history(tenant_id,device_id,snapshot) values($1,$2,'{}')",[uuid(10),d]),/row-level security/);
+  await db.query("insert into it_tickets(tenant_id,title,description,category,device_id) values($1,'Broken screen','Repair please','Hardware',$2)",[uuid(10),d]);
+  await assert.rejects(db.query("insert into it_tickets(tenant_id,title,description,category,device_id) values($1,'Wrong workspace','Repair','Hardware',$2)",[uuid(10),uuid(999)]),/foreign key/);
+  await as(9);await assert.rejects(db.query('update devices set tenant_id=$1 where id=$2',[uuid(11),d]),/identity cannot change/);
+  await assert.rejects(db.query("update device_history set snapshot='{}'"),/permission denied/);
+  await assert.rejects(db.query('delete from devices'),/permission denied/);
+  await as(1);await db.query("update devices set status='Retired',assigned_to=null where id=$1",[d]);
+  await as(2);assert.equal((await db.query('select * from devices')).rows.length,0);assert.equal((await db.query('select * from device_history')).rows.length,0);
+  await as(3);assert.equal((await db.query('select * from devices')).rows.length,0);
+ });
  await db.close();
 });
