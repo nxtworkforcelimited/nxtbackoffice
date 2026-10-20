@@ -3,7 +3,7 @@ export type Capability=typeof capabilities[number];
 export type BusinessKind='quote'|'invoice'|'payroll'|'request'|'sms';
 export type BusinessItem={id:string;tenant_id:string;kind:BusinessKind;title:string;client_id:string|null;status:string;currency:string;payload:Record<string,any>;total:number;paid:number;due_date:string|null;reference:string;created_at:string;parent_id?:string|null};
 export type Comment={id:string;post_id:string;body:string;author_id:string;created_at:string};
-export type Member={user_id:string;role:string;client_id:string|null;permissions:string[]};
+export type Member={name?:string;email?:string;user_id:string;role:string;client_id:string|null;permissions:string[]};
 export type BusinessData={items:BusinessItem[];comments:Comment[];members:Member[];payments:{id:string;invoice_id:string;amount:number;reference:string;created_at:string}[];rules:Record<string,any>};
 export const emptyBusiness:BusinessData={items:[],comments:[],members:[],payments:[],rules:{}};
 export function allowed(role:string,permissions:string[],cap:string){return role==='owner'||permissions.includes(cap);}
