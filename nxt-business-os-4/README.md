@@ -1,3 +1,14 @@
+# v0.8: Device Register added
+See INSTALL_UPDATE.md for the device SQL and deployment steps.
+
+# Version 0.7.0 — shared access and finance
+
+Read **INSTALL_UPDATE.md** first. Apply the NEW finance upgrade and revised access rules before deploying. The latest instructions supersede older release notes. This package has not been deployed to production.
+
+# Version 0.6.0 — staff and operations
+
+Read **INSTALL_UPDATE.md** first. Its setup and access instructions supersede older release notes below. Apply the upgrade SQL before deploying the new source. Live account creation, production installation and email delivery have not been performed by this package.
+
 # Collaboration update 0.4.0
 
 For an existing deployment, start with **COLLABORATION_UPDATE.md**. Run only the new collaboration migration, then the manager setup script. Do not repeat the foundation migrations.
