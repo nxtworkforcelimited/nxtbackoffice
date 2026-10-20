@@ -22,3 +22,6 @@ The test database uses Auth/Storage shims. These checks do not verify live Supab
 
 ## Client invitations
 42 tests passed; production build and TypeScript passed. Coverage includes owner-only linking, email-change checks, staff/cross-client account rejection, repeat-link idempotency, resend cooldown, client isolation, provider failures, no email before safe linking, CSRF, expired/invalid links and session-bound password changes. Live Supabase owner/staff reservation checks passed in a rolled-back transaction; no Auth test account or real email created. Actual recipient inbox delivery and clicking a real email invitation remain unverified.
+
+
+Files/AI update: production build and 44 tests pass. Added database tests for parent plus attachment sharing, client-safe master links, private object access, unauthorized file edits, per-user assistant limits and cross-workspace quota rejection. AI provider calls remain disabled; no live model answer or email was tested. Manual authenticated upload/download and client browser checks still need a real user session.

@@ -88,3 +88,14 @@ A client contact email and the approval-email opt-in flag are stored in the exis
 ## Verification
 
 Production build, TypeScript and 27 database tests passed. Tests cover old and new permissions, task editing restrictions, ticket isolation/admin updates, trial due dates, expense locks/posting, journal balance/immutability, PO approval and invoice/payment ledger entries including tax separation. Browser verification could not run because a browser was unavailable in the runtime. Live Auth, actual Supabase, storage and inbox delivery must be tested after installation.
+
+
+## Task/project files and AI Assistant
+
+Apply upgrade-project-task-files.sql and upgrade-ai-assistant.sql after the previous upgrades. Both have been applied to the connected production Supabase project.
+
+Tasks and Projects now have Files and master documents for saved records. Direct uploads support PDF, Office, CSV, images and MP4/WebM, up to 50 MB each. Documents supports the same formats and serves as the reusable master library. Linking a tracker does not import spreadsheet rows or create tasks automatically. Files are internal by default. Clients require a shared parent and a shared attachment; linked documents additionally require the source document shared with the same client. Uploaders and delivery managers can remove attachment links or change visibility. Removing a link retains its master. Direct file removal removes access; physical object cleanup is not implemented. Signed download links expire after 60 seconds.
+
+AI Assistant is deployed disabled by default. Set an approved project metered-spend cap in Vercel AI Gateway before activation, choose a current text model from the live catalog, then configure server-only AI_GATEWAY_MODEL and AI_CHAT_ENABLED=true and redeploy. Vercel OIDC authenticates production; use AI_GATEWAY_API_KEY only for local or external environments. Never put credentials in NEXT_PUBLIC variables. The integration was checked against the live catalog and Chat Completions documentation; live model authentication and answers have not been tested because activation is pending budget approval.
+
+The assistant uses session RLS and explicit client filters, never service role. It reads the newest 30 rows each of Projects, Tasks, Social Planner and Documents, with bounded descriptions. Document titles only; file contents are not ingested. It has no write tools or conversation memory. Each user has a database-enforced limit of 10 questions per hour per workspace; failed provider requests still count. Usage stores counts only, not chat content. A provider request sends the question and permitted record excerpts through AI Gateway. Review provider retention and logging settings before activation. Hard monetary limits must be set in Gateway; the application question limit is not a monetary cap.
