@@ -1,17 +1,18 @@
 import { NextRequest,NextResponse } from 'next/server';
 import { context } from '@/lib/context';
 import {fileMime,maxFileBytes} from '@/lib/file-formats';
+import {z} from 'zod';
 const BUCKET='workspace-documents';
 export async function POST(req:NextRequest){
  if(req.headers.get('origin')!==req.nextUrl.origin)return NextResponse.json({error:'Forbidden'},{status:403});
  const ctx=await context(req.nextUrl.searchParams.get('workspace'));if(!ctx?.workspace)return NextResponse.json({error:'Staff access required'},{status:403});
- const form=await req.formData();const file=form.get('file');const title=String(form.get('title')??'').trim();const client_id=ctx.workspace.role==='client'?ctx.workspace.client_id:String(form.get('client_id')??'')||null;const visible=ctx.workspace.role==='client'||form.get('client_visible')==='true';
- if(!(file instanceof File)||file.size>maxFileBytes||file.size===0||!title||title.length>160|| (visible&&!client_id)||!fileMime(file.name))return NextResponse.json({error:'Choose a supported document, spreadsheet, image or video up to 50 MB, a title, and a client if sharing.'},{status:400});
+ const parsed=z.object({name:z.string().min(1).max(255),bytes:z.number().int().min(1).max(maxFileBytes),title:z.string().trim().min(1).max(160),client_id:z.uuid().nullable(),client_visible:z.boolean()}).safeParse(await req.json().catch(()=>null));
+ if(!parsed.success||!fileMime(parsed.success?parsed.data.name:''))return NextResponse.json({error:'Choose a supported file up to 50 MB and a title.'},{status:400});
+ const v=parsed.data,title=v.title,client_id=ctx.workspace.role==='client'?ctx.workspace.client_id:v.client_id,visible=ctx.workspace.role==='client'||v.client_visible;
+ if(visible&&!client_id)return NextResponse.json({error:'Choose a client before sharing.'},{status:400});
  const path=`${ctx.workspace.id}/${crypto.randomUUID()}`;
  const {data,error}=await ctx.db.from('documents').insert({tenant_id:ctx.workspace.id,title,client_id,client_visible:visible,status:visible?'shared':'internal',object_path:path}).select().single();
  if(error)return NextResponse.json({error:'Document permissions are invalid.'},{status:400});
- const upload=await ctx.db.storage.from(BUCKET).upload(path,file,{contentType:fileMime(file.name)!,upsert:false});
- if(upload.error){await ctx.db.from('documents').delete().eq('id',data.id);return NextResponse.json({error:'Upload failed. Check bucket configuration.'},{status:400});}
  return NextResponse.json(data,{status:201});
 }
 export async function GET(req:NextRequest){

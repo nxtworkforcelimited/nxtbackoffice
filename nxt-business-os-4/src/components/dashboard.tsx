@@ -3,7 +3,8 @@ import {useState,useRef,useEffect} from 'react';
 import Attachments from './attachments';
 import WorkFiles from './work-files';
 import Assistant from './assistant';
-import {fileAccept} from '@/lib/file-formats';
+import {fileAccept,fileMime,maxFileBytes} from '@/lib/file-formats';
+import {createBrowserClient} from '@supabase/ssr';
 import People from './people';
 import Operations from './operations';
 import Devices from './devices';
@@ -67,7 +68,13 @@ export default function Dashboard({initial,workspace,workspaces,email,demo=false
  const value={title:str('title'),status:m==='social_posts'?'draft':m==='documents'?(client||f.get('client_visible')?'shared':'internal'):str('status')||statuses[m][0],...(m==='clients'?{email:str('email')}:{client_id:ci,client_visible:client||f.get('client_visible')==='on',description:str('description')}),...(['projects','tasks','social_posts'].includes(m)?{due_date:str('due_date')||null}:{}),...(m==='deals'?{amount:num('amount'),currency:'USD'}:{}),...(m==='social_posts'?{channel:str('channel')}:{})};
  let next:RecordRow;
  if(demo)next={id:crypto.randomUUID(),tenant_id:'demo',client_id:ci,client_visible:false,created_at:new Date().toISOString(),...value};
- else if(m==='documents'){f.set('client_visible',client||f.get('client_visible')==='on'?'true':'false');const res=await fetch(`/api/documents?workspace=${workspace.id}`,{method:'POST',body:f});next=await res.json();if(!res.ok)throw new Error((next as any).error);}
+ else if(m==='documents'){
+ const file=f.get('file');if(!(file instanceof File)||!fileMime(file.name)||file.size===0||file.size>maxFileBytes)throw Error('Choose a supported file up to 50 MB.');
+ next=await request('documents',{name:file.name,bytes:file.size,title:str('title'),client_id:ci,client_visible:client||f.get('client_visible')==='on'});
+ const db=createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!,process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!);
+ const uploaded=await db.storage.from('workspace-documents').upload(next.object_path!,file,{contentType:fileMime(file.name)!,upsert:false});
+ if(uploaded.error){await db.from('documents').delete().eq('id',next.id);throw Error('File upload failed. Please retry.');}
+ }
  else next=await request(`records/${m}`,value);
  setData(d=>({...d,[m]:[next,...d[m]]}));if(m==='social_posts')setDetail({module:m,row:next});
  }else{
