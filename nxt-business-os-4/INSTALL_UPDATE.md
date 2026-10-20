@@ -1,3 +1,11 @@
+# Ticket workflow and Back Office Builds update
+
+Tickets use four displayed stages: Not started, In progress, Under review, Complete. Existing database states remain compatible. All internal staff can submit/view tickets; ticket-capability holders and workspace owners update/assign/comment. Clients retain their existing restricted portal.
+
+Back Office Builds: IT administrators add systems, URLs, target dates, assignees, acceptance requirements and review notes. All staff can view. Link tickets through the ticket form. Ready means build Complete plus no linked unresolved tickets; new/reopened tickets immediately make it Not ready on refresh. Review notes are required for Complete. This is a manual readiness tracker, not automatic certification or a connection to other deployments.
+
+For a future installation, run `upgrade-backoffice-builds.sql` after operations, finance and device-register SQL. The migration has already been applied to the NXT Workforce production database on 20 October 2026; do not run it again there. New back offices built from this source include these features once their database is provisioned and IT roles assigned. Separate existing back-office repositories need their own update.
+
 # v0.8 — Device Register
 
 For installations where the operations and finance SQL updates already succeeded:

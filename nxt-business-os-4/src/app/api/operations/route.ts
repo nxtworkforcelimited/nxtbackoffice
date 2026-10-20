@@ -8,8 +8,8 @@ const update=z.discriminatedUnion('action',[
  z.object({action:z.literal('delete'),module:z.enum(['clients','projects','tasks']),id}),
  z.object({action:z.literal('archive'),module:z.enum(['clients','projects','tasks']),id,archived:z.boolean()}),
  z.object({action:z.literal('task_status'),id,status:z.enum(['todo','in_progress','done'])}),
- z.object({action:z.literal('ticket'),device_id:nullableId.optional(),title:text.min(1).max(160),description:text.min(1).max(5000),device:text.max(300),category:z.enum(['Hardware','Software','Network','Account access','Other']),priority:z.enum(['Low','Normal','High','Urgent'])}),
- z.object({action:z.literal('ticket_update'),id,device_id:nullableId.optional(),status:z.enum(['New','Assigned','In progress','Waiting','Resolved','Closed']),assignee_id:nullableId,resolution:text.max(5000),priority:z.enum(['Low','Normal','High','Urgent'])}),
+ z.object({action:z.literal('ticket'),backoffice_id:nullableId.optional(),device_id:nullableId.optional(),title:text.min(1).max(160),description:text.min(1).max(5000),device:text.max(300),category:z.enum(['Hardware','Software','Network','Account access','Other']),priority:z.enum(['Low','Normal','High','Urgent'])}),
+ z.object({action:z.literal('ticket_update'),id,backoffice_id:nullableId.optional(),device_id:nullableId.optional(),status:z.enum(['New','Assigned','In progress','Waiting','Resolved','Closed']),assignee_id:nullableId,resolution:text.max(5000),priority:z.enum(['Low','Normal','High','Urgent'])}),
  z.object({action:z.literal('comment'),ticket_id:id,body:text.min(1).max(5000)})]);
 export async function GET(req:NextRequest){
  const c=await context(req.nextUrl.searchParams.get('workspace'));

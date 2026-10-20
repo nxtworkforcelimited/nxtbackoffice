@@ -280,5 +280,20 @@ test('database enforces tenant and client boundaries',async t=>{
   await as(2);assert.equal((await db.query('select * from devices')).rows.length,0);assert.equal((await db.query('select * from device_history')).rows.length,0);
   await as(3);assert.equal((await db.query('select * from devices')).rows.length,0);
  });
+ await t.test('back-office builds allow staff ticket submission but reserve readiness editing for IT',async()=>{
+  await db.exec('reset role');await db.exec(await readFile(new URL('../supabase/upgrade-backoffice-builds.sql',import.meta.url),'utf8'));
+  await as(9);const build=(await db.query("insert into backoffice_builds(tenant_id,title) values($1,'Client back office') returning id",[uuid(10)])).rows[0].id;
+  await assert.rejects(db.query("update backoffice_builds set status='Complete' where id=$1",[build]),/review notes/);
+  await db.query("update backoffice_builds set status='Under review' where id=$1",[build]);
+  await as(8);assert.equal((await db.query('select * from backoffice_builds')).rows.length,1);
+  assert.equal((await db.query("update backoffice_builds set status='Complete',review_notes='Not authorised' returning id")).rows.length,0);
+  const ticket=(await db.query("insert into it_tickets(tenant_id,title,description,category,backoffice_id) values($1,'Build task','Please test login','Software',$2) returning id",[uuid(10),build])).rows[0].id;
+  await assert.rejects(db.query("insert into it_tickets(tenant_id,title,description,category,backoffice_id) values($1,'Wrong tenant','test','Software',$2)",[uuid(10),uuid(999)]),/foreign key/);
+  await as(9);for(const status of ['In progress','Waiting','Resolved'])await db.query("update it_tickets set status=$1,resolution='Login tested' where id=$2",[status,ticket]);
+  await db.query("update backoffice_builds set status='Complete',review_notes='Reviewed login and acceptance requirements' where id=$1",[build]);
+  await assert.rejects(db.query('update backoffice_builds set tenant_id=$1 where id=$2',[uuid(11),build]),/identity cannot change/);
+  await as(2);assert.equal((await db.query('select * from backoffice_builds')).rows.length,0);
+  await as(3);assert.equal((await db.query('select * from backoffice_builds')).rows.length,0);
+ });
  await db.close();
 });

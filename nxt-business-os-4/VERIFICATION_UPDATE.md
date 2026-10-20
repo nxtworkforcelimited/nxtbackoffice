@@ -14,3 +14,7 @@ The test database uses Auth/Storage shims. These checks do not verify live Supab
 - 28 database tests passed, including register management rights, staff/client isolation, cross-workspace ticket links, duplicate asset tags, protected history and retirement.
 - Browser and live production verification have not been performed.
 - Run upgrade-device-register.sql once before deploying this source.
+
+
+## Tickets and back-office builds
+29 database tests passed; production build passed. New coverage: staff ticket submission linked to builds, IT-only build updates, review notes for completion, tenant isolation. Supabase migration applied to NXT Workforce. Live authenticated UI end-to-end checks not performed.
