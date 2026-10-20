@@ -1,3 +1,13 @@
+# Owner-only client portal invitations
+
+Applied to NXT Workforce on 20 October 2026: `upgrade-client-invitations.sql`. Do not run the same upgrade again there. Future installations need this SQL after the team operations upgrade.
+
+Use Contacts → open a saved active contact → Client portal invitation → Invite client. Save the intended email first. Only owners can invite/resend. Sending explicitly grants that client login access to this contact's shared work. Staff and other-client/workspace accounts are rejected; existing valid client logins receive a fresh password-setup link. Resend is rate-limited to one attempt per contact per 60 seconds. Every attempt is recorded without the token. “Accepted by email provider” does not prove inbox delivery or invitation acceptance.
+
+Client opens email → Continue to password setup → enters and confirms a password of 12–128 characters → portal opens. Links use Supabase one-time verification; expired/used links need resend. The initial email-link GET does not consume the token. Password setup requires a matching short-lived server cookie and verified user session. Existing client membership visibility restrictions still apply. A contact/email edit does not revoke prior logins; remove obsolete memberships separately.
+
+Required production environment: SUPABASE_SERVICE_ROLE_KEY, NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY, RESEND_API_KEY, NOTIFICATION_FROM, NEXT_PUBLIC_APP_URL (HTTPS). Email uses the configured sender and Resend directly; no cron is needed for invitations. Service credentials and generated setup tokens stay server-side. No new invitation emails were sent during deployment verification.
+
 # Ticket workflow and Back Office Builds update
 
 Tickets use four displayed stages: Not started, In progress, Under review, Complete. Existing database states remain compatible. All internal staff can submit/view tickets; ticket-capability holders and workspace owners update/assign/comment. Clients retain their existing restricted portal.

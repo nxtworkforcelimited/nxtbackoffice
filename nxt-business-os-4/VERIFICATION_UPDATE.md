@@ -18,3 +18,7 @@ The test database uses Auth/Storage shims. These checks do not verify live Supab
 
 ## Tickets and back-office builds
 29 database tests passed; production build passed. New coverage: staff ticket submission linked to builds, IT-only build updates, review notes for completion, tenant isolation. Supabase migration applied to NXT Workforce. Live authenticated UI end-to-end checks not performed.
+
+
+## Client invitations
+42 tests passed; production build and TypeScript passed. Coverage includes owner-only linking, email-change checks, staff/cross-client account rejection, repeat-link idempotency, resend cooldown, client isolation, provider failures, no email before safe linking, CSRF, expired/invalid links and session-bound password changes. Live Supabase owner/staff reservation checks passed in a rolled-back transaction; no Auth test account or real email created. Actual recipient inbox delivery and clicking a real email invitation remain unverified.
