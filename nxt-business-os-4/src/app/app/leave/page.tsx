@@ -1,0 +1,3 @@
+import {redirect} from 'next/navigation';import {context} from '@/lib/context';import LeaveWorkspace from '@/components/leave-workspace';
+export const dynamic='force-dynamic';
+export default async function Page({searchParams}:{searchParams:Promise<{workspace?:string}>}){const c=await context((await searchParams).workspace);if(!c?.workspace)redirect('/login');if(c.workspace.role==='client')return <main className="setup">Staff access required.</main>;return <main style={{maxWidth:1200,margin:'auto',padding:24}}><a href={'/app?workspace='+c.workspace.id}>← Back office</a><LeaveWorkspace workspace={c.workspace}/></main>;}

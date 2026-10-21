@@ -1,0 +1,43 @@
+name: Apply reviewed workflow release
+on:
+  push:
+    branches: ['feat/workflow-payroll-leave']
+    paths: ['scripts/reviewed-release.json', '.github/workflows/apply-reviewed-release.yml']
+permissions:
+  contents: write
+jobs:
+  apply-tested-delta:
+    if: github.repository == 'nxtworkforcelimited/nxtbackoffice' && github.ref == 'refs/heads/feat/workflow-payroll-leave'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6.1.0
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Apply exact sandbox-verified files
+        run: python3 scripts/apply-reviewed-release.py
+      - name: Install locked dependencies
+        working-directory: nxt-business-os-4
+        run: npm ci --no-audit --no-fund
+      - name: Check types and test tenant, workflow, payroll and leave boundaries
+        working-directory: nxt-business-os-4
+        run: npm run typecheck && npm test && npm run build
+      - name: Save verified source and remove this one-time release job
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json,subprocess
+          for item in json.loads(Path('scripts/reviewed-release.json').read_text()):
+              data=Path(item['path']).read_bytes()
+              digest=hashlib.sha1(b'blob '+str(len(data)).encode()+b'\x00'+data).hexdigest()
+              if digest != item['after']:
+                  raise RuntimeError('Post-test source mismatch: '+item['path'])
+              subprocess.run(['git','add','--',item['path']],check=True)
+          PY
+          git rm -- scripts/apply-reviewed-release.py scripts/reviewed-release.json .github/workflows/apply-reviewed-release.yml
+          git commit -m 'Apply tested workflow fixes and locked PDF extraction dependency'
+          git push origin HEAD:refs/heads/feat/workflow-payroll-leave
