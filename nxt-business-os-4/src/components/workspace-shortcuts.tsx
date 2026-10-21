@@ -1,3 +1,7 @@
 'use client';
 import type {Workspace} from '@/lib/types';
-export default function WorkspaceShortcuts({workspace}:{workspace:Workspace}){const suffix='?workspace='+workspace.id;if(workspace.role==='client')return null;return <nav className="no-print" aria-label="New workspace tools" style={{position:'fixed',bottom:12,right:12,zIndex:45,display:'flex',gap:8,padding:12,borderRadius:12,background:'#ffffff',border:'1px solid #ccd2da',boxShadow:'0 4px 16px #0002',flexWrap:'wrap',maxWidth:'90vw'}}><a href={'/app/work'+suffix}>Task Builder / Upload</a><span>·</span><a href={'/app/leave'+suffix}>Leave balances</a>{(workspace.role==='owner'||workspace.permissions?.includes('payroll'))&&<><span>·</span><a href={'/app/payroll'+suffix}>Payroll calculator · $5/h</a></>}</nav>;}
+/**
+ * Sample 4 places navigation inside the main application shell.
+ * The old fixed shortcut strip duplicated Tasks, Leave and Payroll, so it is intentionally hidden.
+ */
+export default function WorkspaceShortcuts({workspace}:{workspace:Workspace}){void workspace;return null;}
