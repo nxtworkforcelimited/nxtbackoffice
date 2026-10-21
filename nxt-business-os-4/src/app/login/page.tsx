@@ -2,6 +2,9 @@ import {configured} from '@/lib/supabase/server';
 import LoginForm from './login-form';
 import styles from './login.module.css';
 
+export const dynamic='force-dynamic';
+export const revalidate=0;
+
 export default async function Login({searchParams}:{searchParams:Promise<{error?:string}>}) {
   const error=(await searchParams).error;
   return <main className={styles.shell}>
