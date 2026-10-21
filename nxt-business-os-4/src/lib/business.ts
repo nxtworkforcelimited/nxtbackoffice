@@ -1,4 +1,4 @@
-export const capabilities=['crm','delivery','content','approve_content','documents','finance','payroll','sms','reports','website','hr','approve_leave','tickets','task_admin','finance_admin'] as const;
+export const capabilities=['crm','delivery','content','approve_content','documents','finance','payroll','sms','reports','website','hr','approve_leave','tickets','task_admin','finance_admin','payroll_admin'] as const;
 export type Capability=typeof capabilities[number];
 export type BusinessKind='quote'|'invoice'|'payroll'|'request'|'sms';
 export type BusinessItem={id:string;tenant_id:string;kind:BusinessKind;title:string;client_id:string|null;status:string;currency:string;payload:Record<string,any>;total:number;paid:number;due_date:string|null;reference:string;created_at:string;parent_id?:string|null};
