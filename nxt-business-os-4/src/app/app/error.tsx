@@ -1,2 +1,2 @@
-"use client";
-export default function ErrorPage({reset}:{reset:()=>void}) {return <main className="setup"><h1>We couldn’t load your workspace</h1><p>Check the Supabase configuration and migration, then try again. No sample data has replaced your records.</p><button onClick={reset}>Try again</button></main>;}
+'use client';
+export default function WorkspaceError({reset}:{reset:()=>void}){return <main className="panel people-form"><h1>Your workspace could not load</h1><p>This may be a temporary connection or service problem. Your account has not been changed.</p><button className="primary" onClick={reset}>Try again</button><p><a href="/login">Return to sign in</a></p></main>;}

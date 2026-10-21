@@ -1,0 +1,12 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import ts from 'typescript';
+const source=await readFile(new URL('../src/lib/request-origin.ts',import.meta.url),'utf8');
+const {trustedFormOrigin}=await import('data:text/javascript;base64,'+Buffer.from(ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.ES2022}}).outputText).toString('base64'));
+const req=headers=>new Request('https://deployment.example.test/auth/confirm',{method:'POST',headers});
+test('accepts exact current and explicitly configured portal origins',()=>{assert.equal(trustedFormOrigin(req({origin:'https://deployment.example.test'})),true);assert.equal(trustedFormOrigin(req({origin:'https://portal.example.test'}),['https://portal.example.test']),true);});
+test('rejects foreign, null, suffix-spoofed origins and forwarded-host poisoning',()=>{for(const origin of ['null','https://evil.test','https://portal.example.test.evil.test'])assert.equal(trustedFormOrigin(req({origin,'x-forwarded-host':'evil.test'}),['https://portal.example.test']),false);});
+test('missing Origin requires same-origin browser metadata or a trusted referer',()=>{assert.equal(trustedFormOrigin(req({})),false);assert.equal(trustedFormOrigin(req({'sec-fetch-site':'same-origin'})),true);assert.equal(trustedFormOrigin(req({referer:'https://deployment.example.test/auth/setup'})),true);assert.equal(trustedFormOrigin(req({referer:'https://evil.test/'})),false);});
+test('explicit hostile Origin cannot fall back to a trusted referer',()=>{assert.equal(trustedFormOrigin(req({origin:'https://evil.test',referer:'https://deployment.example.test/'})),false);});
+test('auth forms no longer return bare downloadable Forbidden responses',async()=>{for(const route of ['login','confirm','set-password','signout']){const s=await readFile(new URL('../src/app/auth/'+route+'/route.ts',import.meta.url),'utf8');assert.ok(s.includes('trustedRequest(req)'));assert.ok(!s.includes("new Response('Forbidden'"));}});
