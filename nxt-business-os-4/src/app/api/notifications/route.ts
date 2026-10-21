@@ -1,6 +1,7 @@
 import {NextRequest,NextResponse} from 'next/server';
 import {createClient} from '@supabase/supabase-js';
 import {processFinanceOnboarding} from '@/lib/server/staff-onboarding';
+import {processStaffPasswordReset} from '@/lib/server/staff-password-reset';
 export const dynamic='force-dynamic';
 export const maxDuration=60;
 export async function GET(req:NextRequest){
@@ -9,12 +10,14 @@ export async function GET(req:NextRequest){
  const key=process.env.RESEND_API_KEY,from=process.env.NOTIFICATION_FROM,service=process.env.SUPABASE_SERVICE_ROLE_KEY,url=process.env.NEXT_PUBLIC_SUPABASE_URL,app=process.env.NEXT_PUBLIC_APP_URL;
  if(!key||!from||!service||!url||!app)return NextResponse.json({error:'Email delivery is not configured.'},{status:503});
  const db=createClient(url,service,{auth:{persistSession:false,autoRefreshToken:false}});
- const onboarding=await processFinanceOnboarding(db,app,async(email,subject,body,id)=>{
+ const send=async(email:string,subject:string,body:string,id:string)=>{
   const r=await fetch('https://api.resend.com/emails',{method:'POST',headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json','Idempotency-Key':`nxt-staff-${id}`},body:JSON.stringify({from,to:[email],subject,text:body}),signal:AbortSignal.timeout(10000)});
-  if(!r.ok)throw Error('Staff invitation was not accepted');
- });
+  if(!r.ok)throw Error('Staff email was not accepted');
+ };
+ const passwordReset=await processStaffPasswordReset(db,app,send);
+ const onboarding=await processFinanceOnboarding(db,app,send);
  const {data,error}=await db.from('notification_outbox').select('*').is('sent_at',null).lt('attempts',5).order('created_at').limit(25);
- if(error)return NextResponse.json({error:'Queue unavailable',onboarding},{status:500});
+ if(error)return NextResponse.json({error:'Queue unavailable',onboarding,passwordReset},{status:500});
  let sent=0;
  for(const n of data??[]){
   try{
@@ -24,5 +27,5 @@ export async function GET(req:NextRequest){
    if(saved.error)throw new Error('Delivery status could not be saved');sent++;
   }catch(e){await db.from('notification_outbox').update({attempts:n.attempts+1,last_error:(e as Error).message}).eq('id',n.id).is('sent_at',null);}
  }
- return NextResponse.json({sent,checked:data?.length??0,onboarding});
+ return NextResponse.json({sent,checked:data?.length??0,onboarding,passwordReset});
 }

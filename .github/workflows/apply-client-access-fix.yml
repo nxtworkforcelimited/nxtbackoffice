@@ -1,0 +1,60 @@
+name: Verify client portal and staff recovery release
+on:
+  push:
+    branches: ['fix/client-copy-staff-recovery']
+    paths: ['scripts/client-copy-release.json', '.github/workflows/apply-client-access-fix.yml']
+permissions:
+  contents: write
+jobs:
+  verify-release:
+    if: github.repository == 'nxtworkforcelimited/nxtbackoffice' && github.ref == 'refs/heads/fix/client-copy-staff-recovery'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6.1.0
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Apply only the exact sandbox-tested client-view changes
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json
+          def blob(data):
+              return hashlib.sha1(b'blob '+str(len(data)).encode()+b'\x00'+data).hexdigest()
+          for item in json.loads(Path('scripts/client-copy-release.json').read_text()):
+              path=Path(item['path'])
+              if not item['path'].startswith('nxt-business-os-4/src/') or '..' in path.parts:
+                  raise RuntimeError('Unexpected source path')
+              data=path.read_bytes()
+              if blob(data)!=item['before']:
+                  raise RuntimeError('Base changed: '+item['path'])
+              text=data.decode('utf8')
+              for start,end,value in reversed(item['edits']):
+                  text=text[:start]+value+text[end:]
+              result=text.encode('utf8')
+              if blob(result)!=item['after']:
+                  raise RuntimeError('Patched file differs from tested source')
+              path.write_bytes(result)
+          PY
+      - name: Install and verify the release
+        working-directory: nxt-business-os-4
+        run: npm ci --no-audit --no-fund && npm run typecheck && npm test && npm run build
+      - name: Commit verified changes and remove the one-time release job
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json,subprocess
+          for item in json.loads(Path('scripts/client-copy-release.json').read_text()):
+              data=Path(item['path']).read_bytes()
+              digest=hashlib.sha1(b'blob '+str(len(data)).encode()+b'\x00'+data).hexdigest()
+              if digest != item['after']:
+                  raise RuntimeError('Post-test source mismatch')
+              subprocess.run(['git','add','--',item['path']],check=True)
+          PY
+          git rm -- scripts/client-copy-release.json .github/workflows/apply-client-access-fix.yml
+          git commit -m 'Apply browser-tested client copy isolation and neutral account setup'
+          git push origin HEAD:refs/heads/fix/client-copy-staff-recovery
