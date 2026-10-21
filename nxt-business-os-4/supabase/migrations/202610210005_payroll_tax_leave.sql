@@ -22,7 +22,7 @@ create table public.leave_account_history(id uuid primary key default gen_random
 create table public.leave_holidays(id uuid primary key default gen_random_uuid(),tenant_id uuid not null references public.tenants(id),holiday date not null,label text not null,unique(tenant_id,holiday));
 alter table public.leave_accounts enable row level security;alter table public.leave_adjustments enable row level security;alter table public.leave_account_history enable row level security;alter table public.leave_holidays enable row level security;
 create function public.leave_manager(t uuid) returns boolean language sql stable security definer set search_path='' as $$select public.has_capability(t,'payroll_admin') or public.has_capability(t,'hr') or public.has_capability(t,'approve_leave');$$;
-create function public.leave_account_visible(t uuid,e uuid) returns boolean language sql stable security definer set search_path='' as $$select public.leave_manager(t) or exists(select 1 from public.employees where tenant_id=t and id=e and user_id=auth.uid());$$;
+create function public.leave_account_visible(t uuid,e uuid) returns boolean language sql stable security definer set search_path='' as $$select public.leave_manager(t) or public.has_capability(t,'payroll') or exists(select 1 from public.employees where tenant_id=t and id=e and user_id=auth.uid());$$;
 create policy leave_account_read on public.leave_accounts for select to authenticated using(public.leave_account_visible(tenant_id,employee_id));
 create policy leave_adjustment_read on public.leave_adjustments for select to authenticated using(public.leave_account_visible(tenant_id,employee_id));
 create policy leave_history_read on public.leave_account_history for select to authenticated using(public.leave_manager(tenant_id));
@@ -40,11 +40,15 @@ create trigger leave_adjustments_audit after insert on public.leave_adjustments 
 create function public.configure_leave_account(t uuid,e uuid,v jsonb) returns void language plpgsql security definer set search_path='' as $$declare employee public.employees;begin
  if auth.uid() is null or not public.leave_manager(t) then raise exception 'HR or payroll administrator required';end if;
  select * into employee from public.employees where tenant_id=t and id=e for update;if not found then raise exception 'Employee unavailable';end if;
- if employee.start_date is null then raise exception 'Save the employee start date first. Do not invent it.';end if;
+ if employee.start_date is null then
+  if coalesce(v->>'employee_start_date','') !~ '^\d{4}-\d{2}-\d{2}$' then raise exception 'Enter the verified employment start date';end if;
+  employee.start_date:=(v->>'employee_start_date')::date;
+  update public.employees set start_date=employee.start_date where tenant_id=t and id=e;
+ end if;
  if (v->>'opening_date')::date<employee.start_date or (v->>'opening_date')::date>current_date or (v->>'accrual_start')::date<employee.start_date or (v->>'opening_balance')::numeric>(v->>'balance_cap')::numeric then raise exception 'Check start/opening dates and the opening balance';end if;
  insert into public.leave_accounts(tenant_id,employee_id,opening_date,opening_balance,accrual_start,monthly_rate,balance_cap,day_basis,policy_note,configured_by) values(t,e,(v->>'opening_date')::date,(v->>'opening_balance')::numeric,(v->>'accrual_start')::date,(v->>'monthly_rate')::numeric,(v->>'balance_cap')::numeric,v->>'day_basis',v->>'policy_note',auth.uid()) on conflict(tenant_id,employee_id) do update set opening_date=excluded.opening_date,opening_balance=excluded.opening_balance,accrual_start=excluded.accrual_start,monthly_rate=excluded.monthly_rate,balance_cap=excluded.balance_cap,day_basis=excluded.day_basis,policy_note=excluded.policy_note,configured_by=auth.uid(),updated_at=now();
 end;$$;
-create function public.leave_balance(t uuid,e uuid,as_of date default current_date) returns jsonb language plpgsql stable security definer set search_path='' as $$
+create function public.leave_balance(t uuid,e uuid,as_of date default current_date) returns jsonb language plpgsql volatile security definer set search_path='' as $$
 declare a public.leave_accounts;employee public.employees;r record;balance numeric:=0;earned numeric:=0;used numeric:=0;adjusted numeric:=0;credit numeric;reserved numeric:=0;pending numeric:=0;begin
  if auth.uid() is null or not public.leave_account_visible(t,e) then raise exception 'Leave account access denied';end if;
  select * into employee from public.employees where tenant_id=t and id=e;if not found then raise exception 'Employee unavailable';end if;
@@ -65,7 +69,7 @@ declare a public.leave_accounts;employee public.employees;r record;balance numer
  select count(*) into pending from public.leave_requests l cross join lateral generate_series(l.starts,l.ends,interval '1 day') d where l.tenant_id=t and l.user_id=employee.user_id and l.kind='Annual' and l.status='pending' and (a.day_basis='calendar' or (extract(isodow from d)<6 and not exists(select 1 from public.leave_holidays h where h.tenant_id=t and h.holiday=d::date)));
  return jsonb_build_object('configured',true,'employee_id',e,'name',employee.name,'as_of',as_of,'opening',a.opening_balance,'accrued',round(earned,2),'taken',used,'adjustments',adjusted,'balance',round(balance,2),'reserved',reserved,'pending',pending,'available',round(balance-reserved,2),'policy',to_jsonb(a));
 end;$$;
-create function public.leave_dashboard(t uuid) returns jsonb language plpgsql stable security definer set search_path='' as $$declare rows jsonb:='[]';e record;begin
+create function public.leave_dashboard(t uuid) returns jsonb language plpgsql volatile security definer set search_path='' as $$declare rows jsonb:='[]';e record;begin
  if auth.uid() is null or not public.is_staff(t) then raise exception 'Staff access required';end if;
  for e in select id,name,user_id,start_date,status from public.employees where tenant_id=t and (public.leave_manager(t) or user_id=auth.uid()) order by name loop rows:=rows||jsonb_build_array(jsonb_build_object('employee',to_jsonb(e),'balance',public.leave_balance(t,e.id,current_date)));end loop;return rows;
 end;$$;

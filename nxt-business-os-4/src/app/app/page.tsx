@@ -4,6 +4,7 @@ import { context } from '@/lib/context';
 import { modules, type Data } from '@/lib/types';
 import {type BusinessData} from '@/lib/business';
 import Dashboard from '@/components/dashboard';
+import WorkspaceShortcuts from '@/components/workspace-shortcuts';
 export const dynamic='force-dynamic';
 export default async function Page({searchParams}:{searchParams:Promise<{workspace?:string}>}){
  if(!configured())redirect('/login');
@@ -21,5 +22,5 @@ export default async function Page({searchParams}:{searchParams:Promise<{workspa
  for(const result of [items,comments,payments,rules,memberRows,grants])if(result.error)throw new Error('Business workspace could not load. Check the migration and permissions.');
  const directory=await ctx.db.from('staff_directory').select('user_id,name,email').eq('tenant_id',ctx.workspace.id);
  const business:BusinessData={items:items.data??[],comments:comments.data??[],payments:payments.data??[],rules:rules.data?.rules??{},members:(memberRows.data??[]).map(m=>({...m,...(directory.data??[]).find(d=>d.user_id===m.user_id),permissions:(grants.data??[]).filter(g=>g.user_id===m.user_id).map(g=>g.capability)}))};
- return <Dashboard business={business} initial={Object.fromEntries(pairs) as Data} workspace={ctx.workspace} workspaces={ctx.spaces} email={ctx.user.email??''}/>;
+ return <><WorkspaceShortcuts workspace={ctx.workspace}/><Dashboard business={business} initial={Object.fromEntries(pairs) as Data} workspace={ctx.workspace} workspaces={ctx.spaces} email={ctx.user.email??''}/></>;
 }

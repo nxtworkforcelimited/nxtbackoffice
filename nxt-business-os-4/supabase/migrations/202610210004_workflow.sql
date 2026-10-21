@@ -44,7 +44,7 @@ create function nxt_private.work_parent(t uuid,k text,r uuid) returns jsonb lang
  execute format('select to_jsonb(x) from public.%I x where tenant_id=$1 and id=$2 and archived_at is null',k) into p using t,r;return p;
 end;$$;
 create function public.work_external_access(t uuid,k text,r uuid) returns boolean language plpgsql stable security definer set search_path='' as $$declare p jsonb;begin
- p:=nxt_private.work_parent(t,k,r);return p is not null and (public.is_work_reviewer(t) or ((p->>'client_visible')::boolean and public.can_read_client(t,(p->>'client_id')::uuid)));
+ p:=nxt_private.work_parent(t,k,r);return p is not null and coalesce((p->>'client_visible')::boolean,false) and (public.is_work_reviewer(t) or public.can_read_client(t,(p->>'client_id')::uuid));
 end;$$;
 revoke all on function nxt_private.work_parent(uuid,text,uuid),public.work_external_access(uuid,text,uuid) from public,anon;revoke all on function nxt_private.work_parent(uuid,text,uuid) from authenticated;grant execute on function public.work_external_access(uuid,text,uuid) to authenticated;
 create policy comment_read on public.work_comments for select to authenticated using((scope='internal' and public.is_staff(tenant_id)) or (scope='external' and public.work_external_access(tenant_id,kind,record_id)));
@@ -71,7 +71,9 @@ create function public.work_core_guard() returns trigger language plpgsql securi
   if f.id is null or f.approved_revision<>f.revision or f.stage not in ('approved','complete') then raise exception 'Review approval is required before release or completion';end if;
  elsif new.status in ('under_review','review') and new.status is distinct from old.status then
   if f.stage<>'under_review' then raise exception 'Use Submit for review in the Task Builder';end if;
- end if;return new;
+ end if;
+ if new.status is distinct from old.status and new.status in ('todo','planned','in_progress','active','changes_requested') then new.client_visible:=false;end if;
+ return new;
 end;$$;
 create function public.work_core_after() returns trigger language plpgsql security definer set search_path='' as $$begin
  if tg_op='INSERT' then insert into public.work_flow(tenant_id,kind,record_id) values(new.tenant_id,tg_table_name,new.id) on conflict do nothing;
@@ -104,7 +106,7 @@ declare rid uuid:=nullif(v->>'id','')::uuid;ci uuid:=nullif(v->>'client_id',''):
   if dep=f.id or not exists(select 1 from public.work_flow where tenant_id=t and id=dep and internal_due<start_date) then raise exception 'Dependency must finish before this work starts';end if;
   if exists(with recursive chain as(select id,depends_on from public.work_flow where tenant_id=t and id=dep union select w.id,w.depends_on from public.work_flow w join chain c on w.id=c.depends_on where w.tenant_id=t)select 1 from chain where id=f.id) then raise exception 'Dependency cycle detected';end if;
  end if;
- if (f.internal_due,f.scheduled_start,f.depends_on,f.share_on_approval) is distinct from (internal_date,start_date,dep,coalesce((v->>'share_on_approval')::boolean,false)) then
+ if oldp is not null and (f.internal_due,f.scheduled_start,f.depends_on,f.share_on_approval) is distinct from (internal_date,start_date,dep,coalesce((v->>'share_on_approval')::boolean,false)) then
   update public.work_flow set revision=revision+1,approved_revision=0,stage='in_progress' where id=f.id;
   execute format('update public.%I set client_visible=false,status=$1 where tenant_id=$2 and id=$3',k) using case when k='tasks' then 'in_progress' else 'active' end,t,rid;
  end if;
@@ -128,7 +130,7 @@ declare f public.work_flow;p jsonb;required_count int;approved_count int;mode te
   if not exists(select 1 from public.work_reviewers where tenant_id=t) then raise exception 'The owner must configure reviewers';end if;
   update public.work_flow set stage='under_review',revision=revision+1,approved_revision=0,updated_at=now() where id=fid;
   execute format('update public.%I set status=$1,client_visible=false where tenant_id=$2 and id=$3',f.kind) using case when f.kind='tasks' then 'under_review' else 'review' end,t,f.record_id;
-  perform nxt_private.notify_reviewers(t,'Under review: '||(p->>'title'),'Work needs internal review. Open Task Builder: https://nxt-business-os.vercel.app/app/work?workspace='||t||'&item='||f.record_id);
+  perform nxt_private.notify_reviewers(t,'Under review: '||(p->>'title'),'Work needs internal review. Open Task Builder: https://nxt-business-os.vercel.app/app/work?workspace='||t||'&kind='||f.kind||'&item='||f.record_id);
  elsif a in ('approve','changes') then
   if not public.is_work_reviewer(t) or f.stage<>'under_review' then raise exception 'Only designated reviewers can review submitted work';end if;
   insert into public.work_votes(tenant_id,flow_id,revision,reviewer_id,decision,note) values(t,fid,f.revision,auth.uid(),case when a='approve' then 'approved' else 'changes_requested' end,note) on conflict(flow_id,revision,reviewer_id) do update set decision=excluded.decision,note=excluded.note,created_at=now();
@@ -140,7 +142,7 @@ declare f public.work_flow;p jsonb;required_count int;approved_count int;mode te
    select coalesce(approval_mode,'all') into mode from public.work_settings where tenant_id=t;
    select count(*) into required_count from public.work_reviewers where tenant_id=t;
    select count(*) into approved_count from public.work_votes v join public.work_reviewers r on r.tenant_id=v.tenant_id and r.user_id=v.reviewer_id where v.flow_id=fid and v.revision=f.revision and v.decision='approved';
-   if approved_count>=case when mode='any' then 1 else required_count end then
+   if approved_count>=(case when mode='any' then 1 else required_count end) then
     update public.work_flow set stage='approved',approved_revision=revision,updated_at=now() where id=fid;
     execute format('update public.%I set status=$1,client_visible=$2 where tenant_id=$3 and id=$4',f.kind) using 'approved',f.share_on_approval and p->>'client_id' is not null,t,f.record_id;
     if f.share_on_approval and p->>'client_id' is not null then
@@ -157,12 +159,12 @@ declare f public.work_flow;p jsonb;required_count int;approved_count int;mode te
  return (select to_jsonb(w) from public.work_flow w where id=fid);
 end;$$;
 create function public.commit_task_import(t uuid,request_id uuid,source_label text,entries jsonb) returns jsonb language plpgsql security definer set search_path='' as $$
-declare fingerprint text:=md5(entries::text);oldrow public.task_imports;e jsonb;created jsonb;ids uuid[]:='{}';flowids uuid[]:='{}';depindex int;index_no int:=0;begin
+declare v_fingerprint text:=md5(entries::text);oldrow public.task_imports;e jsonb;created jsonb;ids uuid[]:='{}';flowids uuid[]:='{}';depindex int;index_no int:=0;begin
  if auth.uid() is null or not (public.has_capability(t,'task_admin') or public.is_work_reviewer(t)) then raise exception 'Task manager required';end if;
  if request_id is null or jsonb_typeof(entries) is distinct from 'array' or jsonb_array_length(entries) not between 1 and 100 then raise exception 'Import between 1 and 100 reviewed tasks';end if;
- perform pg_advisory_xact_lock(hashtextextended(t::text||auth.uid()::text||fingerprint,0));
- select * into oldrow from public.task_imports where tenant_id=t and created_by=auth.uid() and (id=request_id or task_imports.fingerprint=commit_task_import.fingerprint) limit 1;
- if found then if oldrow.fingerprint<>fingerprint then raise exception 'Import request already used';end if;return jsonb_build_object('ids',oldrow.task_ids,'duplicate',true);end if;
+ perform pg_advisory_xact_lock(hashtextextended(t::text||auth.uid()::text||v_fingerprint,0));
+ select * into oldrow from public.task_imports where tenant_id=t and created_by=auth.uid() and (id=request_id or task_imports.fingerprint=v_fingerprint) limit 1;
+ if found then if oldrow.fingerprint<>v_fingerprint then raise exception 'Import request already used';end if;return jsonb_build_object('ids',oldrow.task_ids,'duplicate',true);end if;
  for e in select value from jsonb_array_elements(entries) loop
   index_no:=index_no+1;depindex:=nullif(e->>'dependency_index','')::int;
   if depindex is not null and (depindex<1 or depindex>=index_no) then raise exception 'Dependency must refer to an earlier imported row';end if;
@@ -170,7 +172,7 @@ declare fingerprint text:=md5(entries::text);oldrow public.task_imports;e jsonb;
   created:=public.save_work(t,'tasks',(e-'dependency_index')||jsonb_build_object('source_name',left(source_label,200),'share_on_approval',false,'depends_on',case when depindex is null then null else flowids[depindex] end));
   ids:=array_append(ids,(created->>'id')::uuid);flowids:=array_append(flowids,(created->>'flow_id')::uuid);
  end loop;
- insert into public.task_imports(id,tenant_id,created_by,fingerprint,source_name,task_ids) values(request_id,t,auth.uid(),fingerprint,left(source_label,200),ids);
+ insert into public.task_imports(id,tenant_id,created_by,fingerprint,source_name,task_ids) values(request_id,t,auth.uid(),v_fingerprint,left(source_label,200),ids);
  return jsonb_build_object('ids',ids,'duplicate',false);
 end;$$;
 create function public.notify_work_chat() returns trigger language plpgsql security definer set search_path='' as $$declare label text;ci uuid;recipient text;begin

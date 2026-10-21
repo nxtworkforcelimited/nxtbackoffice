@@ -20,7 +20,7 @@ export function parseCSV(text:string):string[][]{const rows:string[][]=[];let ro
 }
 export function proposeTasks(text:string,reference:string,staff:{user_id:string;name:string;email:string}[]=[]):ProposedTask[]{
  if(text.length>150000)throw Error('Use at most 150,000 characters per import. Split larger documents.');
- const csv=parseCSV(text),heads=(csv[0]??[]).map(x=>x.trim().toLowerCase().replaceAll(' ','_'));const titleIndex=heads.findIndex(x=>['title','task','task_name','action'].includes(x));
+ const csv=/^(?:[^\n]*,)/.test(text)?parseCSV(text):[],heads=(csv[0]??[]).map(x=>x.trim().toLowerCase().replaceAll(' ','_'));const titleIndex=heads.findIndex(x=>['title','task','task_name','action'].includes(x));
  let records:Record<string,string>[];
  if(titleIndex>=0&&heads.length>1){records=csv.slice(1).map(row=>Object.fromEntries(heads.map((h,i)=>[h,row[i]??''])));}
  else {records=text.split(/\r?\n|(?<=[.!?])\s+(?=[A-Z])/).map(s=>s.trim()).filter(s=>s.length>=8&&!/^(from:|to:|subject:|date:|sent:|content-type:|mime-version:|--|best regards|kind regards|thank you)/i.test(s)).map(s=>({title:s.replace(/^[-*•\d.)\s]+/,'').replace(/^\[.*?\]\s*[^:]+:\s*/,''),source_excerpt:s}));}
