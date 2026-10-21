@@ -1,0 +1,9 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import ts from 'typescript';
+const source=await readFile(new URL('../src/lib/server/client-invitations.ts',import.meta.url),'utf8');
+const {deliverClientInvitation}=await import('data:text/javascript;base64,'+Buffer.from(ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.ES2022,target:ts.ScriptTarget.ES2022}}).outputText).toString('base64'));
+function fixture(linked){let generated=0;const updates=[],emails=[];return {updates,emails,get generated(){return generated;},d:{workspace:'w',clientId:'c',purpose:'reset',appUrl:'https://portal.example.test',db:{rpc:async name=>({data:name==='reserve_client_invite'?{id:'i',email:'client@example.test',client_title:'Client'}:linked?'client-user':null,error:null})},admin:{auth:{admin:{generateLink:async p=>{generated++;assert.equal(p.type,'recovery');return {data:{user:{id:'client-user'},properties:{verification_type:'recovery',hashed_token:'test-single-use-token'}},error:null};}}},from:()=>({update:value=>({eq:()=>({eq:async()=>{updates.push(value);return {error:null};}})})})},send:async(...args)=>{emails.push(args);}}};}
+test('reset uses a recovery email and records its purpose without returning a token',async()=>{const f=fixture(true);const result=await deliverClientInvitation(f.d);assert.equal(f.generated,1);assert.match(f.emails[0][1],/Reset/);assert.equal(f.updates[0].purpose,'reset');assert.equal(f.updates[0].status,'sent');assert.ok(!JSON.stringify(result).includes('test-single-use-token'));});
+test('reset never creates an account when no linked client login exists',async()=>{const f=fixture(false);await assert.rejects(deliverClientInvitation(f.d),/No linked client login/);assert.equal(f.generated,0);assert.equal(f.emails.length,0);assert.equal(f.updates[0].status,'failed');});
