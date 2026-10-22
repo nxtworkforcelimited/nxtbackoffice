@@ -59,7 +59,7 @@ export default function Dashboard({initial,workspace,workspaces,email,demo=false
  const titleFor=(v:View)=>v==='leave'&&!client&&!can('approve_leave')?'My Leave':titles[v];
  const visible=Object.fromEntries(Object.entries(data).map(([m,rows])=>[m,preview?(rows as RecordRow[]).filter(r=>m==='clients'?r.id===clientId:m!=='deals'&&r.client_id===clientId&&r.client_visible):rows])) as Data;
  const items=preview?biz.items.filter(r=>r.client_id===clientId&&(r.kind==='request'||(['invoice','quote'].includes(r.kind)&&['issued','paid','accepted'].includes(r.status)))):biz.items;
- const nav=(Object.keys(appIcons) as View[]).filter(v=>!['email','website'].includes(v)&&(client?(['overview','projects','tasks','social_posts','documents','messages','requests','assistant','utm'].includes(v)&&(v!=='assistant'||clientAssistantEnabled)):v==='settings'?['owner','admin'].includes(workspace.role):['clients','deals'].includes(v)||!viewCap[v]||can(viewCap[v])||(v==='social_posts'&&can('approve_content'))));
+ const nav=(Object.keys(appIcons) as View[]).filter(v=>!['email','website'].includes(v)&&(client?(['overview','projects','tasks','social_posts','documents','messages','requests','assistant','utm','invoices'].includes(v)&&(v!=='assistant'||clientAssistantEnabled)):v==='settings'?['owner','admin'].includes(workspace.role):['clients','deals'].includes(v)||!viewCap[v]||can(viewCap[v])||(v==='social_posts'&&can('approve_content'))));
  const activeView=nav.includes(view)?view:'overview';
  const clientName=(id:string|null)=>visible.clients.find(c=>c.id===id)?.title??(id?'Client':'NXT Workforce');
  const rows=(m:Module)=>visible[m].filter(r=>(r.title+' '+clientName(r.client_id)).toLowerCase().includes(query.toLowerCase())&&(filter==='all'||r.status===filter));
