@@ -1,0 +1,22 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises';import {PGlite} from '@electric-sql/pglite';
+test('cash and bank receipts persist method, reduce balance and post to separate ledger accounts',async()=>{
+ const db=new PGlite();await db.exec(`create schema nxt_private;
+ create table tenants(id uuid primary key);create table accounting_accounts(tenant_id uuid,code text,name text,account_group text,primary key(tenant_id,code));
+ create function public.has_capability(uuid,text) returns boolean language sql as $$select current_setting('test.allowed',true)='yes'$$;
+ create table business_items(id uuid primary key default gen_random_uuid(),tenant_id uuid,kind text,title text,client_id uuid,currency text,payload jsonb,total numeric,paid numeric default 0,due_date date,parent_id uuid,period date,status text,reference text,unique(parent_id,period));
+ create table invoice_payments(id uuid primary key default gen_random_uuid(),tenant_id uuid,invoice_id uuid,amount numeric,reference text not null,unique(invoice_id,reference));
+ create table accounting_journals(tenant_id uuid,entry_date date,currency text,description text,lines jsonb,source_type text,source_id uuid);`);
+ await db.exec(await readFile('supabase/upgrade-cash-receipts.sql','utf8'));
+ await db.exec(`create trigger payment_ledger after insert on invoice_payments for each row execute function post_finance_event();select set_config('test.allowed','yes',false)`);
+ const t='00000000-0000-4000-8000-000000000001';const id=(await db.query("insert into business_items(tenant_id,kind,status,total,currency,reference) values($1,'invoice','issued',100,'USD','TEST') returning id",[t])).rows[0].id;
+ const pay=v=>db.query("select nxt_private.business_action_base($1,$2,'payment',$3)",[t,id,JSON.stringify(v)]);
+ await pay({amount:30,reference:'CASH-1',payment_method:'cash'});
+ await assert.rejects(pay({amount:5,reference:'CASH-1',payment_method:'cash'}),/unique/);
+ await assert.rejects(pay({amount:71,reference:'BANK-1'}),/Invalid payment/);
+ await assert.rejects(pay({amount:1,reference:'OTHER',payment_method:'invalid'}),/check constraint/);
+ await db.exec("select set_config('test.allowed','no',false)");await assert.rejects(pay({amount:5,reference:'DENIED',payment_method:'cash'}),/Permission denied/);await db.exec("select set_config('test.allowed','yes',false)");
+ await pay({amount:70,reference:'BANK-1',payment_method:'bank'});
+ assert.deepEqual((await db.query('select payment_method from invoice_payments order by amount')).rows.map(r=>r.payment_method),['cash','bank']);
+ assert.deepEqual((await db.query('select lines from accounting_journals order by (lines->0->>\'debit\')::numeric')).rows.map(r=>r.lines[0].account),['1030','1000']);
+ assert.deepEqual((await db.query('select paid,status from business_items')).rows,[{paid:'100.00',status:'paid'}]);await db.close();
+});
