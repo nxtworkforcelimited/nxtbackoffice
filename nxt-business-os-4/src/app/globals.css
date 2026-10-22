@@ -528,13 +528,224 @@ html[data-theme=dark] .studio-shell,html[data-theme=dark] .studio-main{backgroun
  .reference-quick-panel{grid-row:auto}
 }
 
+
+/* Reference fidelity pass — scale, sidebar, colour and spacing */
+.reference-top{
+  left:206px!important;
+  height:66px!important;
+  padding:0 22px!important;
+  background:#fff!important;
+  border-bottom:1px solid #ece9ef!important;
+  display:flex!important;
+  align-items:center!important;
+}
+.reference-search{
+  order:1!important;
+  margin:0!important;
+  width:min(520px,48vw)!important;
+  max-width:520px!important;
+  height:42px!important;
+  border-radius:10px!important;
+  background:#fbfbfd!important;
+  box-shadow:0 4px 16px #22183d0b!important;
+}
+.reference-search input{font-size:12px!important}
+.reference-top-actions{order:2!important;margin-left:auto!important}
+.reference-account{min-width:180px!important}
+.reference-account>b{width:34px!important;height:34px!important;font-size:10px!important}
+.reference-account span{font-size:12px!important;font-weight:650!important}
+.reference-account small{font-size:9.5px!important;font-weight:450!important}
+
+.reference-side{
+  width:206px!important;
+  padding:0 13px 18px!important;
+  background:#fff!important;
+}
+.reference-logo{
+  height:66px!important;
+  padding:8px 10px!important;
+  margin-bottom:18px!important;
+}
+.reference-logo img{
+  max-width:138px!important;
+  max-height:48px!important;
+}
+.reference-side>nav{gap:4px!important}
+.reference-side>nav button{
+  min-height:43px!important;
+  padding:0 14px!important;
+  gap:12px!important;
+  border-radius:9px!important;
+  font-size:11.5px!important;
+  font-weight:520!important;
+}
+.reference-side>nav button svg{width:18px!important;height:18px!important}
+.reference-side>nav button.active{
+  background:linear-gradient(100deg,#f0e8ff,#e9ddff)!important;
+  color:#6335df!important;
+  box-shadow:inset 3px 0 #693ce8!important;
+}
+.reference-side-help{padding:15px 13px!important;margin-top:auto!important}
+.reference-side-help strong{font-size:11px!important}
+.reference-side-help small{font-size:9px!important}
+.reference-side .side-end span{font-size:9px!important}
+
+.studio-main{
+  margin-left:206px!important;
+  padding:82px 24px 34px!important;
+  background:#f7f6f4!important;
+}
+.reference-home{
+  width:min(100%,1420px)!important;
+  margin:0 auto!important;
+  gap:14px!important;
+}
+.reference-hero{
+  height:224px!important;
+  min-height:224px!important;
+  border-radius:14px!important;
+  padding:26px 30px!important;
+  background:
+    linear-gradient(90deg,rgba(19,16,23,.78) 0%,rgba(19,16,23,.44) 42%,rgba(19,16,23,.06) 76%),
+    url('https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1800&q=88') center 53%/cover no-repeat!important;
+}
+.reference-hero-copy>span{font-size:10px!important}
+.reference-hero h1{font-size:35px!important;letter-spacing:-1.1px!important;margin:12px 0 7px!important}
+.reference-hero p{font-size:12px!important}
+.reference-hero-copy label{
+  height:45px!important;
+  max-width:650px!important;
+  font-size:11px!important;
+}
+.reference-hero-copy label input{font-size:11px!important}
+.reference-hero-tag{padding:17px 19px!important}
+.reference-hero-tag span{font-size:13px!important;line-height:1.12!important}
+
+.reference-body{
+  grid-template-columns:minmax(0,1fr) 292px!important;
+  gap:14px!important;
+}
+.reference-primary-column,.reference-utility-rail{gap:14px!important}
+.reference-app-panel{padding:16px!important;border-radius:12px!important}
+.reference-panel-head{margin-bottom:12px!important}
+.reference-panel-head h2{font-size:14px!important;font-weight:700!important}
+.reference-panel-head>span,.reference-panel-head button{font-size:9px!important}
+.reference-app-grid{
+  grid-template-columns:repeat(6,minmax(0,1fr))!important;
+  gap:9px!important;
+}
+.reference-app-tile{
+  min-height:105px!important;
+  padding:13px!important;
+  border-radius:10px!important;
+  border:1px solid rgba(255,255,255,.72)!important;
+  box-shadow:0 6px 18px rgba(72,52,112,.055)!important;
+}
+.reference-app-tile>span{
+  width:38px!important;
+  height:38px!important;
+  border-radius:10px!important;
+  margin-bottom:10px!important;
+}
+.reference-app-tile>span svg{width:22px!important;height:22px!important}
+.reference-app-tile strong{font-size:10.5px!important;font-weight:720!important}
+.reference-app-tile small{font-size:8.3px!important;line-height:1.35!important;margin-top:4px!important}
+.reference-app-tile.tone-0{background:linear-gradient(145deg,#eee5ff,#faf7ff)!important}
+.reference-app-tile.tone-1{background:linear-gradient(145deg,#e4efff,#f8fbff)!important}
+.reference-app-tile.tone-2{background:linear-gradient(145deg,#ddf7e9,#f7fff9)!important}
+.reference-app-tile.tone-3{background:linear-gradient(145deg,#ffeadb,#fff8f3)!important}
+.reference-app-tile.tone-4{background:linear-gradient(145deg,#fde1eb,#fff7fa)!important}
+.reference-app-tile.tone-5{background:linear-gradient(145deg,#e8e2ff,#faf8ff)!important}
+.reference-app-tile.tone-6{background:linear-gradient(145deg,#dcf6f3,#f7fffd)!important}
+.reference-app-tile.tone-7{background:linear-gradient(145deg,#ffecca,#fff9ed)!important}
+
+.reference-quick-panel{
+  min-height:212px!important;
+  padding:18px 18px!important;
+  border-radius:12px!important;
+  background:linear-gradient(150deg,#1e1a32,#24213d)!important;
+}
+.reference-quick-panel h2{font-size:14px!important;margin-bottom:11px!important}
+.reference-quick-panel button{font-size:10px!important;padding:11px 4px!important}
+
+.reference-metrics{gap:9px!important}
+.reference-metric{
+  min-height:98px!important;
+  padding:17px 18px!important;
+  border-radius:11px!important;
+  box-shadow:0 4px 16px rgba(44,34,62,.04)!important;
+}
+.reference-metric span{font-size:8.8px!important}
+.reference-metric strong{font-size:22px!important}
+.reference-metric small{font-size:8px!important}
+
+.reference-lower-grid{gap:14px!important}
+.reference-list-card{
+  padding:16px!important;
+  border-radius:11px!important;
+  box-shadow:0 5px 18px rgba(52,42,68,.035)!important;
+}
+.reference-activity-row,.reference-task-row{
+  min-height:46px!important;
+  padding:8px 2px!important;
+}
+.reference-activity-row strong,.reference-task-row strong{font-size:9.7px!important}
+.reference-activity-row small,.reference-task-row small,
+.reference-activity-row time,.reference-task-row time{font-size:8px!important}
+.activity-icon{width:31px!important;height:31px!important}
+
+.reference-schedule,.reference-invoices{min-height:205px!important}
+.reference-schedule button{padding:9px 1px!important}
+.reference-schedule button time{font-size:8px!important}
+.reference-schedule button strong{font-size:9px!important}
+.reference-invoices button{padding:8px 1px!important}
+.reference-invoices button>span,.reference-invoices button strong{font-size:8.7px!important}
+.reference-invoices button small{font-size:7.5px!important}
+.reference-team-card{padding:15px!important}
+.reference-team-card>div:last-child>span{padding:7px!important}
+.reference-team-card strong{font-size:8.7px!important}
+.reference-team-card small{font-size:7.5px!important}
+
+.reference-setup-strip{
+  padding:17px 19px!important;
+  border-radius:11px!important;
+  background:linear-gradient(100deg,#f8f5ff,#efe8ff)!important;
+}
+.reference-setup-strip h3{font-size:13px!important}
+.reference-setup-strip p{font-size:8.5px!important}
+
+@media(max-width:1250px){
+ .reference-top{left:196px!important}
+ .reference-side{width:196px!important}
+ .studio-main{margin-left:196px!important}
+ .reference-body{grid-template-columns:minmax(0,1fr) 270px!important}
+ .reference-app-grid{grid-template-columns:repeat(5,minmax(0,1fr))!important}
+}
+@media(max-width:1050px){
+ .reference-app-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+}
+@media(max-width:900px){
+ .reference-top{left:0!important}
+ .studio-main{margin-left:0!important}
+ .reference-body{grid-template-columns:1fr!important}
+ .reference-utility-rail{grid-template-columns:1fr 1fr!important}
+}
+@media(max-width:650px){
+ .studio-main{padding:74px 12px 24px!important}
+ .reference-hero{height:210px!important;min-height:210px!important}
+ .reference-app-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .reference-utility-rail,.reference-lower-grid{grid-template-columns:1fr!important}
+}
+
+.studio-shell{--reference-side-width:206px}
+@media(max-width:1250px){.studio-shell{--reference-side-width:196px}}
 /* Internal Projects submodule; inherits the current Business OS palette. */
 .project-subnav{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 24px;border-bottom:1px solid var(--line);padding-bottom:12px}.project-subnav button{display:flex;align-items:center;gap:9px;padding:12px 16px;border-radius:10px;color:var(--muted)}.project-subnav button.active{background:#eeeafa;color:var(--purple);font-weight:600}.project-subnav span{font-size:10px;text-transform:uppercase;letter-spacing:.7px;border:1px solid currentColor;border-radius:20px;padding:3px 6px}.master-tracker{display:grid;gap:24px;max-width:1400px}.master-intro{display:flex;align-items:center;justify-content:space-between;gap:24px;background:var(--white);border:1px solid var(--line);border-radius:16px;padding:28px}.master-intro h2{font-size:28px;margin:16px 0 10px}.master-tracker p{line-height:1.7;color:var(--muted);margin:8px 0 14px}.master-tracker a{display:inline-flex;align-items:center;gap:8px}.master-private{display:inline-flex;align-items:center;gap:7px;color:var(--purple);font-size:12px;font-weight:600}.master-note{display:flex;gap:12px;align-items:flex-start;padding:16px 20px;border:1px solid var(--line);border-radius:12px;background:#f2f0fb}.master-note svg{flex-shrink:0;margin-top:4px;color:var(--purple)}.master-note p{margin:0}.master-project-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.master-project{background:var(--white);border:1px solid var(--line);border-top:4px solid #8d7ab5;border-radius:12px;padding:24px}.master-accent-1{border-top-color:#48a4a0}.master-accent-2{border-top-color:#dcaa59}.master-project h3{margin:16px 0 8px;font-size:18px}.master-project a,.master-resource-grid a{font-weight:600;font-size:13px}.master-delivery{padding:24px;border:1px solid var(--line);border-radius:14px;background:var(--white)}.master-sections{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 24px}.master-sections button{padding:10px 14px;border:1px solid var(--line);border-radius:8px}.master-sections .active{background:var(--purple);color:white;border-color:var(--purple)}.master-section-detail{display:flex;align-items:center;justify-content:space-between;gap:24px;border-top:1px solid var(--line);padding-top:24px}.master-section-detail>div{max-width:660px}.master-section-detail h3{font-size:22px}.master-section-detail small{color:var(--muted);line-height:1.6}.master-resource-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.master-resource-grid .panel{margin:0}.master-tracker .primary,.master-tracker .secondary{white-space:normal;flex-shrink:0}.master-tracker h3{line-height:1.4}.master-tracker .panel-head{gap:16px;flex-wrap:wrap}
 [data-theme="dark"] .master-note,[data-theme="dark"] .project-subnav button.active{background:#302c46}
 @media(max-width:900px){.master-intro,.master-section-detail{align-items:flex-start;flex-direction:column}.master-project-grid{grid-template-columns:1fr}.master-resource-grid{grid-template-columns:1fr}.master-intro,.master-delivery{padding:20px}.project-subnav button{padding:10px}.master-intro h2{font-size:25px}}
 /* Preserve the reference sidebar/header geometry over the earlier horizontal-shell rules. */
-.studio-shell>.reference-top{position:fixed;inset:0 0 auto 184px;z-index:40;height:60px;padding:0 18px 0 24px;border-bottom:1px solid #e7e4df;background:#f7f6f4}
-.studio-shell>.reference-side{position:fixed;inset:0 auto 0 0;z-index:50;width:184px;max-width:none;height:auto;margin:0;padding:0 10px 16px;border-radius:0;flex-direction:column;align-items:stretch;gap:0;overflow-x:hidden;overflow-y:auto}
+.studio-shell>.reference-top{position:fixed;inset:0 0 auto var(--reference-side-width);z-index:40;height:60px;padding:0 18px 0 24px;border-bottom:1px solid #e7e4df;background:#f7f6f4}
+.studio-shell>.reference-side{position:fixed;inset:0 auto 0 0;z-index:50;width:var(--reference-side-width);max-width:none;height:auto;margin:0;padding:0 10px 16px;border-radius:0;flex-direction:column;align-items:stretch;gap:0;overflow-x:hidden;overflow-y:auto}
 .studio-shell>.reference-side>.reference-logo{order:0;flex-shrink:0;margin:0 0 17px;border-radius:0;width:100%;height:61px;padding:9px 10px 8px}
 .studio-shell>.studio-main{margin-top:0;padding-top:82px}
 @media(max-width:900px){.studio-shell>.reference-top{left:0}.studio-shell>.reference-side{display:flex}.studio-shell>.studio-main{margin-left:0}}
@@ -544,6 +755,18 @@ html[data-theme=dark] .master-tracker p,html[data-theme=dark] .master-section-de
 html[data-theme=dark] .master-tracker a:not(.primary),html[data-theme=dark] .master-private{color:#c5afff}
 html[data-theme=dark] .studio-shell>.reference-top{background:#22232b;border-color:#34353f}
 /* Earlier shell rules use !important; scope their reversal to the reference shell. */
-.studio-shell>.reference-side{flex-direction:column!important;justify-content:flex-start!important;align-items:stretch!important;width:184px!important;max-width:184px!important;min-height:0!important}
+.studio-shell>.reference-side{flex-direction:column!important;justify-content:flex-start!important;align-items:stretch!important;width:var(--reference-side-width)!important;max-width:var(--reference-side-width)!important;min-height:0!important}
 .studio-shell>.reference-side>.reference-logo{width:100%!important}
 .studio-shell>.reference-top{flex-direction:row!important}
+.studio-shell{padding:0}
+.studio-shell>.reference-top{display:flex;min-height:0}
+.reference-top>.reference-search{order:0;grid-column:auto;margin:0}
+.reference-top>.reference-top-actions{order:1}
+@media(max-width:900px){
+ .studio-shell>.reference-side{transform:translateX(-100%)!important}
+ .studio-shell>.reference-side.open{transform:translateX(0)!important}
+ .reference-top>.mobile-toggle{display:block;order:-1;margin:0;padding:8px}
+ .reference-top>.reference-search{min-width:0;max-width:none}
+ .reference-top>.reference-search input{min-width:0}
+ .studio-shell>.studio-main{margin-left:0}
+}
