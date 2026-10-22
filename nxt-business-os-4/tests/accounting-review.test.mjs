@@ -1,0 +1,38 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {PGlite} from '@electric-sql/pglite';
+const tenant='00000000-0000-4000-8000-000000000001', accountant='00000000-0000-4000-8000-000000000002', owner='00000000-0000-4000-8000-000000000003', other='00000000-0000-4000-8000-000000000004';
+test('accounting migration keeps imports unposted and authorizes only configured reviewers',async()=>{
+ const db=new PGlite();
+ await db.exec(`create role anon;create role authenticated;create schema auth;
+ create table auth.users(id uuid primary key,email text);create table tenants(id uuid primary key,name text);create table memberships(tenant_id uuid,user_id uuid);
+ create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
+ create function public.has_capability(uuid,text) returns boolean language sql stable as $$select auth.uid() is not null$$;
+ create table accounting_journals(id uuid primary key default gen_random_uuid(),tenant_id uuid,entry_date date,currency text,description text,lines jsonb,source_type text,source_id uuid,created_by uuid,unique(tenant_id,source_type,source_id));
+ alter table accounting_journals enable row level security;create policy journals_post on accounting_journals for insert with check(true);
+ create table audit_events(id uuid default gen_random_uuid(),tenant_id uuid,entity text);alter table audit_events enable row level security;
+ create function record_audit() returns trigger language plpgsql as $$begin return new;end;$$;
+ insert into auth.users values('${accountant}','kristian@nxt-workforce.com'),('${owner}','nyasha@nxt-workforce.com'),('${other}','tatenda@nxt-workforce.com');
+ insert into tenants values('${tenant}','NXT Workforce Limited');insert into memberships values('${tenant}','${accountant}'),('${tenant}','${owner}'),('${tenant}','${other}');`);
+ await db.exec(await readFile('supabase/upgrade-accounting-review.sql','utf8'));
+ await db.exec(`insert into accounting_reviewers values('${tenant}','${accountant}',true),('${tenant}','${owner}',false); insert into accounting_drafts(tenant_id,entry_date,description,reference,source) values('${tenant}','2026-10-10','Imported invoice','IMPORT-1','screenshot');`);
+ // Reuse production trigger for balanced-journal validation.
+ await db.exec('create trigger balanced_journal before insert on accounting_journals for each row execute function validate_journal();');
+ assert.equal((await db.query('select * from accounting_drafts')).rows.length,1);
+ assert.equal((await db.query('select * from accounting_journals')).rows.length,0);
+ assert.equal((await db.query('select * from accounting_accounts')).rows.length,42);
+ assert.equal((await db.query('select * from accounting_reviewers')).rows.length,2);
+ const draft=(await db.query('select id from accounting_drafts limit 1')).rows[0].id;
+ const act=(action)=>db.query('select accounting_review($1,$2,$3)',[tenant,draft,action]);
+ await db.exec(`select set_config('request.jwt.claim.sub','${accountant}',false)`);
+ await assert.rejects(act('approve'),/2–100/);
+ const lines=JSON.stringify([{account:'1100',debit:850,credit:0},{account:'4000',debit:0,credit:850}]);
+ await db.query('update accounting_drafts set lines=$1 where id=$2',[lines,draft]);
+ await db.exec(`select set_config('request.jwt.claim.sub','${other}',false)`);await assert.rejects(act('approve'),/configured/);
+ await db.exec(`select set_config('request.jwt.claim.sub','${owner}',false)`);await act('approve');assert.equal((await db.query('select * from accounting_journals')).rows.length,0);
+ await assert.rejects(act('post'),/configured/);
+ await db.exec(`select set_config('request.jwt.claim.sub','${accountant}',false)`);await act('post');await assert.rejects(act('post'),/transition/);
+ assert.equal((await db.query('select * from accounting_journals')).rows.length,1);
+ await db.close();
+});
