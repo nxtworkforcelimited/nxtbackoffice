@@ -1,6 +1,6 @@
 import type {TrackerKind, TrackerRecord, TrackerSnapshot} from '../master-tracker';
-type TrackerContext = {user:{id:string};workspace?:{id:string;role:string}}|null;
-type Config={workspaceId?:string;sitesToken?:string;feedSecret?:string};
+type TrackerContext = {user:{id:string;email?:string};workspace?:{id:string;role:string}}|null;
+type Config={workspaceId?:string;sitesToken?:string;feedSecret?:string;writeSecret?:string};
 const feedUrl='https://nxt-managing-director-master-tracker.hello153826.chatgpt.site/api/business-os-feed';
 const headers={'Cache-Control':'private, no-store',Vary:'Cookie'};
 const text=(v:unknown,max=12000)=>typeof v==='string'?v.slice(0,max):'';
@@ -10,7 +10,7 @@ function record(value:unknown):TrackerRecord{
  if(!value||typeof value!=='object')throw Error('Invalid record');
  const v=value as Record<string,unknown>;
  const id=text(v.id,200);if(!id)throw Error('Missing record identifier');
- return {id,title:text(v.title||v.name||v.risk||id,500),description:text(v.description),owner:text(v.owner||v.approver,300),support:list(v.support),status:text(v.status,100)||'Not set',priority:text(v.priority,100),due:date(v.due||v.target),clientDue:date(v.clientDue),notes:text(v.notes),action:text(v.action||v.mitigation),evidence:text(v.evidence),updatedAt:typeof v.updatedAt==='string'?text(v.updatedAt,100):null,checks:Array.isArray(v.checks)?v.checks.slice(0,500).map(x=>({text:text(x?.text,2000),done:x?.done===true})):[],dependencies:list(v.dependencies),approvalIds:list(v.approvalIds)};
+ return {version:Number.isInteger(v.version)?Number(v.version):undefined,canEdit:v.canEdit===true,canSchedule:v.canSchedule===true,submitted:text(v.submitted,10),feedbackDate:text(v.feedbackDate,10),revisionDue:text(v.revisionDue,10),approvedDate:text(v.approvedDate,10),rounds:Number.isInteger(v.rounds)?Number(v.rounds):0,id,title:text(v.title||v.name||v.risk||id,500),description:text(v.description),owner:text(v.owner||v.approver,300),support:list(v.support),status:text(v.status,100)||'Not set',priority:text(v.priority,100),due:date(v.due||v.target),clientDue:date(v.clientDue),notes:text(v.notes),action:text(v.action||v.mitigation),evidence:text(v.evidence),updatedAt:typeof v.updatedAt==='string'?text(v.updatedAt,100):null,checks:Array.isArray(v.checks)?v.checks.slice(0,500).map(x=>({text:text(x?.text,2000),done:x?.done===true})):[],dependencies:list(v.dependencies),approvalIds:list(v.approvalIds)};
 }
 export function normalizeSnapshot(value:unknown):TrackerSnapshot{
  if(!value||typeof value!=='object')throw Error('Invalid feed');
@@ -23,7 +23,7 @@ export function normalizeSnapshot(value:unknown):TrackerSnapshot{
   if(!p.available)return {id:p.id as string,name,available:false,checkedAt:null,error:'This tracker could not be refreshed. Its records are excluded.'};
   const data={} as Record<TrackerKind,TrackerRecord[]>;
   for(const kind of ['tasks','approvals','risks'] as const){if(!Array.isArray(p.data?.[kind])||p.data[kind].length>10000)throw Error('Invalid records');data[kind]=p.data[kind].map(record);if(new Set(data[kind].map(r=>r.id)).size!==data[kind].length)throw Error('Duplicate identifiers');}
-  return {id:p.id as string,name,available:true,checkedAt:typeof p.checkedAt==='string'?p.checkedAt:v.checkedAt as string,data};
+  return {id:p.id as string,name,available:true,access:{canCreateTasks:p.access?.canCreateTasks===true,canApplyPlan:p.access?.canApplyPlan===true,canSchedule:p.access?.canSchedule===true,name:text(p.access?.name,100),owners:list(p.access?.owners)},checkedAt:typeof p.checkedAt==='string'?p.checkedAt:v.checkedAt as string,data};
  });
  return {version:1,checkedAt:v.checkedAt,complete:projects.every(p=>p.available),projects};
 }
@@ -36,9 +36,29 @@ export async function masterTrackerResponse(workspace:string|null,getContext:(wo
  if(!config.workspaceId||workspace!==config.workspaceId)return Response.json({error:'Master Tracker is not enabled for this workspace.'},{status:403,headers});
  if(!config.sitesToken||!config.feedSecret)return Response.json({error:'The live tracker connection is not configured.'},{status:503,headers});
  try{
-  const response=await fetcher(feedUrl,{headers:{'OAI-Sites-Authorization':'Bearer '+config.sitesToken,'X-Business-OS-Feed-Secret':config.feedSecret,'X-Business-OS-Workspace':workspace},cache:'no-store',redirect:'manual',signal:AbortSignal.timeout(20000)});
+  const response=await fetcher(feedUrl,{headers:{'OAI-Sites-Authorization':'Bearer '+config.sitesToken,'X-Business-OS-Feed-Secret':config.feedSecret,'X-Business-OS-Workspace':workspace,'X-Business-OS-Actor':ctx.user.email?.toLowerCase()||''},cache:'no-store',redirect:'manual',signal:AbortSignal.timeout(20000)});
   if(!response.ok||!response.headers.get('content-type')?.includes('application/json'))throw Error('Feed unavailable');
   const body=await response.text();if(body.length>8_000_000)throw Error('Feed too large');
   return Response.json(normalizeSnapshot(JSON.parse(body)),{headers});
  }catch{return Response.json({error:'Live tracker could not refresh. Please try again.'},{status:502,headers});}
+}
+
+export async function masterTrackerWrite(workspace:string|null,body:unknown,getContext:(workspace:string)=>Promise<TrackerContext>,config:Config={},fetcher:typeof fetch=fetch){
+ if(!workspace)return Response.json({error:'Choose a workspace.'},{status:400,headers});
+ let ctx:TrackerContext;try{ctx=await getContext(workspace);}catch{return Response.json({error:'Access could not be verified.'},{status:503,headers});}
+ if(!ctx?.user)return Response.json({error:'Sign in to continue.'},{status:401,headers});
+ if(!ctx.workspace||ctx.workspace.id!==workspace||!['owner','admin','staff'].includes(ctx.workspace.role)||!config.workspaceId||workspace!==config.workspaceId)return Response.json({error:'Internal staff access required.'},{status:403,headers});
+ if(!ctx.user.email)return Response.json({error:'A verified staff email is required.'},{status:403,headers});
+ if(!config.sitesToken||!config.writeSecret)return Response.json({error:'The tracker write connection is not configured.'},{status:503,headers});
+ if(!body||typeof body!=='object'||Array.isArray(body))return Response.json({error:'Invalid update.'},{status:422,headers});
+ const b=body as Record<string,unknown>;
+ if(!['packeasy','kavir','cyber'].includes(String(b.project))||!['update','create-task','preview-plan','apply-plan','capabilities'].includes(String(b.action)))return Response.json({error:'Choose a client and a valid action.'},{status:422,headers});
+ // Explicit fields prevent browser supplied identities or destination URLs crossing the gateway.
+ const payload={project:b.project,action:b.action,requestId:b.requestId,kind:b.kind,id:b.id,version:b.version,changes:b.changes,task:b.task,plan:b.plan,baseCursor:b.baseCursor,planHash:b.planHash,actor:{userId:ctx.user.id,email:ctx.user.email.toLowerCase()}};
+ try{
+  const r=await fetcher(feedUrl.replace('/business-os-feed','/business-os-write'),{method:'POST',headers:{'Content-Type':'application/json','OAI-Sites-Authorization':'Bearer '+config.sitesToken,'X-Business-OS-Write-Secret':config.writeSecret,'X-Business-OS-Workspace':workspace},body:JSON.stringify(payload),cache:'no-store',redirect:'manual',signal:AbortSignal.timeout(25000)});
+  if(!r.headers.get('content-type')?.includes('application/json'))throw Error();const raw=await r.text();if(raw.length>1000000)throw Error();const result=JSON.parse(raw);
+  if(!r.ok)return Response.json({error:typeof result.detail==='string'?result.detail:'The source did not save this update.'},{status:[400,401,403,404,409,413,422,503].includes(r.status)?r.status:502,headers});
+  return Response.json(result,{headers});
+ }catch{return Response.json({error:'The source did not confirm the save. Retry this same update to check its result.'},{status:502,headers});}
 }
