@@ -1,52 +1,60 @@
 'use client';
-import {useEffect, useState} from 'react';
-import {ArrowUpRight, ShieldCheck, FolderKanban, ListChecks, Users, FileText} from 'lucide-react';
-
-type Catalog = {url: string; libraryUrl: string; projects: {name: string; description: string; url: string}[]};
-const sections = [
-  ['Tasks', 'Review owners, priorities, internal and client deadlines, acceptance checks and dependencies.'],
-  ['Approvals', 'Follow approval gates, review status and outstanding decisions across delivery.'],
-  ['Risks', 'Review delivery risks, responsible owners and actions that need attention.'],
-  ['Files & Handovers', 'Find exact file versions, recipient responses and handover history.'],
-  ['Team workload', 'Review open work, overdue tasks and blockers by owner.'],
-  ['Brief & delivery plan', 'Read deliverables, responsibilities, milestones and acceptance requirements.'],
-  ['Business and Audience', 'Understand each business, its offers and intended customers.'],
-  ['Sitemaps and Journeys', 'Review proposed pages, customer journeys and required content.'],
-] as const;
-
-export default function MasterTracker({workspace, demo = false}: {workspace: string; demo?: boolean}) {
-  const [catalog, setCatalog] = useState<Catalog | null>(null);
-  const [error, setError] = useState('');
-  const [attempt, setAttempt] = useState(0);
-  const [section, setSection] = useState(0);
-  useEffect(() => {
-    if (demo) return;
-    const controller = new AbortController();
-    setCatalog(null); setError('');
-    fetch('/api/master-tracker?workspace=' + encodeURIComponent(workspace), {cache: 'no-store', signal: controller.signal})
-      .then(async response => {
-        const body = await response.json();
-        if (!response.ok) throw new Error(body.error || 'Master Tracker could not load.');
-        if (!controller.signal.aborted) setCatalog(body);
-      }).catch(reason => {if (!controller.signal.aborted) setError(reason.message || 'Master Tracker could not load.');});
-    return () => controller.abort();
-  }, [workspace, demo, attempt]);
-
-  if (!demo && error) return <section className="panel"><p role="alert">{error}</p><button className="secondary" onClick={() => setAttempt(a => a + 1)}>Try again</button></section>;
-  if (!demo && !catalog) return <section className="panel" role="status">Checking internal access…</section>;
-  return <div className="master-tracker">
-    <section className="master-intro">
-      <div><span className="master-private"><ShieldCheck size={15}/>Internal only</span><h2>Master Tracker</h2><p>One place to reach your team’s delivery trackers, decisions and handovers.</p></div>
-      {catalog ? <a className="primary" href={catalog.url} target="_blank" rel="noopener noreferrer">Open live Master Tracker <ArrowUpRight size={17}/></a> : <span className="badge">Demo · no live records</span>}
-    </section>
-    <div className="master-note"><ShieldCheck size={18}/><p>Live records open in the private tracker in a new tab. Sign in with your invited ChatGPT account. Updates stay in the original team tracker; Business OS does not store a duplicate.</p></div>
-    <section aria-labelledby="master-projects-title"><div className="panel-head"><h3 id="master-projects-title">Team trackers</h3><span className="badge">{demo ? 'Sample workspace' : '3 connected destinations'}</span></div><div className="master-project-grid">
-      {(catalog?.projects || [{name: 'Sample project', description: 'Example delivery workspace', url: ''}]).map((project, index) => <article className={'master-project master-accent-' + index} key={project.name}><FolderKanban size={23}/><h3>{project.name}</h3><p>{project.description}</p>{project.url ? <a href={project.url} target="_blank" rel="noopener noreferrer">Open team tracker <ArrowUpRight size={15}/></a> : <span className="footnote">Live links appear after staff sign-in.</span>}</article>)}
-    </div></section>
-    <section className="master-delivery" aria-labelledby="master-delivery-title"><div className="panel-head"><div><h3 id="master-delivery-title">Delivery overview</h3><p>Choose what to review in the live Master Tracker.</p></div><ListChecks size={23}/></div>
-      <div className="master-sections" aria-label="Tracker sections">{sections.map(([name], index) => <button key={name} aria-pressed={section === index} className={section === index ? 'active' : ''} onClick={() => setSection(index)}>{name}</button>)}</div>
-      <div className="master-section-detail"><div><span className="eyebrow">IN THE LIVE TRACKER</span><h3>{sections[section][0]}</h3><p>{sections[section][1]}</p><small>Open the Master Tracker, then select “{sections[section][0]}” in Delivery overview.</small></div>{catalog && <a className="secondary" href={catalog.url} target="_blank" rel="noopener noreferrer">Open Master Tracker <ArrowUpRight size={15}/></a>}</div>
-    </section>
-    <div className="master-resource-grid"><section className="panel"><FileText size={22}/><h3>Document library</h3><p>Open the existing private document library for shared working references.</p>{catalog && <a href={catalog.libraryUrl} target="_blank" rel="noopener noreferrer">Open document library <ArrowUpRight size={15}/></a>}</section><section className="panel"><Users size={22}/><h3>Access for the team</h3><p>Available to signed-in Business OS owners, administrators and staff. Client accounts cannot open this submodule. Tracker invitations are managed separately.</p></section></div>
-  </div>;
+import {useEffect,useMemo,useRef,useState} from 'react';
+import {RefreshCw,ShieldCheck,Search,X,AlertCircle,CheckCircle2,Clock} from 'lucide-react';
+import type {TrackerKind,TrackerRecord,TrackerSnapshot} from '@/lib/master-tracker';
+const kinds:TrackerKind[]=['tasks','approvals','risks'];
+const labels={tasks:'Tasks',approvals:'Approvals',risks:'Risks'};
+const closed=(status:string)=>['done','approved','deemed approved','resolved','closed','completed'].includes(status.toLowerCase());
+const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Africa/Harare',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+const overdue=(record:TrackerRecord)=>Boolean(record.due&&record.due<today()&&!closed(record.status));
+const date=(value:string|null)=>value?new Date(value+'T12:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'Not set';
+const demoRecord=(id:string,title:string,status:string,owner:string):TrackerRecord=>({id,title,status,owner,description:'Fictional example for the Business OS preview.',support:[],priority:'P1',due:null,clientDue:null,notes:'Sample record. No live data is used in this demo.',action:'',evidence:'',updatedAt:null,checks:[{text:'Review the agreed deliverable',done:false}],dependencies:[],approvalIds:[]});
+function sampleSnapshot():TrackerSnapshot{return {version:1,checkedAt:new Date().toISOString(),complete:true,projects:[{id:'sample-brand',name:'Sample brand project',available:true,checkedAt:null,data:{tasks:[demoRecord('T01','Review homepage concepts','In progress','Alex'),demoRecord('T02','Prepare approved copy','Blocked','Jordan')],approvals:[demoRecord('A01','Homepage direction','Submitted','Alex')],risks:[{...demoRecord('R01','Content dependency','Open','Jordan'),action:'Confirm the remaining content with the team.'}]}},{id:'sample-web',name:'Sample website project',available:true,checkedAt:null,data:{tasks:[demoRecord('T01','Complete responsive checks','Awaiting review','Sam')],approvals:[],risks:[]}},{id:'sample-launch',name:'Sample launch project',available:true,checkedAt:null,data:{tasks:[demoRecord('T01','Prepare launch checklist','Done','Alex')],approvals:[demoRecord('A01','Launch review','Approved','Sam')],risks:[]}}]};}
+type Selected={project:string;kind:TrackerKind;id:string};
+export default function MasterTracker({workspace,demo=false}:{workspace:string;demo?:boolean}){
+ const [snapshot,setSnapshot]=useState<TrackerSnapshot|null>(null),[error,setError]=useState(''),[refreshing,setRefreshing]=useState(false);
+ const [kind,setKind]=useState<TrackerKind>('tasks'),[project,setProject]=useState('all'),[owner,setOwner]=useState('all'),[status,setStatus]=useState('all'),[query,setQuery]=useState(''),[focus,setFocus]=useState('all'),[selection,setSelection]=useState<Selected|null>(null);
+ const refresh=useRef<()=>void>(()=>{}),dialog=useRef<HTMLDialogElement>(null);
+ useEffect(()=>{
+  if(demo){setSnapshot(sampleSnapshot());refresh.current=()=>setSnapshot(sampleSnapshot());return;}
+  let stopped=false,busy=false;const controller=new AbortController();setSnapshot(null);setError('');
+  async function load(){if(stopped||busy)return;busy=true;setRefreshing(true);try{
+   const response=await fetch('/api/master-tracker?workspace='+encodeURIComponent(workspace),{cache:'no-store',signal:controller.signal});
+   const body=await response.json();if(stopped)return;
+   if(!response.ok){if([401,403].includes(response.status)){setSnapshot(null);setSelection(null);}throw Error(body.error||'Live tracker could not refresh.');}
+   setSnapshot(body);setError('');
+  }catch(reason){if(!stopped)setError(reason instanceof Error?reason.message:'Live tracker could not refresh.');}finally{busy=false;if(!stopped)setRefreshing(false);}}
+  refresh.current=load;void load();const timer=setInterval(()=>{if(!document.hidden)void load();},30000);
+  const onVisible=()=>{if(!document.hidden)void load();};document.addEventListener('visibilitychange',onVisible);window.addEventListener('focus',onVisible);
+  return()=>{stopped=true;controller.abort();clearInterval(timer);document.removeEventListener('visibilitychange',onVisible);window.removeEventListener('focus',onVisible);refresh.current=()=>{};};
+ },[workspace,demo]);
+ const projects=snapshot?.projects??[];
+ const records=useMemo(()=>projects.filter(p=>p.available).flatMap(p=>(p.data?.[kind]??[]).map(record=>({project:p,record}))),[snapshot,kind]);
+ const owners=[...new Set(records.flatMap(({record})=>[record.owner,...record.support]).filter(Boolean))].sort();
+ const statuses=[...new Set(records.map(({record})=>record.status))].sort();
+ const filtered=records.filter(({project:p,record:r})=>(project==='all'||p.id===project)&&(owner==='all'||r.owner===owner||r.support.includes(owner))&&(status==='all'||r.status===status)&&(focus==='all'||focus==='overdue'&&overdue(r)||focus==='blocked'&&r.status.toLowerCase()==='blocked'||focus==='open'&&!closed(r.status))&&[r.id,r.title,r.description,r.owner,r.notes,p.name].join(' ').toLowerCase().includes(query.toLowerCase().trim()));
+ const selectedProject=selection?projects.find(p=>p.id===selection.project&&p.available):undefined;
+ const selected=selection?selectedProject?.data?.[selection.kind].find(r=>r.id===selection.id):undefined;
+ useEffect(()=>{if(selected){if(!dialog.current?.open)dialog.current?.showModal();}else dialog.current?.close();},[selected]);
+ function changeKind(next:TrackerKind){setKind(next);setStatus('all');setOwner('all');setFocus('all');setSelection(null);}
+ const tasks=projects.filter(p=>p.available).flatMap(p=>p.data?.tasks??[]);
+ function badge(record:TrackerRecord){return <span className={'badge '+(closed(record.status)?'master-done':record.status.toLowerCase()==='blocked'?'master-blocked':'master-open')}>{record.status}</span>;}
+ function related(id:string,nextKind:TrackerKind){const relatedRecord=selectedProject?.data?.[nextKind].find(r=>r.id===id);return relatedRecord&&selection?<button className="text-button" key={id} onClick={()=>setSelection({...selection,kind:nextKind,id})}>{id} · {relatedRecord.title}</button>:<span key={id}>{id} · Record unavailable</span>;}
+ return <div className="master-tracker native-master">
+  <section className="master-intro"><div><span className="master-private"><ShieldCheck size={15}/>Internal only · Read-only master view</span><h2>Master Tracker</h2><p>Live tasks, approvals and risks. All in your Projects workspace.</p></div><div className="master-sync"><button className="secondary" disabled={refreshing} onClick={()=>refresh.current()}><RefreshCw size={16} className={refreshing?'master-spin':''}/>{refreshing?'Refreshing…':'Refresh'}</button><small role="status">{demo?'Demo · fictional records':snapshot?(error?'Refresh paused · last successful update ':'Updated ')+new Date(snapshot.checkedAt).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'Africa/Harare'})+' CAT':'Connecting to live trackers…'}</small></div></section>
+  {error&&<div className="master-warning" role="alert"><AlertCircle size={18}/><div><strong>{error}</strong>{snapshot&&<p>Displayed records are from the last successful update. They may have changed.</p>}</div></div>}
+  {!snapshot&&!error&&<div className="panel" role="status">Loading live tasks, approvals and risks…</div>}
+  {snapshot&&<>
+   {!snapshot.complete&&<div className="master-warning" role="alert"><AlertCircle size={18}/><div><strong>Some trackers are unavailable. Portfolio totals are incomplete.</strong><p>Unavailable sources are excluded from the lists below.</p></div></div>}
+   <div className="master-project-grid">{projects.map(p=><button key={p.id} className={'master-project master-project-filter '+(project===p.id?'is-selected':'')} aria-pressed={project===p.id} onClick={()=>setProject(project===p.id?'all':p.id)}><span className="master-project-top"><strong>{p.name}</strong>{p.available?<CheckCircle2 size={17}/>:<AlertCircle size={17}/>}</span>{p.available?<><span className="master-progress"><b>{p.data?.tasks.filter(r=>closed(r.status)).length??0}</b> / {p.data?.tasks.length??0} tasks complete</span><small>{p.data?.approvals.filter(r=>!closed(r.status)).length??0} open approvals · {p.data?.risks.filter(r=>!closed(r.status)).length??0} open risks</small></>:<span>{p.error}</span>}<small>{project===p.id?'Showing this project · click to show all':'Filter this project'}</small></button>)}</div>
+   <div className="master-live-metrics">{[['Total tasks',tasks.length],['Complete',tasks.filter(r=>closed(r.status)).length],['Internal overdue',tasks.filter(overdue).length],['Blocked',tasks.filter(r=>r.status.toLowerCase()==='blocked').length]].map(([name,count])=><div key={name}><span>{name}</span><strong>{snapshot.complete?count:'—'}</strong><small>{snapshot.complete?'Across all trackers':'Waiting for all sources'}</small></div>)}</div>
+   <section className="master-delivery"><div className="master-record-tabs" role="tablist" aria-label="Live tracker records">{kinds.map(k=><button key={k} role="tab" id={'master-tab-'+k} aria-controls="master-records" aria-selected={kind===k} className={kind===k?'active':''} onClick={()=>changeKind(k)}>{labels[k]}</button>)}</div>
+    <div className="master-live-filters"><label className="master-search"><span>Search records</span><div><Search size={16}/><input type="search" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Title, ID, owner or keyword"/></div></label><label>Project<select value={project} onChange={e=>setProject(e.target.value)}><option value="all">All projects</option>{projects.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></label><label>Owner or support<select value={owner} onChange={e=>setOwner(e.target.value)}><option value="all">Everyone</option>{owners.map(name=><option key={name}>{name}</option>)}</select></label><label>Status<select value={status} onChange={e=>setStatus(e.target.value)}><option value="all">All statuses</option>{statuses.map(name=><option key={name}>{name}</option>)}</select></label><label>Focus<select value={focus} onChange={e=>setFocus(e.target.value)}><option value="all">All records</option><option value="open">Open records</option><option value="overdue">Internal overdue</option><option value="blocked">Blocked</option></select></label></div>
+    <div className="master-results-meta"><span role="status">{filtered.length} {labels[kind].toLowerCase()} shown{!snapshot.complete?' · Partial results':''}</span><button className="text-button" onClick={()=>{setQuery('');setProject('all');setOwner('all');setStatus('all');setFocus('all');}}>Clear filters</button></div>
+    <div id="master-records" role="tabpanel" aria-labelledby={'master-tab-'+kind} className="table-wrap"><table><thead><tr><th>Project</th><th>{kind==='tasks'?'Task':kind==='approvals'?'Approval':'Risk'}</th><th>{kind==='approvals'?'Approver / owner':'Owner'}</th><th>{kind==='tasks'?'Internal deadline':'Due / target'}</th>{kind==='tasks'&&<th>Client deadline</th>}<th>Status</th><th>Priority</th></tr></thead><tbody>{filtered.map(({project:p,record:r})=><tr key={p.id+':'+kind+':'+r.id}><td>{p.name}</td><td><button className="table-title" onClick={()=>setSelection({project:p.id,kind,id:r.id})}>{r.title}</button><small>{r.id}</small></td><td>{r.owner||'Unassigned'}{r.support.length>0&&<small>Support: {r.support.join(', ')}</small>}</td><td className={overdue(r)?'master-overdue':''}>{date(r.due)}{overdue(r)&&<small>Overdue</small>}</td>{kind==='tasks'&&<td>{date(r.clientDue)}</td>}<td>{badge(r)}</td><td>{r.priority||'—'}</td></tr>)}</tbody></table>{!filtered.length&&<div className="empty">{projects.some(p=>p.id===project&&!p.available)?'This source is unavailable. Try Refresh.':'No records match these filters.'}</div>}</div>
+   </section>
+  </>}
+  <p className="master-live-footnote"><Clock size={15}/>{demo?'Sample data for preview.':'Refreshes every 30 seconds while visible.'} Source team trackers remain the record of truth. This master view does not change tasks or approvals.</p>
+  <dialog ref={dialog} className="detail-dialog master-live-dialog" onClose={()=>setSelection(null)} onCancel={()=>setSelection(null)}>{selected&&selection&&<><div className="modal-head"><span className="eyebrow">{selectedProject?.name} / {labels[selection.kind]}</span><button title="Close record" onClick={()=>setSelection(null)}><X size={20}/></button></div><h2>{selected.title}</h2><p>{selected.id} · {badge(selected)}</p><p className="detail-description">{selected.description||'No description recorded.'}</p><dl className="master-detail-grid"><div><dt>Owner / approver</dt><dd>{selected.owner||'Unassigned'}</dd></div><div><dt>Support</dt><dd>{selected.support.join(', ')||'None recorded'}</dd></div><div><dt>Internal deadline / target</dt><dd>{date(selected.due)}</dd></div><div><dt>Client deadline</dt><dd>{date(selected.clientDue)}</dd></div><div><dt>Priority</dt><dd>{selected.priority||'Not set'}</dd></div><div><dt>Last changed</dt><dd>{selected.updatedAt&&Number.isFinite(Date.parse(selected.updatedAt))?new Date(selected.updatedAt).toLocaleString('en-GB',{timeZone:'Africa/Harare'}):'Not recorded'}</dd></div></dl>{selected.checks.length>0&&<section><h3>Acceptance checks</h3>{selected.checks.map((check,i)=><p key={i}>{check.done?'☑':'☐'} {check.text}</p>)}</section>}{selected.dependencies.length>0&&<section className="master-related"><h3>Dependencies</h3>{selected.dependencies.map(id=>related(id,'tasks'))}</section>}{selected.approvalIds.length>0&&<section className="master-related"><h3>Linked approvals</h3>{selected.approvalIds.map(id=>related(id,'approvals'))}</section>}{[['Notes',selected.notes],['Action / mitigation',selected.action],['Evidence',selected.evidence]].map(([title,body])=>body&&<section key={title}><h3>{title}</h3><p className="detail-description">{body}</p></section>)}</>}</dialog>
+ </div>;
 }
