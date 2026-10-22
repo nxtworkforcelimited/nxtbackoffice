@@ -330,3 +330,22 @@ html[data-theme=dark] .studio-main .client-status.is-active{background:#183d34;c
 @media(max-width:1250px){.studio-main .client-layout{grid-template-columns:1fr}.studio-main .client-card-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:850px){.studio-main .client-card-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:520px){.studio-main .client-card-grid{grid-template-columns:1fr}}
+
+
+/* Native UTM Generator restored from NXT Dashboard Sample 4 */
+.utm-workspace{display:grid;gap:16px}
+.utm-hero{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:22px 25px;border-radius:20px;background:linear-gradient(120deg,#271b38,#5a347e);color:#fff}
+.utm-hero h2{margin:5px 0;font-size:27px}.utm-hero p{margin:0;color:#dbd2e7;font-size:12px}.utm-hero .eyebrow{color:#cfbaff}.utm-hero .badge{background:#ffffff20;color:#fff}
+.utm-layout{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
+.utm-form,.utm-result{padding:22px}
+.utm-form>label,.utm-form .form-grid label{display:grid;gap:7px;font-size:11px;color:#777083;font-weight:700}
+.utm-form input,.utm-form select,.utm-result textarea{width:100%;border:1px solid #ded9e8;border-radius:11px;background:#fff;color:#29243a;padding:12px;font-size:13px}
+.utm-form .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;margin:15px 0}
+.utm-form .primary{display:inline-flex;align-items:center;gap:8px}
+.utm-result textarea{margin:12px 0;min-height:130px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;line-height:1.55}
+.utm-empty{display:grid;place-items:center;min-height:190px;text-align:center;color:#9a93a5;border:1px dashed #ddd6e6;border-radius:14px;margin-top:12px}
+.utm-empty p{max-width:260px;font-size:12px}.utm-result .panel-note code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+html[data-theme=dark] .utm-form input,html[data-theme=dark] .utm-form select,html[data-theme=dark] .utm-result textarea{background:#292b38;border-color:#3c3e4d;color:#f1eef8}
+html[data-theme=dark] .utm-empty{border-color:#3b3d4a;color:#aaa5b5}
+@media(max-width:900px){.utm-layout{grid-template-columns:1fr}}
+@media(max-width:600px){.utm-form .form-grid{grid-template-columns:1fr}.utm-hero{align-items:flex-start;flex-direction:column}}
