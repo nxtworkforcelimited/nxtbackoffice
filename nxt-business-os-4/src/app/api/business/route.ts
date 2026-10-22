@@ -27,7 +27,7 @@ export async function POST(req:NextRequest){
   return NextResponse.json(error?{error:error.message}:{ok:true},{status:error?400:200});
  }
  if(raw?.action){
-  const parsed=z.object({id:z.uuid(),action:z.enum(['issue','convert','payment','close','finalise','recur']),amount:money.optional(),reference:z.string().trim().min(1).max(160).optional(),period:z.iso.date().optional()}).strict().safeParse(raw);
+  const parsed=z.object({id:z.uuid(),action:z.enum(['issue','convert','payment','close','finalise','recur']),amount:money.optional(),payment_method:z.enum(['bank','cash']).optional(),reference:z.string().trim().min(1).max(160).optional(),period:z.iso.date().optional()}).strict().safeParse(raw);
   if(!parsed.success)return NextResponse.json({error:'Invalid action details'},{status:400});
   const {data,error}=await ctx.db.rpc('business_action',{t:ctx.workspace.id,r:parsed.data.id,a:parsed.data.action,v:parsed.data});
   return NextResponse.json(error?{error:error.message}:data,{status:error?400:200});
