@@ -3,12 +3,12 @@ import {context} from '@/lib/context';
 import {allowed} from '@/lib/business';
 import {z} from 'zod';
 const text=z.string().trim();
-const schema=z.object({id:z.uuid().optional(),title:text.min(1).max(160),description:text.max(5000),url:z.union([z.url().refine(s=>/^https?:\/\//.test(s)),z.literal('')]),status:z.enum(['Not started','In progress','Under review','Complete']),assignee_id:z.uuid().nullable(),target_date:z.iso.date().nullable(),review_notes:text.max(5000)});
+const schema=z.object({id:z.uuid().optional(),title:text.min(1).max(160),description:text.max(5000),url:z.union([z.url().refine(s=>/^https?:\/\//.test(s)),z.literal('')]),status:z.enum(['Not started','In progress','Under review','Complete']),assignee_id:z.uuid().nullable(),client_id:z.uuid().nullable(),target_date:z.iso.date().nullable(),review_notes:text.max(5000)});
 export async function GET(req:NextRequest){
  const c=await context(req.nextUrl.searchParams.get('workspace'));
  if(!c?.workspace||c.workspace.role==='client')return NextResponse.json({error:'Staff access required'},{status:403});
- const tables=['backoffice_builds','it_tickets','staff_directory'];
- const results=await Promise.all(tables.map(table=>c.db.from(table).select('*').eq('tenant_id',c.workspace!.id)));
+ const tables=['backoffice_builds','it_tickets','staff_directory','clients'];
+ const results=await Promise.all(tables.map(table=>{let q=c.db.from(table).select('*').eq('tenant_id',c.workspace!.id);if(table==='clients')q=q.is('archived_at',null);return q;}));
  const out:Record<string,unknown>={};for(const [i,table] of tables.entries()){if(results[i].error)return NextResponse.json({error:'The back-office builds database upgrade is required.'},{status:400});out[table]=results[i].data??[];}
  return NextResponse.json(out,{headers:{'Cache-Control':'private, no-store'}});
 }
