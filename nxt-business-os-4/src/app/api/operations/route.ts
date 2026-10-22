@@ -46,6 +46,6 @@ export async function POST(req:NextRequest){
  else if(v.action==='ticket_update'){
  if(!can('tickets'))return NextResponse.json({error:'IT ticket manager access required'},{status:403});
  const {action,id,...fields}=v;r=await c.db.from('it_tickets').update(fields).eq('tenant_id',tenant_id).eq('id',id).select().single();
- }else {if(!can('tickets'))return NextResponse.json({error:'Only IT administrators can add ticket updates'},{status:403});const {action,...fields}=v;r=await c.db.from('it_ticket_comments').insert({...fields,tenant_id}).select().single();}
+ }else {const {action,...fields}=v;r=await c.db.from('it_ticket_comments').insert({...fields,tenant_id}).select().single();}
  return NextResponse.json(r.error?{error:r.error.message}:r.data,{status:r.error?400:200});
 }
