@@ -38,6 +38,7 @@ const ruleExample={USD:{verified:false,valid_from:'2026-01-01',valid_to:'2026-12
 export default function Dashboard({initial,workspace,workspaces,email,demo=false,business=emptyBusiness}:{initial:Data;workspace:Workspace;workspaces:Workspace[];email:string;demo?:boolean;business?:BusinessData}){
  const [data,setData]=useState(initial),[biz,setBiz]=useState(business),[preview,setPreview]=useState(false),[view,setView]=useState<View>('overview'),[query,setQuery]=useState(''),[filter,setFilter]=useState('all'),[mode,setMode]=useState('calendar'),[message,setMessage]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false),[mobile,setMobile]=useState(false);
  const [theme,setTheme]=useState<'light'|'dark'>('light');
+ const [showAllApps,setShowAllApps]=useState(false);
  const [projectSection,setProjectSection]=useState<'workspace'|'master'>('workspace');
  useEffect(()=>{const q=new URLSearchParams(window.location.search);if(workspace.role!=='client'&&q.get('module')==='projects'){setView('projects');if(q.get('section')==='master-tracker')setProjectSection('master');}},[workspace.role]);
  const [dialNumber,setDialNumber]=useState('');
@@ -153,7 +154,8 @@ export default function Dashboard({initial,workspace,workspaces,email,demo=false
   ['projects','Projects','Track project delivery'],['tasks','Tasks','See actions & deadlines'],['invoices','Invoices & Payments','View and pay invoices'],['documents','Documents','Shared files & uploads'],['social_posts','Approvals','Review content'],['requests','Support','Send service requests'],
   ['messages','Messages','Talk to the NXT team'],['utm','Campaign Links','Create tracked links'],...(clientAssistantEnabled?[['assistant','NXT Assistant','Ask about your workspace'] as [View,string,string]]:[])
  ] as [View,string,string][];
- const homeApps=(client?clientHomeApps:staffHomeApps).filter(([v])=>nav.includes(v));
+ const allHomeApps=(client?clientHomeApps:staffHomeApps).filter(([v])=>nav.includes(v));
+ const homeApps=client?allHomeApps:(showAllApps?allHomeApps:allHomeApps.slice(0,8));
  const issuedInvoices=items.filter(i=>i.kind==='invoice'&&i.status==='issued');
  const paidInvoices=items.filter(i=>i.kind==='invoice'&&i.status==='paid');
  const outstandingUSD=issuedInvoices.filter(i=>i.currency==='USD').reduce((s,i)=>s+Number(i.total)-Number(i.paid),0);
@@ -200,7 +202,7 @@ export default function Dashboard({initial,workspace,workspaces,email,demo=false
 
   <div className="reference-body">
    <div className="reference-primary-column">
-    <section className="reference-app-panel"><div className="reference-panel-head"><h2>Your Apps</h2><span>{client?'Apps available to your account':'Customise'}</span></div><div className="reference-app-grid">{homeApps.map(([v,label,description],i)=>{const Icon=appIcons[v];return <button key={v} className={'reference-app-tile tone-'+(i%8)} onClick={()=>go(v)}><span><Icon size={22}/></span><strong>{label}</strong><small>{description}</small></button>})}{!client&&<button className="reference-app-tile reference-add-app" onClick={()=>go('settings')}><span><Plus size={21}/></span><strong>Add App</strong><small>Permissions & setup</small></button>}</div></section>
+    <section className="reference-app-panel"><div className="reference-panel-head"><h2>Your Apps</h2><span>{client?'Apps available to your account':'Customise'}</span></div><div className="reference-app-grid">{homeApps.map(([v,label,description],i)=>{const Icon=appIcons[v];return <button key={v} className={'reference-app-tile tone-'+(i%8)} onClick={()=>go(v)}><span><Icon size={22}/></span><strong>{label}</strong><small>{description}</small></button>})}{!client&&<button className="reference-app-tile reference-add-app" onClick={()=>setShowAllApps(v=>!v)}><span><Grid2X2 size={21}/></span><strong>{showAllApps?'Fewer Apps':'More Apps'}</strong><small>{showAllApps?'Keep home focused':'Open the full app list'}</small></button>}</div></section>
 
     <div className="reference-metrics">{homeMetrics.map(([label,value,note],i)=><div key={String(label)} className={'reference-metric tone-'+(i%4)}><span>{label}</span><strong>{value}</strong><small>{note}</small><i/></div>)}</div>
 
