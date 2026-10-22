@@ -906,3 +906,120 @@ html[data-theme=dark] .master-live-metrics>div{background:#25262f;border-color:#
 @media(max-width:1200px){.master-live-filters{grid-template-columns:repeat(3,minmax(0,1fr))}.master-search{grid-column:span 2}}
 @media(max-width:650px){.master-live-filters{grid-template-columns:1fr 1fr}.master-search{grid-column:1/-1}.master-live-metrics{grid-template-columns:1fr 1fr}.master-sync{justify-items:start;max-width:none}.master-sync small{text-align:left}.master-detail-grid{grid-template-columns:1fr}.master-record-tabs button{padding:10px 12px}.native-master .master-delivery{padding:14px}}
 .native-master{grid-template-columns:minmax(0,1fr);min-width:0}.native-master>*{min-width:0}.native-master .table-wrap{min-width:0;max-width:100%;overflow:auto}
+
+
+/* Mac-inspired Launchpad styling for NXT apps */
+.launchpad-panel{
+  padding:18px 18px 16px!important;
+  border-radius:16px!important;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.90),rgba(252,251,253,.88)),
+    radial-gradient(circle at 15% 10%,rgba(137,96,255,.08),transparent 34%)!important;
+  backdrop-filter:blur(16px) saturate(135%);
+  border:1px solid rgba(222,217,229,.9)!important;
+  box-shadow:0 14px 36px rgba(45,36,64,.07)!important;
+}
+.launchpad-panel .reference-panel-head{margin-bottom:14px!important}
+.launchpad-panel .reference-panel-head>div{display:grid;gap:2px}
+.launchpad-panel .reference-panel-head>div>span{font-size:8.5px;color:#8e8795}
+.launchpad-toggle{
+  padding:7px 10px;
+  border-radius:9px;
+  background:#f0edf6;
+  color:#5f48a6!important;
+  font-size:8.5px!important;
+  font-weight:700;
+}
+.launchpad-toggle:hover{background:#e9e4f4}
+.launchpad-grid{
+  grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  gap:14px 12px!important;
+  align-items:start;
+}
+.launchpad-app{
+  min-height:118px!important;
+  padding:8px 4px 6px!important;
+  border:0!important;
+  border-radius:14px!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  text-align:center!important;
+  transition:transform .16s ease,filter .16s ease!important;
+}
+.launchpad-app:hover{
+  transform:translateY(-3px) scale(1.025)!important;
+  box-shadow:none!important;
+}
+.launchpad-icon{
+  position:relative;
+  width:62px!important;
+  height:62px!important;
+  display:grid!important;
+  place-items:center!important;
+  border-radius:18px!important;
+  margin:0 0 9px!important;
+  color:#fff!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.45),
+    inset 0 -1px 0 rgba(0,0,0,.06),
+    0 9px 18px rgba(40,31,58,.14)!important;
+  overflow:hidden;
+}
+.launchpad-icon::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(180deg,rgba(255,255,255,.24),rgba(255,255,255,0) 45%,rgba(0,0,0,.04));
+  pointer-events:none;
+}
+.launchpad-app strong{
+  font-size:10.2px!important;
+  font-weight:680!important;
+  color:#28252e!important;
+  line-height:1.25!important;
+}
+.launchpad-app small{
+  margin-top:3px!important;
+  max-width:110px;
+  font-size:7.4px!important;
+  line-height:1.28!important;
+  color:#928b97!important;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+.launchpad-app.tone-0 .launchpad-icon{background:linear-gradient(145deg,#7d5cff,#5b36db)!important}
+.launchpad-app.tone-1 .launchpad-icon{background:linear-gradient(145deg,#52a4ff,#2876dd)!important}
+.launchpad-app.tone-2 .launchpad-icon{background:linear-gradient(145deg,#42c991,#1c9e68)!important}
+.launchpad-app.tone-3 .launchpad-icon{background:linear-gradient(145deg,#ffae59,#e87824)!important}
+.launchpad-app.tone-4 .launchpad-icon{background:linear-gradient(145deg,#ff759b,#e84d78)!important}
+.launchpad-app.tone-5 .launchpad-icon{background:linear-gradient(145deg,#8d73ff,#6947df)!important}
+.launchpad-app.tone-6 .launchpad-icon{background:linear-gradient(145deg,#4fc9c6,#279f9b)!important}
+.launchpad-app.tone-7 .launchpad-icon{background:linear-gradient(145deg,#ffc85a,#efa42c)!important}
+.launchpad-more .launchpad-icon{
+  background:linear-gradient(145deg,#cbc6d2,#9d96aa)!important;
+}
+.launchpad-more strong{color:#69626f!important}
+html[data-theme=dark] .launchpad-panel{
+  background:linear-gradient(180deg,rgba(37,38,47,.92),rgba(32,33,41,.92))!important;
+  border-color:#3a3b45!important;
+}
+html[data-theme=dark] .launchpad-app strong{color:#f0edf5!important}
+html[data-theme=dark] .launchpad-app small{color:#9e98a7!important}
+html[data-theme=dark] .launchpad-toggle{background:#34313f;color:#d4c6ff!important}
+
+@media(max-width:1180px){
+  .launchpad-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+}
+@media(max-width:900px){
+  .launchpad-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+}
+@media(max-width:650px){
+  .launchpad-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  .launchpad-icon{width:58px!important;height:58px!important}
+}
