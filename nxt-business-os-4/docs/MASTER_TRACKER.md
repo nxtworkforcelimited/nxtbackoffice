@@ -19,7 +19,7 @@ A future native live-data integration would need a separately designed, authenti
 ## Verification
 
 - TypeScript and optimized Next.js production build passed.
-- 107 existing and new tests passed, including tenant/client database isolation and the executable Master Tracker response handler for owner, admin, staff, client, anonymous and mismatched workspace contexts.
+- 108 existing and new tests passed, including tenant/client database isolation and the executable Master Tracker response handler for owner, admin, staff, client, anonymous and mismatched workspace contexts.
 - Browser QA uses the public fictional demo; it does not request the real catalog or contain live project links. Actual invited staff/client sessions require a production smoke check by those users.
 - No database migration, tracker access change or source tracker deployment is included.
-- The existing reference shell had inherited horizontal navigation rules that placed the sidebar in document flow. Minimal reference-specific overrides restore the intended fixed sidebar/header; the dashboard design and workspace components are retained.
+- Preserves the latest approved dashboard design and shell layout repair from production.

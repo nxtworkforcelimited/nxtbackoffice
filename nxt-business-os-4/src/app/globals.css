@@ -737,36 +737,145 @@ html[data-theme=dark] .studio-shell,html[data-theme=dark] .studio-main{backgroun
  .reference-utility-rail,.reference-lower-grid{grid-template-columns:1fr!important}
 }
 
-.studio-shell{--reference-side-width:206px}
-@media(max-width:1250px){.studio-shell{--reference-side-width:196px}}
+
+/* Critical shell isolation: prevent legacy Studio shell rules from affecting the approved reference UI. */
+aside.studio-side.reference-side{
+  position:fixed!important;
+  inset:0 auto 0 0!important;
+  top:0!important;
+  bottom:0!important;
+  left:0!important;
+  right:auto!important;
+  z-index:60!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:stretch!important;
+  justify-content:flex-start!important;
+  width:206px!important;
+  max-width:206px!important;
+  min-width:206px!important;
+  height:100vh!important;
+  min-height:100vh!important;
+  margin:0!important;
+  padding:0 13px 18px!important;
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+  border-radius:0!important;
+  background:#fff!important;
+  border-right:1px solid #ebe8e4!important;
+  box-shadow:none!important;
+}
+aside.studio-side.reference-side>nav{
+  display:grid!important;
+  width:100%!important;
+  gap:4px!important;
+  overflow:visible!important;
+}
+aside.studio-side.reference-side>nav>button{
+  display:flex!important;
+  flex:0 0 auto!important;
+  width:100%!important;
+  max-width:none!important;
+  min-height:43px!important;
+  margin:0!important;
+  padding:0 14px!important;
+  border-radius:9px!important;
+  white-space:nowrap!important;
+}
+aside.studio-side.reference-side>nav>button>span{
+  display:inline!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+aside.studio-side.reference-side .reference-logo{
+  flex:0 0 66px!important;
+}
+aside.studio-side.reference-side .reference-side-help{
+  display:grid!important;
+  margin-top:auto!important;
+}
+aside.studio-side.reference-side .side-end{
+  display:flex!important;
+  flex:0 0 auto!important;
+}
+
+header.studio-top.reference-top{
+  position:fixed!important;
+  inset:0 0 auto 206px!important;
+  top:0!important;
+  left:206px!important;
+  right:0!important;
+  z-index:55!important;
+  height:66px!important;
+  min-height:66px!important;
+  margin:0!important;
+  padding:0 22px!important;
+  border-radius:0!important;
+  background:#fff!important;
+  border-bottom:1px solid #ece9ef!important;
+  box-shadow:none!important;
+  display:flex!important;
+  grid-template-columns:none!important;
+  flex-direction:row!important;
+  align-items:center!important;
+  gap:14px!important;
+}
+header.studio-top.reference-top .reference-search{
+  order:1!important;
+  grid-column:auto!important;
+  margin:0!important;
+  flex:0 1 520px!important;
+  width:min(520px,48vw)!important;
+  max-width:520px!important;
+}
+header.studio-top.reference-top .reference-top-actions{
+  order:2!important;
+  margin-left:auto!important;
+}
+header.studio-top.reference-top .mobile-toggle{
+  display:none!important;
+}
+
+main.studio-main{
+  margin:0 0 0 206px!important;
+  padding:82px 24px 34px!important;
+  min-height:100vh!important;
+  border-radius:0!important;
+  background:#f7f6f4!important;
+  box-shadow:none!important;
+}
+main.studio-main>.reference-home{
+  margin-top:0!important;
+  padding-top:0!important;
+}
+
+@media(max-width:900px){
+  aside.studio-side.reference-side{
+    transform:translateX(-100%)!important;
+    width:206px!important;
+    max-width:206px!important;
+    min-width:206px!important;
+    transition:transform .2s ease!important;
+  }
+  aside.studio-side.reference-side.open{transform:translateX(0)!important}
+  header.studio-top.reference-top{
+    left:0!important;
+    inset:0 0 auto 0!important;
+  }
+  header.studio-top.reference-top .mobile-toggle{
+    display:grid!important;
+    order:0!important;
+  }
+  main.studio-main{
+    margin-left:0!important;
+    padding-top:78px!important;
+  }
+}
+
 /* Internal Projects submodule; inherits the current Business OS palette. */
 .project-subnav{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 24px;border-bottom:1px solid var(--line);padding-bottom:12px}.project-subnav button{display:flex;align-items:center;gap:9px;padding:12px 16px;border-radius:10px;color:var(--muted)}.project-subnav button.active{background:#eeeafa;color:var(--purple);font-weight:600}.project-subnav span{font-size:10px;text-transform:uppercase;letter-spacing:.7px;border:1px solid currentColor;border-radius:20px;padding:3px 6px}.master-tracker{display:grid;gap:24px;max-width:1400px}.master-intro{display:flex;align-items:center;justify-content:space-between;gap:24px;background:var(--white);border:1px solid var(--line);border-radius:16px;padding:28px}.master-intro h2{font-size:28px;margin:16px 0 10px}.master-tracker p{line-height:1.7;color:var(--muted);margin:8px 0 14px}.master-tracker a{display:inline-flex;align-items:center;gap:8px}.master-private{display:inline-flex;align-items:center;gap:7px;color:var(--purple);font-size:12px;font-weight:600}.master-note{display:flex;gap:12px;align-items:flex-start;padding:16px 20px;border:1px solid var(--line);border-radius:12px;background:#f2f0fb}.master-note svg{flex-shrink:0;margin-top:4px;color:var(--purple)}.master-note p{margin:0}.master-project-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.master-project{background:var(--white);border:1px solid var(--line);border-top:4px solid #8d7ab5;border-radius:12px;padding:24px}.master-accent-1{border-top-color:#48a4a0}.master-accent-2{border-top-color:#dcaa59}.master-project h3{margin:16px 0 8px;font-size:18px}.master-project a,.master-resource-grid a{font-weight:600;font-size:13px}.master-delivery{padding:24px;border:1px solid var(--line);border-radius:14px;background:var(--white)}.master-sections{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 24px}.master-sections button{padding:10px 14px;border:1px solid var(--line);border-radius:8px}.master-sections .active{background:var(--purple);color:white;border-color:var(--purple)}.master-section-detail{display:flex;align-items:center;justify-content:space-between;gap:24px;border-top:1px solid var(--line);padding-top:24px}.master-section-detail>div{max-width:660px}.master-section-detail h3{font-size:22px}.master-section-detail small{color:var(--muted);line-height:1.6}.master-resource-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.master-resource-grid .panel{margin:0}.master-tracker .primary,.master-tracker .secondary{white-space:normal;flex-shrink:0}.master-tracker h3{line-height:1.4}.master-tracker .panel-head{gap:16px;flex-wrap:wrap}
 [data-theme="dark"] .master-note,[data-theme="dark"] .project-subnav button.active{background:#302c46}
 @media(max-width:900px){.master-intro,.master-section-detail{align-items:flex-start;flex-direction:column}.master-project-grid{grid-template-columns:1fr}.master-resource-grid{grid-template-columns:1fr}.master-intro,.master-delivery{padding:20px}.project-subnav button{padding:10px}.master-intro h2{font-size:25px}}
-/* Preserve the reference sidebar/header geometry over the earlier horizontal-shell rules. */
-.studio-shell>.reference-top{position:fixed;inset:0 0 auto var(--reference-side-width);z-index:40;height:60px;padding:0 18px 0 24px;border-bottom:1px solid #e7e4df;background:#f7f6f4}
-.studio-shell>.reference-side{position:fixed;inset:0 auto 0 0;z-index:50;width:var(--reference-side-width);max-width:none;height:auto;margin:0;padding:0 10px 16px;border-radius:0;flex-direction:column;align-items:stretch;gap:0;overflow-x:hidden;overflow-y:auto}
-.studio-shell>.reference-side>.reference-logo{order:0;flex-shrink:0;margin:0 0 17px;border-radius:0;width:100%;height:61px;padding:9px 10px 8px}
-.studio-shell>.studio-main{margin-top:0;padding-top:82px}
-@media(max-width:900px){.studio-shell>.reference-top{left:0}.studio-shell>.reference-side{display:flex}.studio-shell>.studio-main{margin-left:0}}
-@media(max-width:620px){.studio-shell>.reference-top{height:58px;padding:0 10px}.studio-shell>.studio-main{padding-top:74px}}
 html[data-theme=dark] .master-intro,html[data-theme=dark] .master-project,html[data-theme=dark] .master-delivery,html[data-theme=dark] .master-resource-grid .panel{background:#25262f;border-color:#393a44;color:#f4f1f8}
 html[data-theme=dark] .master-tracker p,html[data-theme=dark] .master-section-detail small{color:#c4bfce}
 html[data-theme=dark] .master-tracker a:not(.primary),html[data-theme=dark] .master-private{color:#c5afff}
-html[data-theme=dark] .studio-shell>.reference-top{background:#22232b;border-color:#34353f}
-/* Earlier shell rules use !important; scope their reversal to the reference shell. */
-.studio-shell>.reference-side{flex-direction:column!important;justify-content:flex-start!important;align-items:stretch!important;width:var(--reference-side-width)!important;max-width:var(--reference-side-width)!important;min-height:0!important}
-.studio-shell>.reference-side>.reference-logo{width:100%!important}
-.studio-shell>.reference-top{flex-direction:row!important}
-.studio-shell{padding:0}
-.studio-shell>.reference-top{display:flex;min-height:0}
-.reference-top>.reference-search{order:0;grid-column:auto;margin:0}
-.reference-top>.reference-top-actions{order:1}
-@media(max-width:900px){
- .studio-shell>.reference-side{transform:translateX(-100%)!important}
- .studio-shell>.reference-side.open{transform:translateX(0)!important}
- .reference-top>.mobile-toggle{display:block;order:-1;margin:0;padding:8px}
- .reference-top>.reference-search{min-width:0;max-width:none}
- .reference-top>.reference-search input{min-width:0}
- .studio-shell>.studio-main{margin-left:0}
-}
