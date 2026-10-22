@@ -16,7 +16,7 @@ export default function TaskChat({workspace,parent,kind,demo=false}:{workspace:W
  useEffect(()=>{load().catch(e=>setError(e.message));const timer=setInterval(()=>{if(!document.hidden)load().catch(e=>setError(e.message));},15000);return()=>clearInterval(timer);},[load]);
  const client=workspace.role==='client',reviewer=(data.work_reviewers??[]).some((r:any)=>r.user_id===data.user_id),messages=(data.comments??[]).filter((m:any)=>m.scope===scope);
  const teammates=useMemo(()=>client?[]:(data.staff_directory??[]).filter((s:any)=>s.user_id&&s.user_id!==data.user_id).map((s:any)=>({...s,handle:mentionHandle(s.name||s.email||'Team member')})),[client,data.staff_directory,data.user_id]);
- const handles=useMemo(()=>new Set(teammates.map((s:any)=>s.handle.toLowerCase())),[teammates]);
+ const handles=useMemo<Set<string>>(()=>new Set<string>(teammates.map((s:any)=>String(s.handle).toLowerCase())),[teammates]);
  function addMention(person:any){const tag=person.handle;setBody(v=>{const trimmed=v.replace(/\s+$/,'');return (trimmed?trimmed+' ':'')+tag+' ';});}
  function mentionIds(){const lower=body.toLowerCase();return teammates.filter((s:any)=>lower.includes(s.handle.toLowerCase())).map((s:any)=>s.user_id);}
  if(demo)return null;
