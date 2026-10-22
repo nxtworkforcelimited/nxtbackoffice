@@ -14,6 +14,8 @@ import Devices from './devices';
 import Builds from './builds';
 import Finance from './finance';
 import Loans from './loans';
+import dynamic from 'next/dynamic';
+const MasterTracker = dynamic(() => import('./master-tracker'), {loading: () => <p role="status">Loading Master Tracker…</p>});
 import {LayoutDashboard,Users,ChartNoAxesCombined,FolderKanban,CalendarDays,FileText,ListChecks,BarChart3,Search,Plus,ArrowUpRight,ArrowRight,Check,LogOut,X,Download,Grid2X2,ChevronLeft,ChevronRight,Mail,Phone,MessageSquare,Wallet,Globe,ShieldCheck,Settings,Printer,Upload,Clock,Send,Sun,Moon,Link2,Copy} from 'lucide-react';
 import {type Data,type Module,type RecordRow,type Workspace,labels,statuses} from '@/lib/types';
 import {type BusinessData,type BusinessItem,type BusinessKind,emptyBusiness,allowed,capabilities,formatMoney} from '@/lib/business';
@@ -36,6 +38,8 @@ const ruleExample={USD:{verified:false,valid_from:'2026-01-01',valid_to:'2026-12
 export default function Dashboard({initial,workspace,workspaces,email,demo=false,business=emptyBusiness}:{initial:Data;workspace:Workspace;workspaces:Workspace[];email:string;demo?:boolean;business?:BusinessData}){
  const [data,setData]=useState(initial),[biz,setBiz]=useState(business),[preview,setPreview]=useState(false),[view,setView]=useState<View>('overview'),[query,setQuery]=useState(''),[filter,setFilter]=useState('all'),[mode,setMode]=useState('calendar'),[message,setMessage]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false),[mobile,setMobile]=useState(false);
  const [theme,setTheme]=useState<'light'|'dark'>('light');
+ const [projectSection,setProjectSection]=useState<'workspace'|'master'>('workspace');
+ useEffect(()=>{const q=new URLSearchParams(window.location.search);if(workspace.role!=='client'&&q.get('module')==='projects'){setView('projects');if(q.get('section')==='master-tracker')setProjectSection('master');}},[workspace.role]);
  const [dialNumber,setDialNumber]=useState('');
  const [omari,setOmari]=useState({mode:'off',client_enabled:false,test_number:'',show:false,msisdn:'',otp:'',session_id:'',otp_reference:''});
  const [utm,setUtm]=useState({url:'',source:'linkedin',medium:'social',campaign:'',employee:''}),[utmResult,setUtmResult]=useState('');
@@ -71,14 +75,15 @@ export default function Dashboard({initial,workspace,workspaces,email,demo=false
  const activeView=nav.includes(view)?view:'overview';
  const clientName=(id:string|null)=>visible.clients.find(c=>c.id===id)?.title??(id?'Client':'NXT Workforce');
  const rows=(m:Module)=>visible[m].filter(r=>(r.title+' '+clientName(r.client_id)).toLowerCase().includes(query.toLowerCase())&&(filter==='all'||r.status===filter));
- const ops=!client&&!demo&&['clients','projects','tasks','team','tickets'].includes(activeView);
- const current=!ops&&core.includes(activeView as Module)?activeView as Module:null;
+ const showMaster=activeView==='projects'&&!client&&projectSection==='master';
+ const ops=!showMaster&&!client&&!demo&&['clients','projects','tasks','team','tickets'].includes(activeView);
+ const current=!showMaster&&!ops&&core.includes(activeView as Module)?activeView as Module:null;
  const selected=detail?visible[detail.module].find(r=>r.id===detail.row.id):null;
  const openTasks=visible.tasks.filter(r=>r.status!=='done');
  const posts=visible.social_posts;
  const queue=posts.filter(p=>client?p.status==='client_review':p.status==='manager_review'||p.status==='client_review');
  const matchItems=items.filter(i=>(activeView==='quotes'?i.kind==='quote':activeView==='invoices'?i.kind==='invoice':true)&&(i.title+' '+i.reference).toLowerCase().includes(query.toLowerCase()));
- function go(v:View){setView(v);setQuery('');setFilter('all');setMode(v==='social_posts'?'calendar':'list');setMobile(false);setError('');setMessage('');}
+ function go(v:View){setView(v);setProjectSection('workspace');setQuery('');setFilter('all');setMode(v==='social_posts'?'calendar':'list');setMobile(false);setError('');setMessage('');}
  function openForm(k:Module|BusinessKind){setLines([{...blankLine}]);setError('');setForm(k);}
  function generateUtm(){try{const base=new URL(utm.url);if(!utm.source.trim()||!utm.medium.trim()||!utm.campaign.trim())throw new Error('Complete Source, Medium and Campaign.');const slug=(v:string)=>v.trim().toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');base.searchParams.set('utm_source',slug(utm.source));base.searchParams.set('utm_medium',slug(utm.medium));base.searchParams.set('utm_campaign',slug(utm.campaign));if(utm.employee)base.searchParams.set('utm_content',slug(utm.employee));setUtmResult(base.toString());setError('');}catch(e){setUtmResult('');setError(e instanceof Error&&e.message!=='Invalid URL'?e.message:'Enter a complete website URL, including https://');}}
  async function copyUtm(){if(!utmResult)return;try{await navigator.clipboard.writeText(utmResult);setMessage('UTM link copied.');}catch{setError('Copy was blocked by the browser. Select the link and copy it manually.');}}
@@ -176,6 +181,8 @@ export default function Dashboard({initial,workspace,workspaces,email,demo=false
  {!client&&activeView==='loans'&&<Loans workspace={workspace} demo={demo}/>}
  {activeView==='assistant'&&<Assistant key={workspace.id} workspace={workspace.id} demo={demo||preview} client={client}/>}
  {!client&&activeView==='devices'&&<Devices workspace={workspace} demo={demo}/>}
+ {activeView==='projects'&&!client&&<nav className="project-subnav" aria-label="Projects sections"><button className={!showMaster?'active':''} aria-current={!showMaster?'page':undefined} onClick={()=>setProjectSection('workspace')}><FolderKanban size={16}/>Projects workspace</button><button className={showMaster?'active':''} aria-current={showMaster?'page':undefined} onClick={()=>setProjectSection('master')}><ShieldCheck size={16}/>Master Tracker <span>Internal</span></button></nav>}
+ {showMaster&&<MasterTracker key={workspace.id} workspace={workspace.id} demo={demo}/>}
  {ops&&<Operations key={activeView} area={activeView as 'clients'|'projects'|'tasks'|'team'|'tickets'} workspace={workspace} demo={demo}/>}
  {['employees','leave','messages'].includes(activeView)&&<People key={activeView} area={activeView as 'employees'|'leave'|'messages'} workspace={workspace} clients={visible.clients} manager={can('approve_leave')} demo={demo}/>}
  {activeView==='overview'&&<section className="reference-home">
