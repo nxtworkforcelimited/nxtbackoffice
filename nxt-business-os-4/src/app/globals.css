@@ -433,3 +433,7 @@ html[data-theme=dark] .client-logo-editor{background:#292b37;border-color:#3a3c4
 .payment-options .payment-connected{background:#e5f7ee;color:#187b58;border-color:#bfe8d4;font-weight:850}
 .paynow-button{display:inline-flex;align-items:center;gap:7px}
 html[data-theme=dark] .payment-options .payment-connected{background:#183d34;color:#91e3bc;border-color:#285b4d}
+
+/* Omari merchant payments */
+.payment-options .payment-testing{background:#fff1d9;color:#976414;border-color:#f1d39f;font-weight:850}
+.omari-button{display:inline-flex;align-items:center;gap:7px}.omari-payment-form{border:1px solid #ded4ef;background:#faf8fd;border-radius:16px;padding:16px}.omari-otp-ref{padding:10px 12px;border-radius:10px;background:#efe9fb;color:#5f4890;font-size:11px}html[data-theme=dark] .payment-options .payment-testing{background:#4a371b;color:#f2cb87;border-color:#6d5229}html[data-theme=dark] .omari-payment-form{background:#262833;border-color:#414352}html[data-theme=dark] .omari-otp-ref{background:#383146;color:#dacdf0}
