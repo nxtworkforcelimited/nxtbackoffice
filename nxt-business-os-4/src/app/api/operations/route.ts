@@ -5,6 +5,7 @@ import {z} from 'zod';
 const id=z.uuid(),text=z.string().trim(),nullableId=id.nullable();
 const update=z.discriminatedUnion('action',[
  z.object({action:z.literal('record'),module:z.enum(['clients','projects','tasks']),id:id.optional(),title:text.min(1).max(160),status:text.max(30),email:z.union([z.email(),z.literal('')]).optional(),approval_email_enabled:z.boolean().optional(),description:text.max(5000).optional(),client_id:nullableId.optional(),client_visible:z.boolean().optional(),due_date:z.iso.date().nullable().optional(),assignee_id:nullableId.optional(),project_id:nullableId.optional()}),
+ z.object({action:z.literal('client_logo'),id,logo_path:z.string().max(500).nullable()}),
  z.object({action:z.literal('delete'),module:z.enum(['clients','projects','tasks']),id}),
  z.object({action:z.literal('archive'),module:z.enum(['clients','projects','tasks']),id,archived:z.boolean()}),
  z.object({action:z.literal('task_status'),id,status:z.enum(['todo','in_progress','done'])}),
@@ -35,6 +36,10 @@ export async function POST(req:NextRequest){
  else fields={...fields,description:v.description??'',client_id:v.client_id??null,client_visible:v.client_visible??false,due_date:v.due_date??null,...(v.module==='tasks'?{assignee_id:v.assignee_id??null,project_id:v.project_id??null}:{})};
  if(v.module==='tasks'&&v.project_id){const project=await c.db.from('projects').select('client_id').eq('id',v.project_id).eq('tenant_id',tenant_id).is('archived_at',null).single();if(!project.data||project.data.client_id!==(v.client_id??null))return NextResponse.json({error:'Task and project must use the same client'},{status:400});}
  r=v.id?await c.db.from(v.module).update(fields).eq('tenant_id',tenant_id).eq('id',v.id).select().single():await c.db.from(v.module).insert({...fields,tenant_id}).select().single();
+ }else if(v.action==='client_logo'){
+ if(!can('crm'))return NextResponse.json({error:'CRM access required'},{status:403});
+ if(v.logo_path&&!v.logo_path.startsWith(tenant_id+'/'+v.id+'/'))return NextResponse.json({error:'Invalid logo path'},{status:400});
+ r=await c.db.from('clients').update({logo_path:v.logo_path}).eq('tenant_id',tenant_id).eq('id',v.id).select().single();
  }else if(v.action==='delete'){
  if(!(v.module==='tasks'?can('task_admin'):c.workspace.role==='owner'))return NextResponse.json({error:'Owner access required'},{status:403});
  r=await c.db.from(v.module).delete().eq('tenant_id',tenant_id).eq('id',v.id).not('archived_at','is',null).select().single();

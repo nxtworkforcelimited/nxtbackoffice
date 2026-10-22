@@ -409,3 +409,15 @@ html[data-theme=dark] .chat-message{background:#292b37;border-color:#3a3c49}html
 .kanban-client{display:block;margin-bottom:7px;color:#6a45cf;font-size:9px;font-weight:850;text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .work-detail-client{display:block;margin-bottom:7px;color:#6a45cf;font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:.08em}
 html[data-theme=dark] .kanban-client,html[data-theme=dark] .work-detail-client{color:#c9b6ff}
+
+
+/* Contact logo upload */
+.client-logo-mark.has-logo{padding:0;overflow:hidden;background:#fff;border:1px solid #e4deec}
+.client-logo-mark.has-logo img{width:100%;height:100%;object-fit:contain;background:#fff}
+.client-logo-editor{display:flex;align-items:center;gap:15px;padding:14px;border:1px solid var(--nxt-line,#e5e2ef);border-radius:14px;background:#faf9fc;margin:4px 0 12px}
+.client-logo-preview{display:grid;place-items:center;flex:0 0 72px;width:72px;height:72px;border-radius:16px;background:linear-gradient(135deg,#8760ef,#6844da);color:#fff;font-weight:850}
+.client-logo-preview.has-logo{overflow:hidden;padding:5px;background:#fff;border:1px solid #e4deec}
+.client-logo-preview img{width:100%;height:100%;object-fit:contain}
+.client-logo-editor>div{display:flex;flex-wrap:wrap;align-items:center;gap:8px}.client-logo-editor strong{width:100%;font-size:13px}.client-logo-editor p{width:100%;margin:0;color:#817a8d;font-size:10px}
+.logo-upload-button{position:relative;overflow:hidden;cursor:pointer}.logo-upload-button input{position:absolute;inset:0;opacity:0;cursor:pointer}
+html[data-theme=dark] .client-logo-editor{background:#292b37;border-color:#3a3c49}
