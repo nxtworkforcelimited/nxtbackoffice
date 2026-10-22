@@ -349,3 +349,17 @@ html[data-theme=dark] .utm-form input,html[data-theme=dark] .utm-form select,htm
 html[data-theme=dark] .utm-empty{border-color:#3b3d4a;color:#aaa5b5}
 @media(max-width:900px){.utm-layout{grid-template-columns:1fr}}
 @media(max-width:600px){.utm-form .form-grid{grid-template-columns:1fr}.utm-hero{align-items:flex-start;flex-direction:column}}
+
+
+/* Issued invoice payment terms */
+.invoice-payment-terms{margin:18px 0;padding:16px 18px;border:1px solid #ded7ec;border-radius:14px;background:#f8f5ff}
+.invoice-payment-terms>strong{display:block;color:#4f2b9e;font-size:13px;margin-bottom:5px}
+.invoice-payment-terms>p{margin:0 0 12px;color:#6e687a;font-size:11px;line-height:1.55}
+.invoice-payment-terms>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.invoice-payment-terms span{display:flex;justify-content:space-between;gap:12px;padding:10px 12px;border-radius:10px;background:#fff;font-size:11px}
+.invoice-payment-terms b{font-weight:750}
+html[data-theme=dark] .invoice-payment-terms{background:#2d2840;border-color:#443b5d}
+html[data-theme=dark] .invoice-payment-terms>strong{color:#cfbbff}
+html[data-theme=dark] .invoice-payment-terms>p{color:#b8b1c6}
+html[data-theme=dark] .invoice-payment-terms span{background:#232532;color:#eeeaf7}
+@media(max-width:620px){.invoice-payment-terms>div{grid-template-columns:1fr}}
