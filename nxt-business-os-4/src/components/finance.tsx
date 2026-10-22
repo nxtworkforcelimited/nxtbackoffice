@@ -1,5 +1,6 @@
 'use client';
 import {useEffect,useState} from 'react';
+import AccountingWorkspace from './accounting-workspace';
 import type {Workspace} from '@/lib/types';
 import {allowed,formatMoney} from '@/lib/business';
 type Kind='expense'|'purchase_order'|'subscription';
@@ -11,7 +12,7 @@ const accounts:Record<string,string>={'1000':'Cash / Bank','1100':'Accounts rece
 const today=()=>new Date().toISOString().slice(0,10);
 const currencies=['USD','ZWG','GBP','AUD'];
 function csv(name:string,rows:(string|number)[][]){const url=URL.createObjectURL(new Blob([rows.map(row=>row.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(',')).join('\n')],{type:'text/csv'}));const a=document.createElement('a');a.href=url;a.download=name;a.click();URL.revokeObjectURL(url);}
-export default function Finance({area,workspace}:{area:Kind|'accounting';workspace:Workspace}){
+function FinanceRecords({area,workspace}:{area:Kind|'accounting';workspace:Workspace}){
  const [records,setRecords]=useState<RecordItem[]>([]),[journals,setJournals]=useState<Journal[]>([]),[error,setError]=useState(''),[notice,setNotice]=useState(''),[busy,setBusy]=useState(false),[edit,setEdit]=useState<Partial<RecordItem>|null>(null),[selected,setSelected]=useState<RecordItem|null>(null),[currency,setCurrency]=useState('USD'),[filter,setFilter]=useState('all'),[from,setFrom]=useState(''),[to,setTo]=useState(''),[showJournal,setShowJournal]=useState(false),[lines,setLines]=useState<Line[]>([{account:'1000',debit:0,credit:0},{account:'3000',debit:0,credit:0}]);
  const admin=allowed(workspace.role,workspace.permissions??[],'finance_admin'),base='/api/finance?workspace='+workspace.id;
  async function load(){const r=await fetch(base,{cache:'no-store'}),b=await r.json();if(!r.ok)throw Error(b.error);setRecords(b.records);setJournals(b.journals);}
@@ -34,3 +35,5 @@ export default function Finance({area,workspace}:{area:Kind|'accounting';workspa
  {selected&&<article className="panel people-form finance-print"><div className="paper-brand"><img src="/brand/nxt-business-os.png" alt="NXT Business OS" width="160"/><h2>{selected.kind==='purchase_order'?'Purchase order':selected.kind==='expense'?'Expense record':'Subscription'}</h2></div><p>{workspace.name} · {selected.reference}</p><h3>{selected.title}</h3><p>Supplier: {selected.vendor||'Not supplied'}</p><p className="detail-description">{selected.description}</p>{selected.kind==='purchase_order'&&<table><thead><tr><th>Item</th><th>Qty</th><th>Unit price</th><th>Total</th></tr></thead><tbody>{(selected.order_lines??[]).map((l,i)=><tr key={i}><td>{l.description}</td><td>{l.quantity}</td><td>{formatMoney(l.unit_price,selected.currency)}</td><td>{formatMoney(Math.round(l.quantity*l.unit_price*100)/100,selected.currency)}</td></tr>)}</tbody></table>}<strong>{formatMoney(selected.amount,selected.currency)}</strong><p>Due: {selected.due_date??'Not supplied'} · Status: {selected.status}</p>{selected.status==='draft'&&<p>DRAFT · Not authorised</p>}<div className="action-row no-print">{(selected.status==='draft'||selected.kind==='subscription')&&<button onClick={()=>setEdit({...selected})}>Edit</button>}<button onClick={()=>{document.body.classList.add('printing-finance');window.print();document.body.classList.remove('printing-finance');}}>Print / Save PDF</button>{admin&&selected.kind!=='subscription'&&((selected.kind==='expense'?{draft:['approved','cancelled'],approved:['paid']}:{draft:['issued','cancelled'],issued:['received','cancelled']}) as Record<string,string[]>)[selected.status]?.map(status=><button disabled={busy} className="secondary" key={status} onClick={()=>{if(window.confirm('Mark '+selected.reference+' as '+status+'?'))run(async()=>setSelected(await send({action:'status',id:selected.id,status})));}}>Mark {status}</button>)}<button onClick={()=>setSelected(null)}>Close</button></div></article>}</>}
  </section>;
 }
+
+export default function Finance(props:{area:Kind|'accounting';workspace:Workspace}){return props.area==='accounting'?<AccountingWorkspace workspace={props.workspace}/>:<FinanceRecords {...props}/>;}
