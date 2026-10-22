@@ -1,14 +1,16 @@
 'use client';
 
-import {useState} from 'react';
+import {useEffect,useState} from 'react';
 import styles from './login.module.css';
 
 export default function LoginForm({ready,error}:{ready:boolean;error?:string}) {
   const [show,setShow]=useState(false);
+  useEffect(()=>{if(error&&window.location.search)window.history.replaceState({},'',window.location.pathname);},[error]);
+  const linkExpired=Boolean(error&&(/expired|already used|password-setup|setup session/i.test(error)));
   if(!ready) return <p className={styles.notice}>NXT Business OS is temporarily unavailable. Please contact your workspace administrator.</p>;
 
   return <>
-    {error&&<p role="alert" className={styles.notice}>{error}</p>}
+    {error&&<p role="alert" className={styles.notice}>{linkExpired?'That setup/reset link has expired or was already used. If you already have a password, sign in below. If you do not know your password, ask NXT Workforce to send a fresh reset link.':error}</p>}
     <form action="/auth/login" method="post" className={styles.form}>
       <label>Email address
         <input name="email" type="email" autoComplete="username" required/>
