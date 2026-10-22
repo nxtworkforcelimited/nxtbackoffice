@@ -1,4 +1,5 @@
-import {configured} from '@/lib/supabase/server';
+import {configured,supabase} from '@/lib/supabase/server';
+import {redirect} from 'next/navigation';
 import LoginForm from './login-form';
 import styles from './login.module.css';
 
@@ -6,6 +7,13 @@ export const dynamic='force-dynamic';
 export const revalidate=0;
 
 export default async function Login({searchParams}:{searchParams:Promise<{error?:string}>}) {
+  if(configured()){
+    try{
+      const db=await supabase();
+      const {data:{user}}=await db.auth.getUser();
+      if(user)redirect('/app');
+    }catch{}
+  }
   const error=(await searchParams).error;
   return <main className={styles.shell}>
     <section className={styles.visual} aria-label="NXT Workforce">
