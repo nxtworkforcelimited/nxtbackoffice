@@ -403,3 +403,9 @@ html[data-theme=dark] .work-detail-meta>span{background:#2b2d3a;color:#bbb5c8}
 .mention-picker button{border:1px solid #ded5f2;background:#fff;color:#6541c7;border-radius:99px;padding:6px 9px;font-size:9px;font-weight:750}
 .mention-picker button:hover{background:#eee7ff;border-color:#bba6ef}
 html[data-theme=dark] .chat-message{background:#292b37;border-color:#3a3c49}html[data-theme=dark] .chat-message.mine{background:#332b49;border-color:#4b3d6d}html[data-theme=dark] .chat-message-body{color:#eeeaf5}html[data-theme=dark] .chat-mention{background:#47356f;color:#dacbff}html[data-theme=dark] .mention-picker{background:#292b37}html[data-theme=dark] .mention-picker button{background:#343646;border-color:#494b5c;color:#ddd4f2}
+
+
+/* Task client identity */
+.kanban-client{display:block;margin-bottom:7px;color:#6a45cf;font-size:9px;font-weight:850;text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.work-detail-client{display:block;margin-bottom:7px;color:#6a45cf;font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:.08em}
+html[data-theme=dark] .kanban-client,html[data-theme=dark] .work-detail-client{color:#c9b6ff}
