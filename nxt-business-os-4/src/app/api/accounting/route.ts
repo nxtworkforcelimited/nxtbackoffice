@@ -17,7 +17,7 @@ export async function GET(req:NextRequest){
   return {data:null,error:{message:'Too many records to report safely. Narrow the reporting scope.'}};
  }));
  const failed=rows.find(r=>r.error);if(failed)return NextResponse.json({error:failed.error?.message},{status:400});
- return NextResponse.json({drafts:rows[0].data,reviewers:rows[1].data,journals:rows[2].data,invoices:rows[3].data?.filter(v=>v.kind==='invoice'&&v.currency==='USD'),audit:rows[4].data,user_id:c.user.id},{headers:{'Cache-Control':'private, no-store'}});
+ return NextResponse.json({drafts:rows[0].data,reviewers:rows[1].data,journals:rows[2].data,invoices:rows[3].data?.filter(v=>v.kind==='invoice'&&v.currency==='USD'&&!v.deleted_at),audit:rows[4].data,user_id:c.user.id},{headers:{'Cache-Control':'private, no-store'}});
 }
 export async function POST(req:NextRequest){
  if(req.headers.get('origin')!==req.nextUrl.origin)return NextResponse.json({error:'Forbidden'},{status:403});

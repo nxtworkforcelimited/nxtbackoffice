@@ -13,6 +13,12 @@ export async function POST(req:NextRequest){
  if(!trustedRequest(req))return NextResponse.json({error:'Forbidden'},{status:403});
  const ctx=await context(req.nextUrl.searchParams.get('workspace'));if(!ctx?.workspace)return NextResponse.json({error:'Sign in required'},{status:401});
  const raw=await req.json().catch(()=>null);
+ if(raw?.action==='remove_test_invoice'){
+  const parsed=z.object({action:z.literal('remove_test_invoice'),id:z.uuid(),reason:z.string().trim().min(5).max(500)}).strict().safeParse(raw);
+  if(!parsed.success)return NextResponse.json({error:'Choose an invoice and give a removal reason.'},{status:400});
+  const {data,error}=await ctx.db.rpc('remove_test_invoice',{t:ctx.workspace.id,r:parsed.data.id,reason:parsed.data.reason});
+  return NextResponse.json(error?{error:error.message}:data,{status:error?400:200});
+ }
  if(raw?.action==='rules'){
   if(ctx.workspace.role!=='owner'&&!(ctx.workspace.permissions??[]).includes('payroll_admin'))return NextResponse.json({error:'Payroll administrator access required'},{status:403});
   const parsed=z.object({action:z.literal('rules'),rules:z.object({USD:rule.optional(),ZWG:rule.optional()}).strict()}).safeParse(raw);
