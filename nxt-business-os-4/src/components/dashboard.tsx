@@ -13,7 +13,6 @@ import SmsCenter from './sms-center';
 import Devices from './devices';
 import Builds from './builds';
 import Finance from './finance';
-import AccountStatement from './account-statement';
 import Loans from './loans';
 import dynamic from 'next/dynamic';
 const MasterTracker = dynamic(() => import('./master-tracker'), {loading: () => <p role="status">Loading Master Tracker…</p>});
@@ -186,7 +185,6 @@ export default function Dashboard({initial,workspace,workspaces,email,demo=false
  
  {activeView!=='overview'&&<div className="studio-heading reference-page-heading"><div><p className="eyebrow">{client?'CLIENT PORTAL':'NXT WORKFORCE'} / {navTitle(activeView).toUpperCase()}</p><h1>{activeView==='social_posts'?(client?'Approvals':'Content Workspace'):navTitle(activeView)}</h1><p>{activeView==='social_posts'?(client?'Review content shared with your account.':'Plan content. Review together. Keep every approval in one place.'):activeView==='payroll'?'Employee payroll and payslips.':'Your connected workspace, built around the way you work.'}</p></div><div className="action-row">{current&&((!client&&can(viewCap[activeView]))||(client&&current==='documents'))&&<button className="primary" onClick={()=>openForm(current)}><Plus size={16}/>{current==='documents'?'Upload file':current==='social_posts'?'Create content':'New '+(current==='clients'?'contact':current==='deals'?'opportunity':current==='projects'?'project':'task')}</button>}{activeView==='requests'&&<button className="primary" onClick={()=>openForm('request')}><Plus size={16}/>New request</button>}{activeView==='quotes'&&!client&&<button className="primary" onClick={()=>openForm('quote')}>New quotation</button>}{['invoices','quotes'].includes(activeView)&&!client&&<button className="primary" onClick={()=>openForm('invoice')}>New invoice</button>}{activeView==='payroll'&&<button className="primary" onClick={()=>openForm('payroll')}><Plus size={16}/>Prepare payslip</button>}</div></div>}
  {error&&!form&&!detail&&!paper&&<p className="notice error" role="alert">{error}</p>}{message&&<p className="notice" role="status">{message}</p>}
- {!client&&activeView==='invoices'&&can('finance')&&<AccountStatement workspace={workspace} clients={visible.clients}/>}
  {!client&&['expenses','purchase_orders','subscriptions','accounting'].includes(activeView)&&<Finance key={activeView} area={activeView==='expenses'?'expense':activeView==='purchase_orders'?'purchase_order':activeView==='subscriptions'?'subscription':'accounting'} workspace={workspace}/>}
  {!client&&activeView==='builds'&&<Builds workspace={workspace} demo={demo}/>} 
  {!client&&activeView==='loans'&&<Loans workspace={workspace} demo={demo}/>}
