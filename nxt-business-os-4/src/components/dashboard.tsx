@@ -40,7 +40,7 @@ export default function Dashboard({initial,workspace,workspaces,email,demo=false
  const [theme,setTheme]=useState<'light'|'dark'>('light');
  const [showAllApps,setShowAllApps]=useState(false);
  const [projectSection,setProjectSection]=useState<'workspace'|'master'>('workspace');
- useEffect(()=>{const q=new URLSearchParams(window.location.search);if(workspace.role!=='client'&&q.get('module')==='projects'){setView('projects');if(q.get('section')==='master-tracker')setProjectSection('master');}},[workspace.role]);
+ useEffect(()=>{const q=new URLSearchParams(window.location.search);if(workspace.role!=='client'&&q.get('module')==='accounting')setView('accounting');if(workspace.role!=='client'&&q.get('module')==='projects'){setView('projects');if(q.get('section')==='master-tracker')setProjectSection('master');}},[workspace.role]);
  const [dialNumber,setDialNumber]=useState('');
  const [omari,setOmari]=useState({mode:'off',client_enabled:false,test_number:'',show:false,msisdn:'',otp:'',session_id:'',otp_reference:''});
  const [utm,setUtm]=useState({url:'',source:'linkedin',medium:'social',campaign:'',employee:''}),[utmResult,setUtmResult]=useState('');
@@ -73,7 +73,7 @@ export default function Dashboard({initial,workspace,workspaces,email,demo=false
  const nav=(Object.keys(appIcons) as View[]).filter(v=>!['email','website'].includes(v)&&(client?(['overview','projects','tasks','social_posts','documents','messages','requests','assistant','utm','invoices'].includes(v)&&(v!=='assistant'||clientAssistantEnabled)):v==='settings'?['owner','admin'].includes(workspace.role):['clients','deals'].includes(v)||!viewCap[v]||can(viewCap[v])||(v==='social_posts'&&can('approve_content'))));
  const sidebarOrder:View[]=client
   ? ['overview','projects','tasks','invoices','documents','social_posts','messages','requests','utm',...(clientAssistantEnabled?['assistant' as View]:[])]
-  : ['overview','deals','projects','tasks','clients','expenses','invoices','payroll','loans','tickets','social_posts','documents','phone','reports','settings'];
+  : ['overview','deals','projects','tasks','clients','expenses','accounting','invoices','payroll','loans','tickets','social_posts','documents','phone','reports','settings'];
  const sidebarNav=sidebarOrder.filter(v=>nav.includes(v));
  const activeView=nav.includes(view)?view:'overview';
  const clientName=(id:string|null)=>visible.clients.find(c=>c.id===id)?.title??(id?'Client':'NXT Workforce');
@@ -147,7 +147,7 @@ export default function Dashboard({initial,workspace,workspaces,email,demo=false
  const navTitle=(v:View)=>client?({overview:'Home',projects:'Projects',tasks:'Tasks',invoices:'Invoices & Payments',documents:'Documents',social_posts:'Approvals',messages:'Messages',requests:'Support',assistant:'NXT Assistant',utm:'Campaign Links'} as Partial<Record<View,string>>)[v]??titleFor(v):({overview:'Home',deals:'CRM',clients:'Contacts',expenses:'Finance',social_posts:'Marketing',reports:'Reports',payroll:'Payroll',loans:'Employee Loans',tickets:'Tickets'} as Partial<Record<View,string>>)[v]??titleFor(v);
  const staffHomeApps=[
   ['deals','CRM','Leads & pipeline'],['projects','Projects','Plan & deliver work'],['tasks','Tasks','Stay on track'],['clients','Contacts','Manage contacts'],['invoices','Invoices','Bill & get paid'],['quotes','Quotes','Create proposals'],
-  ['expenses','Finance','Money & expenses'],['payroll','Payroll','Run payroll'],['loans','Employee Loans','Manage staff loans'],['tickets','Tickets','Support & IT'],['documents','Documents','Store & share'],['social_posts','Marketing','Plan & publish'],
+  ['accounting','Accounting','Journals & financial statements'],['expenses','Finance','Money & expenses'],['payroll','Payroll','Run payroll'],['loans','Employee Loans','Manage staff loans'],['tickets','Tickets','Support & IT'],['documents','Documents','Store & share'],['social_posts','Marketing','Plan & publish'],
   ['phone','Phone','Business calls'],['reports','Reports','Analytics & insights'],['settings','Settings','Configure OS']
  ] as [View,string,string][];
  const clientHomeApps=[
