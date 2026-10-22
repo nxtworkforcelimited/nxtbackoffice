@@ -14,10 +14,12 @@ export default function Loans({workspace,demo=false}:{workspace:Workspace;demo?:
  const loans:Loan[]=data.loans??[],mine=loans.filter(l=>l.is_mine),queue=loans.filter(l=>l.status==='requested'&&!l.is_mine);
  const active=useMemo(()=>mine.find(l=>l.status==='approved')??mine.find(l=>l.status==='requested')??mine[0]??null,[mine]);
  const stats={
+  available:Number(data.allowance?.available??0),
+  earned:Number(data.allowance?.earned??0),
+  used:Number(data.allowance?.used??0),
   pending:mine.filter(l=>l.status==='requested').length,
   approved:mine.filter(l=>l.status==='approved').length,
-  deducted:mine.filter(l=>l.status==='deducted').length,
-  total:mine.reduce((s,l)=>s+Number(l.amount),0)
+  deducted:mine.filter(l=>l.status==='deducted').length
  };
  const statusLabel=(s:Loan['status'])=>s==='requested'?'Pending review':s==='approved'?'Approved · next payroll':s==='deducted'?'Deducted':'Declined';
  return <section className="loan-bank-shell">
@@ -35,9 +37,9 @@ export default function Loans({workspace,demo=false}:{workspace:Workspace;demo?:
   </div>
 
   {showRequest&&data.employee&&<section className="loan-request-drawer">
-   <div><span className="eyebrow">NEW REQUEST</span><h3>Request a salary loan</h3><p>Approved loans are deducted from the next finalised payroll.</p></div>
+   <div><span className="eyebrow">NEW REQUEST</span><h3>Request a salary loan</h3><p>You can request up to <strong>{formatMoney(stats.available,'USD')}</strong>. The amount is reserved immediately and, if approved, deducted from the next finalised payroll.</p></div>
    <form onSubmit={e=>{e.preventDefault();run(async()=>{await send({action:'request',amount:Number(amount),reason});setAmount('');setReason('');setShowRequest(false);setNotice('Loan request submitted to Bridget, Kristian and Nyasha.');});}}>
-    <div className="form-grid"><label>Amount (USD)<input type="number" min="0.01" max="1000000" step="0.01" required value={amount} onChange={e=>setAmount(e.target.value)} placeholder="0.00"/></label><label>Employee<input readOnly value={data.employee.name}/></label></div>
+    <div className="form-grid"><label>Amount (USD)<input type="number" min="0.01" max={Math.max(stats.available,0)} step="0.01" required value={amount} onChange={e=>setAmount(e.target.value)} placeholder="0.00"/></label><label>Employee<input readOnly value={data.employee.name}/></label></div>
     <label>Reason<textarea required minLength={5} maxLength={1000} value={reason} onChange={e=>setReason(e.target.value)} placeholder="Tell the reviewers why you need this loan."/></label>
     <button className="primary" disabled={busy||demo}>Submit request</button>
    </form>
@@ -48,18 +50,18 @@ export default function Loans({workspace,demo=false}:{workspace:Workspace;demo?:
   {tab==='overview'&&<>
    <div className="loan-bank-grid">
     <section className="loan-main-card">
-     <div className="loan-main-card-top"><span>{data.employee?.name??'Employee account'}</span><span className={'loan-status-chip '+(active?.status??'none')}>{active?statusLabel(active.status):'No active loan'}</span></div>
-     <div className="loan-main-amount"><small>{active?'Current / latest loan':'Current loan'}</small><strong>{active?formatMoney(active.amount,'USD'):formatMoney(0,'USD')}</strong></div>
-     {active?<><p>{active.reason}</p><div className="loan-progress"><span className={['requested','approved','deducted'].includes(active.status)?'done':''}>Requested</span><i/><span className={['approved','deducted'].includes(active.status)?'done':''}>Approved</span><i/><span className={active.status==='deducted'?'done':''}>Payroll</span></div></>:<p>You do not have an active loan request.</p>}
+     <div className="loan-main-card-top"><span>{data.employee?.name??'Employee account'}</span><span className={'loan-status-chip '+(active?.status??'none')}>{active?statusLabel(active.status):'Available'}</span></div>
+     <div className="loan-main-amount"><small>Available to borrow</small><strong>{formatMoney(stats.available,'USD')}</strong></div>
+     {active?<><p>{active.reason} · Current/latest request: {formatMoney(active.amount,'USD')}</p><div className="loan-progress"><span className={['requested','approved','deducted'].includes(active.status)?'done':''}>Requested</span><i/><span className={['approved','deducted'].includes(active.status)?'done':''}>Approved</span><i/><span className={active.status==='deducted'?'done':''}>Payroll</span></div></>:<p>You do not have an active loan request.</p>}
     </section>
-    <section className="loan-side-card"><span>Next action</span><h3>{active?.status==='requested'?'Awaiting review':active?.status==='approved'?'Scheduled for payroll deduction':active?.status==='deducted'?'Loan completed':'Ready when you are'}</h3><p>{active?.status==='approved'?'The approved amount will be deducted automatically from the next finalised payslip.':active?.status==='requested'?'Bridget, Kristian or Nyasha can review this request.':'You can submit a new request at any time.'}</p>{data.employee&&<button className="secondary" onClick={()=>setShowRequest(true)}>Request another loan</button>}</section>
+    <section className="loan-side-card"><span>Allowance growth</span><h3>+ US$5 every 2 weeks</h3><p>You started with US$20. Your earned allowance grows by US$5 every 14 completed days. Loans you take reduce the available balance.</p><div className="loan-next-rise"><small>Next increase</small><strong>{data.allowance?.next_increase?new Date(data.allowance.next_increase+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'Not available'}</strong></div>{data.employee&&<button className="secondary" disabled={stats.available<=0} onClick={()=>setShowRequest(true)}>Request loan</button>}</section>
    </div>
 
    <div className="loan-stat-grid">
-    <div><span>Pending</span><strong>{stats.pending}</strong><small>Waiting for review</small></div>
-    <div><span>Approved</span><strong>{stats.approved}</strong><small>Next payroll deduction</small></div>
-    <div><span>Deducted</span><strong>{stats.deducted}</strong><small>Completed loans</small></div>
-    <div><span>Total requested</span><strong>{formatMoney(stats.total,'USD')}</strong><small>Your loan history</small></div>
+    <div><span>Available</span><strong>{formatMoney(stats.available,'USD')}</strong><small>Can be requested now</small></div>
+    <div><span>Earned allowance</span><strong>{formatMoney(stats.earned,'USD')}</strong><small>US$20 + fortnightly growth</small></div>
+    <div><span>Used / reserved</span><strong>{formatMoney(stats.used,'USD')}</strong><small>Pending, approved or deducted</small></div>
+    <div><span>Next increase</span><strong>+ US$5</strong><small>{data.allowance?.next_increase??'Every 14 days'}</small></div>
    </div>
 
    {data.reviewer&&<section className="loan-review-preview panel"><div className="panel-head"><div><span className="eyebrow">REVIEW</span><h3>Requests waiting for you</h3></div><button className="text-button" onClick={()=>setTab('review')}>Open queue</button></div>{queue.slice(0,3).map(l=><div className="loan-review-row" key={l.id}><div><strong>{l.employee_name}</strong><small>{l.reason}</small></div><b>{formatMoney(l.amount,'USD')}</b><span className="badge loan-requested">Pending</span></div>)}{!queue.length&&<p className="empty">No requests are waiting for review.</p>}</section>}
