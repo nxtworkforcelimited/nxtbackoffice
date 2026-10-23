@@ -1,7 +1,7 @@
 import {NextRequest,NextResponse} from 'next/server';
 import {createClient} from '@supabase/supabase-js';
 import {z} from 'zod';
-const schema=z.object({type:z.enum(['enquiry','free_audit']),name:z.string().trim().min(2).max(120),company:z.string().trim().max(160).optional().default(''),email:z.email().max(254),phone:z.string().trim().max(60).optional().default(''),service:z.string().trim().max(160).optional().default(''),industry:z.string().trim().max(160).optional().default(''),audit_type:z.string().trim().max(160).optional().default(''),message:z.string().trim().min(2).max(4000),website:z.string().max(0).optional().default('')}).strict();
+const schema=z.object({type:z.enum(['enquiry','free_audit']),name:z.string().trim().min(2).max(120),company:z.string().trim().max(160).optional().default(''),email:z.email().max(254),phone:z.string().trim().max(60).optional().default(''),service:z.string().trim().max(160).optional().default(''),industry:z.string().trim().max(160).optional().default(''),audit_type:z.string().trim().max(160).optional().default(''),contact_method:z.string().trim().max(80).optional().default(''),message:z.string().trim().min(2).max(4000),website:z.string().max(0).optional().default('')}).strict();
 export async function POST(req:NextRequest){
  const origin=req.headers.get('origin');if(origin&&origin!==req.nextUrl.origin)return NextResponse.json({error:'Forbidden'},{status:403});
  const parsed=schema.safeParse(await req.json().catch(()=>null));if(!parsed.success)return NextResponse.json({error:'Invalid enquiry'},{status:400});
@@ -14,7 +14,7 @@ export async function POST(req:NextRequest){
  const {data:enquiry,error}=await db.from('website_enquiries').insert({tenant_id:tenant.id,enquiry_type:v.type,name:v.name,company:v.company||null,email:v.email,phone:v.phone||null,service:v.service||null,industry:v.industry||null,audit_type:v.audit_type||null,message:v.message,source:'website'}).select('id').single();
  if(error)return NextResponse.json({error:'Could not save enquiry'},{status:500});
  const title=v.type==='free_audit'?'Free Audit Request':'NXT Website Enquiry';
- const description=[v.company&&'Company: '+v.company,'Email: '+v.email,v.phone&&'Phone: '+v.phone,v.service&&'Service: '+v.service,v.industry&&'Industry: '+v.industry,v.audit_type&&'Audit: '+v.audit_type,'Message: '+v.message].filter(Boolean).join('\n');
+ const description=[v.company&&'Company: '+v.company,'Email: '+v.email,v.phone&&'Phone: '+v.phone,v.service&&'Service: '+v.service,v.industry&&'Industry: '+v.industry,v.audit_type&&'Audit: '+v.audit_type,v.contact_method&&'Preferred contact: '+v.contact_method,'Message: '+v.message].filter(Boolean).join('\n');
  await db.from('deals').insert({tenant_id:tenant.id,title:title+' - '+v.name,description,status:'new',client_visible:false,amount:0,currency:'USD'});
  return NextResponse.json({ok:true,id:enquiry.id},{status:201});
 }
