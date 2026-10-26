@@ -20,7 +20,7 @@ export default function SocialPublisher({workspace,clients,posts}:{workspace:Wor
  const selectedPost=data.posts.find(p=>p.id===postId);
  useEffect(()=>{if(selectedPost)setCopy(selectedPost.description||selectedPost.title||'');},[postId]);
  return <section className="social-publisher">
-  <div className="social-publisher-head"><div><span className="eyebrow">NXT SOCIAL PUBLISHER</span><h2>Schedule, publish and track social content</h2><p>Approved content moves from your calendar into a publishing queue. Provider credentials stay server-side.</p></div><button className="secondary" disabled={busy} onClick={()=>load().catch(e=>setError(e.message)}><RefreshCw size={15}/>Refresh</button></div>
+  <div className="social-publisher-head"><div><span className="eyebrow">NXT SOCIAL PUBLISHER</span><h2>Schedule, publish and track social content</h2><p>Approved content moves from your calendar into a publishing queue. Provider credentials stay server-side.</p></div><button className="secondary" disabled={busy} onClick={()=>load().catch(e=>setError(e.message))}><RefreshCw size={15}/>Refresh</button></div>
   <div className="social-publish-metrics"><div><Clock3/><span>Scheduled<strong>{scheduledJobs.length}</strong></span></div><div><CheckCircle2/><span>Published<strong>{published.length}</strong></span></div><div><AlertCircle/><span>Failed<strong>{failed.length}</strong></span></div><div><Users/><span>Connected accounts<strong>{activeAccounts.length}</strong></span></div></div>
   {error&&<p className="notice error">{error}</p>}{notice&&<p className="notice">{notice}</p>}
   <div className="social-publisher-grid">
