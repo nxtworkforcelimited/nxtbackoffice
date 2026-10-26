@@ -10,7 +10,7 @@ type State={
 };
 
 export default function SmsCenter({workspace}:{workspace:Workspace}){
- const [state,setState]=useState<State|null>(null),[error,setError]=useState('');
+ const [state,setState]=useState<State|null>(null),[error,setError]=useState(''),[notice,setNotice]=useState(''),[busy,setBusy]=useState(false),[recipient,setRecipient]=useState(''),[message,setMessage]=useState('NXT Business OS SMS test. If you received this message, Gikko SMS is working.');
  useEffect(()=>{let live=true;async function load(){try{const r=await fetch('/api/sms?workspace='+workspace.id,{cache:'no-store'}),b=await r.json();if(!r.ok)throw Error(b.error);if(live){setState(b);setError('');}}catch(e){if(live)setError((e as Error).message);}}load();const timer=setInterval(load,15000);return()=>{live=false;clearInterval(timer);};},[workspace.id]);
  if(error)return <p className="notice error">{error}</p>;
  if(!state)return <section className="panel"><p>Loading SMS integration status…</p></section>;
@@ -27,6 +27,11 @@ export default function SmsCenter({workspace}:{workspace:Workspace}){
    <div><span>Queued / submitted</span><strong>{state.counts.queued} / {state.counts.submitted}</strong><small>Awaiting or sent to provider</small></div>
    <div><span>Delivered / failed</span><strong>{state.counts.delivered} / {state.counts.failed}</strong><small>Provider delivery state</small></div>
   </div>
+  <section className="panel sms-test-panel">
+   <h3>Send test SMS</h3><p>Use an internal mobile number in international format to verify live Gikko delivery.</p>
+   {notice&&<p className="notice">{notice}</p>}
+   <form onSubmit={async e=>{e.preventDefault();setBusy(true);setError('');setNotice('');try{const r=await fetch('/api/sms?workspace='+workspace.id,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({recipient,message})}),b=await r.json();if(!r.ok)throw Error(b.error);setNotice('Test SMS queued. The worker runs every minute; watch Recent SMS Activity below for submitted/failed status.');}catch(e){setError((e as Error).message);}finally{setBusy(false);}}}><div className="form-grid"><label>Mobile number<input required value={recipient} onChange={e=>setRecipient(e.target.value.replace(/\s+/g,''))} placeholder="+2637XXXXXXXX"/></label><label>Message<textarea required maxLength={480} rows={3} value={message} onChange={e=>setMessage(e.target.value)}/></label></div><button className="primary" disabled={busy}>{busy?'Queuing…':'Send test SMS'}</button></form>
+  </section>
   <section className="panel">
    <h3>Approval notification workflow</h3>
    <p>When a client-facing project, task or social deliverable reaches its configured approval/review stage, NXT Business OS checks the linked Contact. SMS is queued only when that contact has an international mobile number and <strong>SMS approval alerts</strong> enabled.</p>
