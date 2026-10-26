@@ -4,7 +4,7 @@ import {capabilities} from '@/lib/business';
 import {z} from 'zod';
 export async function POST(req:NextRequest){
  if(req.headers.get('origin')!==req.nextUrl.origin)return NextResponse.json({error:'Forbidden'},{status:403});
- const ctx=await context(req.nextUrl.searchParams.get('workspace'));if(!ctx?.workspace||!['owner','admin'].includes(ctx.workspace.role))return NextResponse.json({error:'Administrator access required'},{status:403});
+ const ctx=await context(req.nextUrl.searchParams.get('workspace'));const accessAdmin=!!ctx?.workspace&&(['owner','admin'].includes(ctx.workspace.role)||(ctx.workspace.permissions??[]).includes('hr'));if(!ctx?.workspace||!accessAdmin)return NextResponse.json({error:'Access administration permission required'},{status:403});
  const p=z.object({user_id:z.uuid(),capability:z.enum(capabilities),enabled:z.boolean()}).safeParse(await req.json().catch(()=>null));
  if(!p.success)return NextResponse.json({error:'Invalid permission'},{status:400});
  const member=await ctx.db.from('memberships').select('role').eq('tenant_id',ctx.workspace.id).eq('user_id',p.data.user_id).single();
