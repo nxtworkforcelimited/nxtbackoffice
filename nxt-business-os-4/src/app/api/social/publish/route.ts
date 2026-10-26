@@ -3,7 +3,7 @@ import {supabaseAdmin} from '@/lib/supabase/admin';
 import {publishSocial} from '@/lib/server/social-publish';
 export const dynamic='force-dynamic';export const maxDuration=60;
 export async function GET(req:NextRequest){
- if(!process.env.CRON_SECRET||req.headers.get('authorization')!=='Bearer '+process.env.CRON_SECRET)return NextResponse.json({error:'Unauthorized'},{status:401});
+ if(!process.env.SOCIAL_SCHEDULER_SECRET||req.headers.get('authorization')!=='Bearer '+process.env.SOCIAL_SCHEDULER_SECRET)return NextResponse.json({error:'Unauthorized'},{status:401});
  const admin=supabaseAdmin(),claimed=await admin.rpc('claim_social_publish_jobs',{p_limit:10});
  if(claimed.error)return NextResponse.json({error:claimed.error.message},{status:500});
  const results=[];
