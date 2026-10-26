@@ -39,6 +39,7 @@ export default function Dashboard({initial,workspace,workspaces,email,demo=false
  const [data,setData]=useState(initial),[biz,setBiz]=useState(business),[preview,setPreview]=useState(false),[view,setView]=useState<View>('overview'),[query,setQuery]=useState(''),[filter,setFilter]=useState('all'),[mode,setMode]=useState('calendar'),[message,setMessage]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false),[mobile,setMobile]=useState(false);
  const [theme,setTheme]=useState<'light'|'dark'>('light');
  const [showAllApps,setShowAllApps]=useState(false);
+ const [localNow,setLocalNow]=useState<Date|null>(null);
  const [projectSection,setProjectSection]=useState<'workspace'|'master'>('workspace');
  useEffect(()=>{const q=new URLSearchParams(window.location.search);if(workspace.role!=='client'&&q.get('module')==='accounting')setView('accounting');if(workspace.role!=='client'&&q.get('module')==='projects'){setView('projects');if(q.get('section')==='master-tracker')setProjectSection('master');}},[workspace.role]);
  const [dialNumber,setDialNumber]=useState('');
@@ -48,6 +49,7 @@ export default function Dashboard({initial,workspace,workspaces,email,demo=false
  const [form,setForm]=useState<Module|BusinessKind|null>(null),[detail,setDetail]=useState<{module:Module;row:RecordRow}|null>(null),[paper,setPaper]=useState<BusinessItem|null>(null),[lines,setLines]=useState([{...blankLine}]),[rulesText,setRulesText]=useState(JSON.stringify(Object.keys(business.rules).length?business.rules:ruleExample,null,2));
  const createDialog=useRef<HTMLDialogElement>(null),detailsDialog=useRef<HTMLDialogElement>(null),paperDialog=useRef<HTMLDialogElement>(null);
  useEffect(()=>{const q=new URLSearchParams(window.location.search),payment=q.get('payment');if(payment){setView('invoices');setMessage(payment==='paid'?'Payment confirmed. Your invoice has been updated.':payment==='pending'?'Payment is still being confirmed. Refresh the invoice shortly.':'Payment was not completed.');}const saved=localStorage.getItem('nxt-color-theme');const next=saved==='dark'||saved==='light'?saved:(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');setTheme(next);document.documentElement.dataset.theme=next;},[]);
+ useEffect(()=>{const tick=()=>setLocalNow(new Date());tick();const timer=window.setInterval(tick,60000);return()=>window.clearInterval(timer);},[]);
  function toggleTheme(){const next=theme==='dark'?'light':'dark';setTheme(next);document.documentElement.dataset.theme=next;localStorage.setItem('nxt-color-theme',next);}
  useEffect(()=>{form?createDialog.current?.showModal():createDialog.current?.close();},[form]);useEffect(()=>{detail?detailsDialog.current?.showModal():detailsDialog.current?.close();},[detail]);useEffect(()=>{paper?paperDialog.current?.showModal():paperDialog.current?.close();},[paper]);
  const [syncError,setSyncError]=useState('');
@@ -144,6 +146,8 @@ export default function Dashboard({initial,workspace,workspaces,email,demo=false
  const currentMember=biz.members.find(m=>m.email?.toLowerCase()===email.toLowerCase());
  const accountName=client?(clientName(clientId)||workspace.name):(currentMember?.name||workspace.name);
  const firstName=(currentMember?.name||accountName||email.split('@')[0]).trim().split(/\s+/)[0]||'there';
+ const greeting=client?'Welcome':!localNow?'Welcome':localNow.getHours()<12?'Good morning':localNow.getHours()<18?'Good afternoon':'Good evening';
+ const localDate=localNow?.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})??'';
  const navTitle=(v:View)=>client?({overview:'Home',projects:'Projects',tasks:'Tasks',invoices:'Invoices & Payments',documents:'Documents',social_posts:'Approvals',messages:'Messages',requests:'Support',assistant:'NXT Assistant',utm:'Campaign Links'} as Partial<Record<View,string>>)[v]??titleFor(v):({overview:'Home',deals:'CRM',clients:'Contacts',expenses:'Finance',social_posts:'Marketing',reports:'Reports',payroll:'Payroll',loans:'Employee Loans',tickets:'Tickets'} as Partial<Record<View,string>>)[v]??titleFor(v);
  const staffHomeApps=[
   ['deals','CRM','Leads & pipeline'],['projects','Projects','Plan & deliver work'],['tasks','Tasks','Stay on track'],['clients','Contacts','Manage contacts'],['invoices','Invoices','Bill & get paid'],['quotes','Quotes','Create proposals'],
@@ -196,7 +200,7 @@ export default function Dashboard({initial,workspace,workspaces,email,demo=false
  {['employees','leave','messages'].includes(activeView)&&<People key={activeView} area={activeView as 'employees'|'leave'|'messages'} workspace={workspace} clients={visible.clients} manager={can('approve_leave')} demo={demo}/>}
  {activeView==='overview'&&<section className="reference-home">
   <section className="reference-hero">
-   <div className="reference-hero-copy"><span>{new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</span><h1>{client?'Welcome, ':'Good morning, '}<strong>{client?accountName:firstName}</strong></h1><p>{client?'Your projects, files, approvals and payments are all in one place.':"Here's what's happening at NXT Business OS today."}</p><label><Search size={18}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder={client?'Search your portal…':'Search clients, projects, invoices, tasks…'}/><ArrowRight size={17}/></label></div>
+   <div className="reference-hero-copy"><span>{localDate}</span><h1>{greeting}, <strong>{client?accountName:firstName}</strong></h1><p>{client?'Your projects, files, approvals and payments are all in one place.':"Here's what's happening at NXT Business OS today."}</p><label><Search size={18}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder={client?'Search your portal…':'Search clients, projects, invoices, tasks…'}/><ArrowRight size={17}/></label></div>
    <div className="reference-hero-tag"><span>{client?'YOUR NXT PORTAL':'People'}</span><span>{client?'CONNECTED WORKSPACE':'Systems'}</span><span>{client?'':'Growth.'}</span></div>
   </section>
 
