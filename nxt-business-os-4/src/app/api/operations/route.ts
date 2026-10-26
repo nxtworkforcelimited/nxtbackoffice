@@ -16,7 +16,7 @@ export async function GET(req:NextRequest){
  const c=await context(req.nextUrl.searchParams.get('workspace'));
  if(!c?.workspace||c.workspace.role==='client')return NextResponse.json({error:'Staff access required'},{status:403});
  const out:Record<string,unknown>={user_id:c.user.id};
- const tables=['staff_directory','clients','projects','tasks','it_tickets','it_ticket_comments'];
+ const tables=['staff_directory','clients','projects','tasks','it_tickets','it_ticket_comments','cold_call_prospects','cold_call_activities'];
  const results=await Promise.all(tables.map(table=>c.db.from(table).select('*').eq('tenant_id',c.workspace!.id)));
  for(let i=0;i<tables.length;i++){if(results[i].error)return NextResponse.json({error:'Install upgrade-team-operations.sql before opening Operations.'},{status:400});out[tables[i]]=results[i].data??[];}
  return NextResponse.json(out,{headers:{'Cache-Control':'private, no-store'}});
