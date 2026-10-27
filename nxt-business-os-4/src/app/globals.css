@@ -1925,3 +1925,6 @@ main.studio-main{background:#ffffff!important}
   background:#f4f0ff!important;
   color:#6846d6!important;
 }
+
+/* New tickets: high-visibility queue treatment */
+.ticket-list-table tbody tr.ticket-row-new > td{background:#fff1f2;color:#991b1b;border-top-color:#fecdd3;border-bottom-color:#fecdd3}.ticket-list-table tbody tr.ticket-row-new > td:first-child{border-left:4px solid #dc2626}.ticket-list-table tbody tr.ticket-row-new .table-title{color:#b91c1c;font-weight:800}.ticket-list-table tbody tr.ticket-row-new small{color:#9f1239}.ticket-list-table tbody tr.ticket-row-new select{border-color:#f87171;background:#fff;color:#991b1b;font-weight:700}
