@@ -35,14 +35,15 @@ export async function GET(req:NextRequest){
   const t=c.workspace.id,date=req.nextUrl.searchParams.get('date')||new Date().toISOString().slice(0,10),offset=Number(req.nextUrl.searchParams.get('offset')||0);
   const start=new Date(date+'T00:00:00.000Z');start.setUTCMinutes(start.getUTCMinutes()-offset);
   const end=new Date(start);end.setUTCDate(end.getUTCDate()+1);
-  const [prospects,activities,clients,staff]=await Promise.all([
+  const [prospects,activities,recentActivities,clients,staff]=await Promise.all([
    c.db.from('cold_call_prospects').select('*').eq('tenant_id',t).order('updated_at',{ascending:false}).limit(1000),
    c.db.from('cold_call_activities').select('*').eq('tenant_id',t).gte('called_at',start.toISOString()).lt('called_at',end.toISOString()).order('called_at',{ascending:false}).limit(2000),
+   c.db.from('cold_call_activities').select('*').eq('tenant_id',t).order('called_at',{ascending:false}).limit(5000),
    c.db.from('clients').select('id,title').eq('tenant_id',t).is('archived_at',null).order('title'),
    c.db.from('staff_directory').select('user_id,name,email').eq('tenant_id',t).order('name')
   ]);
-  for(const r of [prospects,activities,clients,staff])if(r.error)throw r.error;
-  return reply({user_id:c.user.id,date,prospects:prospects.data,activities:activities.data,clients:clients.data,staff:staff.data});
+  for(const r of [prospects,activities,recentActivities,clients,staff])if(r.error)throw r.error;
+  return reply({user_id:c.user.id,date,prospects:prospects.data,activities:activities.data,recent_activities:recentActivities.data,clients:clients.data,staff:staff.data});
  }catch(e){return reply({error:(e as Error).message||'Cold calling could not load'},500);}
 }
 export async function POST(req:NextRequest){
