@@ -2,7 +2,8 @@ import {NextRequest} from 'next/server';
 import {createClient} from '@supabase/supabase-js';
 import {v6Files,v6UrlByFile,slugForUrl} from '@/lib/v6-page-map';
 
-const assetBase='/v6/';
+const sourceBase=process.env.V6_SOURCE_BASE||'https://lambent-dango-30e63f.netlify.app/';
+const assetBase=sourceBase;
 const htmlEscape=(value:string)=>value.replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]||ch));
 
 function cleanPath(value:string){
@@ -80,7 +81,7 @@ export async function GET(req:NextRequest){
   const path=req.nextUrl.searchParams.get('path')||'/';
   const file=(v6Files as Record<string,string>)[path];
   if(!file)return new Response('Not found',{status:404});
-  const upstream=await fetch(new URL('/v6/'+file,req.nextUrl.origin),{cache:'no-store'});
+  const upstream=await fetch(sourceBase+file,{cache:'no-store'});
   if(!upstream.ok)return new Response('Website source unavailable',{status:502});
   let html=await upstream.text();
   html=rewriteLinks(html,file);
