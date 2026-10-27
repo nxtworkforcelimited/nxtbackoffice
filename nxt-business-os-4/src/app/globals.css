@@ -1792,3 +1792,28 @@ main.studio-main{background:#ffffff!important}
 .ticket-drag-hint{margin-top:9px!important;padding-top:8px!important;border-top:1px dashed #ded6e8!important;color:#8b7da0!important;font-size:10px!important}
 .ticket-empty{min-height:90px!important;display:grid!important;place-items:center!important;border:1px dashed #d8cfee!important;border-radius:12px!important;color:#9a8da9!important;background:#fff!important}
 @media(max-width:1100px){.ticket-board.ticket-kanban-board{grid-template-columns:repeat(5,250px)!important}}
+
+
+/* Ticket workspace must be full width, not inside generic people split pane */
+.ticket-workspace-layout{
+  display:block!important;
+  width:100%!important;
+  min-width:0!important;
+}
+.ticket-workspace-layout>.ticket-kanban-board{
+  width:100%!important;
+  max-width:100%!important;
+}
+.ticket-create-panel{
+  width:100%!important;
+  margin:0 0 18px!important;
+  padding:20px!important;
+  border-radius:16px!important;
+}
+.ticket-create-panel .panel-head{
+  padding:0 0 16px!important;
+}
+.ticket-create-panel fieldset{
+  display:grid!important;
+  gap:14px!important;
+}
