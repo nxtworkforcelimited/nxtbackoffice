@@ -15,8 +15,8 @@ function cleanPath(value:string){
   return parts.join('/');
 }
 function rewriteLinks(html:string,currentFile:string){
-  html=html.replace(/href="(?:\.\.\/)*styles\.css"/gi,'href="'+sourceBase+'styles.css"');
-  html=html.replace(/src="(?:\.\.\/)*app\.js"/gi,'src="'+sourceBase+'app.js"');
+  html=html.replace(/href="(?:\.\.\/)*styles\.css"/gi,'href="'+assetBase+'styles.css"');
+  html=html.replace(/src="(?:\.\.\/)*app\.js"/gi,'src="'+assetBase+'app.js"');
   html=html.replace(/(src|href)="(?:\.\.\/)*assets\/([^"]+)"/gi,(_m,attr,asset)=>attr+'="'+assetBase+'assets/'+asset+'"');
   const currentDir=currentFile.includes('/')?currentFile.slice(0,currentFile.lastIndexOf('/')+1):'';
   html=html.replace(/href="([^"]+)"/gi,(full,href)=>{
