@@ -3,8 +3,18 @@ import {context} from '@/lib/context';
 import {allowed} from '@/lib/business';
 import {z} from 'zod';
 const id=z.uuid(),text=z.string().trim(),nullableId=id.nullable();
+const phoneInput=z.union([z.string().trim().max(40),z.literal('')]);
+function normalizePhone(value?:string){
+ const raw=(value??'').trim();if(!raw)return '';
+ let cleaned=raw.replace(/[\s().-]/g,'');
+ if(cleaned.startsWith('00'))cleaned='+'+cleaned.slice(2);
+ else if(cleaned.startsWith('0'))cleaned='+263'+cleaned.slice(1);
+ else if(cleaned.startsWith('263'))cleaned='+'+cleaned;
+ if(!/^\+[1-9][0-9]{7,14}$/.test(cleaned))throw new Error('Enter a valid mobile number, for example 0771234567 or +263771234567.');
+ return cleaned;
+}
 const update=z.discriminatedUnion('action',[
- z.object({action:z.literal('record'),module:z.enum(['clients','projects','tasks']),id:id.optional(),title:text.min(1).max(160),status:text.max(30),email:z.union([z.email(),z.literal('')]).optional(),phone:z.union([z.string().regex(/^\\+[1-9][0-9]{7,14}$/),z.literal('')]).optional(),approval_email_enabled:z.boolean().optional(),approval_sms_enabled:z.boolean().optional(),description:text.max(5000).optional(),client_id:nullableId.optional(),client_visible:z.boolean().optional(),due_date:z.iso.date().nullable().optional(),assignee_id:nullableId.optional(),project_id:nullableId.optional()}),
+ z.object({action:z.literal('record'),module:z.enum(['clients','projects','tasks']),id:id.optional(),title:text.min(1).max(160),status:text.max(30),email:z.union([z.email(),z.literal('')]).optional(),phone:phoneInput.optional(),approval_email_enabled:z.boolean().optional(),approval_sms_enabled:z.boolean().optional(),description:text.max(5000).optional(),client_id:nullableId.optional(),client_visible:z.boolean().optional(),due_date:z.iso.date().nullable().optional(),assignee_id:nullableId.optional(),project_id:nullableId.optional()}),
  z.object({action:z.literal('client_logo'),id,logo_path:z.string().max(500).nullable()}),
  z.object({action:z.literal('delete'),module:z.enum(['clients','projects','tasks']),id}),
  z.object({action:z.literal('archive'),module:z.enum(['clients','projects','tasks']),id,archived:z.boolean()}),
@@ -24,7 +34,7 @@ export async function GET(req:NextRequest){
 export async function POST(req:NextRequest){
  if(req.headers.get('origin')!==req.nextUrl.origin)return NextResponse.json({error:'Forbidden'},{status:403});
  const c=await context(req.nextUrl.searchParams.get('workspace'));if(!c?.workspace||c.workspace.role==='client')return NextResponse.json({error:'Staff access required'},{status:403});
- const p=update.safeParse(await req.json().catch(()=>null));if(!p.success)return NextResponse.json({error:p.error.issues.map(i=>i.message).join('; ')},{status:400});
+ const p=update.safeParse(await req.json().catch(()=>null));if(!p.success)return NextResponse.json({error:p.error.issues.map(i=>i.path.includes('phone')?'Enter a valid mobile number, for example 0771234567 or +263771234567.':i.message).join('; ')},{status:400});
  const v=p.data,tenant_id=c.workspace.id;const can=(cap:string)=>allowed(c.workspace!.role,c.workspace!.permissions??[],cap);let r;
  if(v.action==='record'){
  if(!(v.module==='tasks'?(v.id?true:can('task_admin')):can(v.module==='clients'?'crm':'delivery')))return NextResponse.json({error:'Manager access required'},{status:403});
@@ -32,7 +42,7 @@ export async function POST(req:NextRequest){
  if(!states[v.module].includes(v.status))return NextResponse.json({error:'Invalid status'},{status:400});
  if(v.client_visible&&!v.client_id)return NextResponse.json({error:'Select a client before sharing'},{status:400});
  let fields:Record<string,unknown>={title:v.title,status:v.status};
- if(v.module==='clients'){if(v.approval_email_enabled&&!v.email)return NextResponse.json({error:'Add the client notification email first'},{status:400});if(v.approval_sms_enabled&&!v.phone)return NextResponse.json({error:'Add the client mobile number first'},{status:400});fields={...fields,email:v.email??'',phone:v.phone??'',approval_email_enabled:v.approval_email_enabled??false,approval_sms_enabled:v.approval_sms_enabled??false};}
+ if(v.module==='clients'){if(v.approval_email_enabled&&!v.email)return NextResponse.json({error:'Add the client notification email first'},{status:400});if(v.approval_sms_enabled&&!v.phone)return NextResponse.json({error:'Add the client mobile number first'},{status:400});fields={...fields,email:v.email??'',phone:normalizePhone(v.phone),approval_email_enabled:v.approval_email_enabled??false,approval_sms_enabled:v.approval_sms_enabled??false};}
  else fields={...fields,description:v.description??'',client_id:v.client_id??null,client_visible:v.client_visible??false,due_date:v.due_date??null,...(v.module==='tasks'?{assignee_id:v.assignee_id??null,project_id:v.project_id??null}:{})};
  if(v.module==='tasks'&&v.project_id){const project=await c.db.from('projects').select('client_id').eq('id',v.project_id).eq('tenant_id',tenant_id).is('archived_at',null).single();if(!project.data||project.data.client_id!==(v.client_id??null))return NextResponse.json({error:'Task and project must use the same client'},{status:400});}
  r=v.id?await c.db.from(v.module).update(fields).eq('tenant_id',tenant_id).eq('id',v.id).select().single():await c.db.from(v.module).insert({...fields,tenant_id}).select().single();
