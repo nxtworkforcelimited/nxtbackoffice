@@ -1846,3 +1846,50 @@ main.studio-main{background:#ffffff!important}
 @media(min-width:1200px){
   .ticket-board.ticket-kanban-board>.ticket-stage{flex:1 1 0!important;min-width:190px!important}
 }
+
+
+/* Cleaner client contact editor */
+.client-contact-grid{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:14px!important;
+}
+.client-notification-settings{
+  margin-top:8px!important;
+  border:1px solid #ece8f1!important;
+  border-radius:12px!important;
+  background:#fbfaff!important;
+  overflow:hidden!important;
+}
+.client-notification-settings summary{
+  cursor:pointer!important;
+  padding:12px 14px!important;
+  font-weight:700!important;
+  color:#4f4758!important;
+}
+.notification-options{
+  display:grid!important;
+  gap:10px!important;
+  padding:0 14px 14px!important;
+}
+.notification-options label{
+  display:flex!important;
+  align-items:flex-start!important;
+  gap:10px!important;
+  padding:10px 0!important;
+  margin:0!important;
+}
+.notification-options label>span{
+  display:grid!important;
+  gap:3px!important;
+}
+.notification-options strong{font-size:13px!important}
+.notification-options small{font-size:11px!important;color:#7b7482!important}
+.client-form-actions{
+  margin-top:18px!important;
+  padding-top:14px!important;
+  border-top:1px solid #eee9f3!important;
+}
+@media(max-width:700px){
+  .client-contact-grid{grid-template-columns:1fr!important}
+}
