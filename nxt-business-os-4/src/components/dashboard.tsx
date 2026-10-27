@@ -80,7 +80,7 @@ export default function Dashboard({initial,workspace,workspaces,email,demo=false
  const nav=(Object.keys(appIcons) as View[]).filter(v=>!['email','website'].includes(v)&&(client?(['overview','projects','tasks','social_posts','documents','messages','requests','assistant','utm','invoices'].includes(v)&&(v!=='assistant'||clientAssistantEnabled)):v==='settings'?(['owner','admin'].includes(workspace.role)||can('hr')):['clients','deals'].includes(v)||!viewCap[v]||can(viewCap[v])||(v==='social_posts'&&can('approve_content'))));
  const sidebarOrder:View[]=client
   ? ['overview','projects','tasks','invoices','documents','social_posts','messages','requests','utm',...(clientAssistantEnabled?['assistant' as View]:[])]
-  : ['overview','deals','calls','projects','tasks','clients','employees','team','leave','expenses','accounting','invoices','payroll','loans','tickets','social_posts','documents','sms','phone','utm','reports','settings'];
+  : ['overview','deals','calls','projects','tasks','clients','employees','team','leave','expenses','accounting','invoices','payroll','loans','tickets','builds','social_posts','documents','sms','phone','utm','reports','settings'];
  const sidebarNav=sidebarOrder.filter(v=>nav.includes(v));
  const activeView=nav.includes(view)?view:'overview';
  const clientName=(id:string|null)=>visible.clients.find(c=>c.id===id)?.title??(id?'Client':'NXT Workforce');
@@ -156,7 +156,7 @@ export default function Dashboard({initial,workspace,workspaces,email,demo=false
  const navTitle=(v:View)=>client?({overview:'Home',projects:'Projects',tasks:'Tasks',invoices:'Invoices & Payments',documents:'Documents',social_posts:'Approvals',messages:'Messages',requests:'Support',assistant:'NXT Assistant',utm:'Campaign Links'} as Partial<Record<View,string>>)[v]??titleFor(v):({overview:'Home',deals:'CRM',clients:'Contacts',expenses:'Finance',social_posts:'Marketing',reports:'Reports',payroll:'Payroll',loans:'Employee Loans',tickets:'Tickets'} as Partial<Record<View,string>>)[v]??titleFor(v);
  const staffHomeApps=[
   ['deals','CRM','Leads & pipeline'],['projects','Projects','Plan & deliver work'],['tasks','Tasks','Stay on track'],['clients','Contacts','Manage contacts'],['invoices','Invoices','Bill & get paid'],['quotes','Quotes','Create proposals'],
-  ['accounting','Accounting','Journals & financial statements'],['expenses','Finance','Money & expenses'],['payroll','Payroll','Run payroll'],['loans','Employee Loans','Manage staff loans'],['tickets','Tickets','Support & IT'],['documents','Documents','Store & share'],['social_posts','Marketing','Plan & publish'],
+  ['accounting','Accounting','Journals & financial statements'],['expenses','Finance','Money & expenses'],['payroll','Payroll','Run payroll'],['loans','Employee Loans','Manage staff loans'],['tickets','Tickets','Support & IT'],['builds','Back Office Builds','Systems & internal platforms'],['documents','Documents','Store & share'],['social_posts','Marketing','Plan & publish'],
   ['phone','Phone','Business calls'],['sms','SMS','Send & monitor client messages'],['calls','Cold Calling','Call lists & daily reports'],['employees','Employees','Staff records & salaries'],['utm','UTM Generator','Create tracked campaign links'],['reports','Reports','Analytics & insights'],['settings','Settings','Configure OS']
  ] as [View,string,string][];
  const clientHomeApps=[
