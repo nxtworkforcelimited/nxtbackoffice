@@ -1928,3 +1928,23 @@ main.studio-main{background:#ffffff!important}
 
 /* New tickets: high-visibility queue treatment */
 .ticket-list-table tbody tr.ticket-row-new > td{background:#fff1f2;color:#991b1b;border-top-color:#fecdd3;border-bottom-color:#fecdd3}.ticket-list-table tbody tr.ticket-row-new > td:first-child{border-left:4px solid #dc2626}.ticket-list-table tbody tr.ticket-row-new .table-title{color:#b91c1c;font-weight:800}.ticket-list-table tbody tr.ticket-row-new small{color:#9f1239}.ticket-list-table tbody tr.ticket-row-new select{border-color:#f87171;background:#fff;color:#991b1b;font-weight:700}
+
+
+/* Cold calling — company-based logging */
+.company-call-history{margin-top:18px;border-top:1px solid #eee9f3;padding-top:4px}
+.company-call-history .panel-head{padding:14px 0 10px!important}
+.company-call-history-list{display:grid;gap:8px}
+.company-call-history-list article{display:grid;grid-template-columns:minmax(170px,.7fr) 1.3fr;gap:14px;padding:11px 12px;border:1px solid #eee9f3;border-radius:10px;background:#fbfaff}
+.company-call-history-list article>div{display:grid;gap:4px}
+.company-call-history-list article strong{font-size:12px}
+.company-call-history-list article small{font-size:10px;color:#827b88}
+.company-call-history-list article p{margin:0!important;font-size:11px!important;color:#5f5965!important}
+.company-call-history-list article p small{display:block;margin-top:4px}
+.company-daily-report{display:grid;gap:14px;padding:0 18px 18px}
+.company-daily-group{border:1px solid #ece7f1;border-radius:13px;overflow:hidden;background:#fff}
+.company-daily-group>header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:13px 15px;background:#faf8ff;border-bottom:1px solid #eee8f4}
+.company-daily-group>header>div{display:grid;gap:3px}
+.company-daily-group h4{margin:0!important;font-size:14px!important}
+.company-daily-group header small{font-size:10px;color:#827b88}
+.company-daily-group header>strong{font-size:11px;color:#6846d6}
+@media(max-width:700px){.company-call-history-list article{grid-template-columns:1fr}}
