@@ -1893,3 +1893,35 @@ main.studio-main{background:#ffffff!important}
 @media(max-width:700px){
   .client-contact-grid{grid-template-columns:1fr!important}
 }
+
+
+/* Back Office QA workflow */
+.build-assignees{
+  border:1px solid #ece8f1!important;
+  border-radius:12px!important;
+  padding:12px 14px!important;
+  display:flex!important;
+  flex-wrap:wrap!important;
+  gap:8px!important;
+}
+.build-assignees legend{
+  padding:0 6px!important;
+  font-size:12px!important;
+  font-weight:700!important;
+  color:#514b58!important;
+}
+.build-assignees label{
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:7px!important;
+  padding:8px 10px!important;
+  border:1px solid #e4deeb!important;
+  border-radius:999px!important;
+  background:#fff!important;
+  margin:0!important;
+}
+.build-assignees label:has(input:checked){
+  border-color:#b9a8ef!important;
+  background:#f4f0ff!important;
+  color:#6846d6!important;
+}
