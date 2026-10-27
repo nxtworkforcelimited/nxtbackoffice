@@ -12,7 +12,7 @@
 <div class="layout"><aside class="aside"><a class="brand" href="/"><img src="https://cogent-technology.com/static/img/cogent_logo.png" alt="Cogent" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><span class="brand-fallback" style="display:none">Cogent Technology</span></a><div id="nav"></div></aside>
 <div class="main"><header class="topbar"><h1 id="title">Cogent Desk</h1><span class="live">● Live sync</span><div class="user"><strong id="who"></strong><small id="org"></small></div><button class="logout" id="logout">Log out</button></header><main class="page" id="content"><div class="card pad">Connecting to Cogent Service Desk...</div></main></div></div>
 <div class="modal" id="modal"><div class="dialog"><div class="modal-head"><h3 id="mtitle"></h3><button class="btn light" id="mclose">Close</button></div><div class="modal-body" id="mbody"></div></div></div><div class="toast" id="toast"></div>
-<script>
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script><script>
 const API='https://cbcgpxtlxqmuzhxkutso.supabase.co/functions/v1/cogent-demo-api', KEY='sb_publishable_RYpkY8vkkmcDPmxv2w6WVQ_c_vww3CD';
 const store=localStorage,token=store.getItem('cogent_demo_token');
 let user=JSON.parse(store.getItem('cogent_demo_user')||'null'), data=null, view='overview', lastSig='', filter='All', viewMode='Cards', selectedProject='', chatHistory=[];
@@ -35,7 +35,7 @@ function note(t){const node=$('toast');node.textContent=t;node.classList.add('sh
 async function api(action,payload={}){const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY,'x-cogent-session':token},body:JSON.stringify({action,token,...payload})});const j=await r.json();if(r.status===401){store.removeItem('cogent_demo_token');store.removeItem('cogent_demo_user');location.replace('/login/');throw Error('Session expired')}if(!r.ok)throw Error(j.error||'Request failed');return j}
 function title(text,sub,btn=''){return '<div class="space"><div><h2 class="section-title">'+text+'</h2><p class="section-sub">'+sub+'</p></div>'+btn+'</div>'}
 const clientNav=[['overview','Overview'],['tickets','My Tickets'],['projects','Projects'],['invoices','Payments & Invoices'],['knowledge','Help Centre'],['assistant','Cogent Assist']];
-const staffNav=[['overview','Overview'],['tickets','Tickets'],['projects','Projects'],['clients','Client 360'],['messages','Messages'],['smsalerts','SMS Alerts'],['knowledge','Knowledge Base'],['assistant','Cogent Assist'],['crm','CRM Pipeline'],['reports','Reports']];
+const staffNav=[['overview','Overview'],['tickets','Tickets'],['projects','Projects'],['consultants','Consultants'],['board','Ticket Board'],['clients','Client 360'],['messages','Messages'],['smsalerts','SMS Alerts'],['knowledge','Knowledge Base'],['assistant','Cogent Assist'],['crm','CRM Pipeline'],['reports','Reports']];
 function navList(){const n=user?.role==='client'?clientNav:[...staffNav.slice(0,6),...(finance()?[['invoices','Invoicing'],['sms','SMS Centre']]:[]),...staffNav.slice(6)];return n}
 function nav(){const groups=navList();$('nav').innerHTML='<div class="nav-group">'+(user?.role==='client'?'CLIENT PORTAL':'COGENT OPERATIONS')+'</div>'+groups.map(x=>'<button class="navlink '+(view===x[0]?'active':'')+'" data-view="'+x[0]+'">'+x[1]+'</button>').join('')}
 function stats(){let t=data.tickets||[],p=projects(),a=invoices().filter(i=>balance(i)>.01),s=[
@@ -79,11 +79,122 @@ function smsalerts(){
 }
 function help(){let q=(window.helpQuery||'').toLowerCase();const rows=(data.knowledge||[]).filter(k=>(k.title+' '+k.symptoms+' '+k.keywords).toLowerCase().includes(q));return title('Self-Service Help Centre','Troubleshooting guidance for common banking platform failures. Check these first before contacting support.')+'<div class="notice">Do not share passwords, PINs, full card details or customer data in support tickets. Never retry financial transactions without confirming their status.</div><div class="space"><input class="input" style="width:min(450px,100%)" id="kbSearch" placeholder="Search login, COB, API timeouts, AML, payments..." value="'+esc(window.helpQuery||'')+'"/><button class="btn gold" data-view="assistant">Ask Cogent Assist</button></div><div class="cards">'+rows.map(a=>'<article class="card pad" data-kb="'+a.id+'"><span class="badge">'+esc(a.category)+'</span><h3>'+esc(a.title)+'</h3><p>'+esc(a.symptoms)+'</p><button class="btn light" data-open-kb="'+a.id+'">View checks</button></article>').join('')+'</div>'}
 function assistant(){return title('Cogent Assist','Guided troubleshooting based on the Cogent support knowledge base.')+'<div class="columns"><div class="chat"><div class="chat-feed" id="chatFeed">'+(chatHistory.length?chatHistory.map(m=>'<div class="bubble '+(m.who==='user'?'user':'')+'">'+m.content+'</div>').join(''):'<div class="bubble">Hello. I can suggest approved checks for common Temenos, integration, payments and COGBI problems. Describe the issue you are seeing.</div>')+'</div><form class="chat-compose" id="chatForm"><input class="input" id="chatInput" placeholder="Describe the problem..." required><button class="btn gold">Ask</button></form></div><div class="card pad"><h3>Try a question</h3><div class="list">'+['COB processing is slow','Our payments API is timing out','A user cannot log in','AML batch validation failed'].map(q=>'<button class="btn light" data-ask="'+q+'">'+q+'</button>').join('')+'</div><div class="sep"></div><p class="section-sub">Cogent Assist currently searches approved troubleshooting articles rather than generating unverified answers. If the issue persists, create a ticket.</p><button class="btn gold" data-new-ticket>Create Support Ticket</button></div></div>'}
-function reports(){let t=data.tickets||[],s=projects(),due=invoices().filter(i=>balance(i)>0);return title('Service Reports','Metrics derived from current service desk records.')+stats()+'<div class="columns"><div class="card pad"><h3>Ticket status</h3><div class="chart">'+[t.filter(x=>x.status==='Open').length,t.filter(x=>x.status==='In progress').length,t.filter(x=>x.status==='Waiting on Client').length,t.filter(x=>x.status==='Resolved').length,Math.max(1,t.length)].map(n=>'<div style="height:'+Math.max(10,Math.round(100*n/Math.max(1,t.length)))+'%"></div>').join('')+'</div></div><div class="card pad"><h3>Delivery and finance</h3><div class="list-item"><b>'+s.length+' visible projects</b></div><div class="list-item"><b>'+due.length+' invoices with unpaid balances</b></div><div class="list-item"><b>'+t.filter(x=>x.sentiment==='Negative').length+' tickets flagged with negative sentiment</b></div></div></div>'}
+
+const closedStatus=t=>['Resolved','Closed'].includes(t.status);
+const workStats=()=>{
+ const all=data.tickets||[], resolved=all.filter(closedStatus),open=all.filter(t=>!closedStatus(t));
+ const responded=all.filter(t=>t.first_response_at&&t.response_due_at);
+ const slaHit=responded.filter(t=>new Date(t.first_response_at)<=new Date(t.response_due_at));
+ const firstMins=responded.map(t=>(new Date(t.first_response_at)-new Date(t.created_at))/60000).filter(x=>Number.isFinite(x)&&x>=0);
+ const now=Date.now(),weekStart=now-7*86400000;
+ return {
+  total:all.length,open:open.length, resolved:resolved.length,
+  resolvedWeek:resolved.filter(t=>t.resolved_at&&new Date(t.resolved_at).getTime()>=weekStart).length,
+  resolutionRate:all.length?100*resolved.length/all.length:0,
+  sla:responded.length?100*slaHit.length/responded.length:null,
+  slaSample:responded.length,
+  avgFirstMinutes:firstMins.length?firstMins.reduce((a,b)=>a+b,0)/firstMins.length:null
+ };
+};
+function consultantRows(){
+ return (data.users||[]).filter(u=>u.role==='staff').map(u=>{
+  const mine=data.tickets.filter(t=>t.assigned_to===u.id),open=mine.filter(t=>!closedStatus(t)),resolved=mine.filter(closedStatus);
+  const time=(data.timeEntries||[]).filter(t=>t.user_id===u.id);
+  return {id:u.id,name:u.name,total:mine.length,open:open.length,resolved:resolved.length,
+   rate:mine.length?resolved.length/mine.length*100:0,
+   high:open.filter(t=>['High','Urgent','Critical'].includes(t.priority)).length,
+   breach:open.filter(t=>t.response_due_at&&!t.first_response_at&&Date.parse(t.response_due_at)-Date.now()<3600000).length,
+   minutes:time.reduce((a,t)=>a+Number(t.minutes||0),0)
+  }
+ });
+}
+function consultants(){let rows=consultantRows();return title('Consultants','Workload, assigned tickets, resolution rate and recorded effort per specialist.')+
+ '<div class="cards">'+rows.map(x=>'<div class="card pad"><div class="space" style="margin:0"><h3>'+esc(x.name)+'</h3><span class="badge">'+x.open+' open</span></div>'+
+ '<div class="money">'+x.total+' <span style="font-size:12px;font-weight:500">assigned tickets</span></div><div class="progress"><div style="width:'+x.rate+'%"></div></div>'+
+ '<p>'+x.resolved+' resolved · '+x.rate.toFixed(1)+'% resolution · '+(x.minutes/60).toFixed(1)+'h recorded</p>'+
+ '<p>'+x.high+' high priority · '+x.breach+' nearing SLA</p></div>').join('')+'</div>'}
+let ticketBoardFilter='All';
+function board(){const cols=['New','In progress','Waiting on client','Resolved'];const map=t=>closedStatus(t)?'Resolved':t.status==='Waiting on Client'?'Waiting on client':t.status==='In progress'||t.status==='Under review'?'In progress':'New';
+return title('Ticket Board','Drag requests between stages. Every update is saved and reflected in the client portal.')+
+'<div class="board">'+cols.map(stage=>{
+ const items=data.tickets.filter(t=>map(t)===stage);
+ return '<div class="lane" data-ticket-lane="'+stage+'"><div class="lane-head">'+stage+' <span class="badge">'+items.length+'</span></div>'+
+ items.map(t=>'<div class="story" draggable="true" data-ticket-drag="'+t.id+'"><b>'+esc(t.ticket_no)+' · '+esc(t.subject)+'</b>'+
+ '<small>'+esc(t.client_org)+' · '+esc(t.priority)+' · '+esc(byid(t.assigned_to).name||'Unassigned')+'</small>'+
+ '<button class="btn light" data-open-ticket="'+t.id+'">Open</button></div>').join('')+'</div>'
+ }).join('')+'</div>'}
+function reportFiltered(){const term=(window.reportSearch||'').trim().toLowerCase();
+return (data.tickets||[]).filter(t=>!term||(t.ticket_no+' '+t.subject+' '+t.client_org+' '+t.status+' '+t.priority).toLowerCase().includes(term))}
+function reports(){
+ const k=workStats(),rows=consultantRows(),byP=['Urgent','High','Normal','Low'].map(p=>[p,data.tickets.filter(t=>t.priority===p).length]);
+ const sample=k.sla===null?'No responses recorded':k.sla.toFixed(1)+'%';
+ const avg=k.avgFirstMinutes===null?'Not available':k.avgFirstMinutes<60?k.avgFirstMinutes.toFixed(0)+' min':(k.avgFirstMinutes/60).toFixed(1)+' hrs';
+ return title('Service Reports','Actual ticket resolution, consultants’ workloads and SLA performance for the current demo data.',
+ '<div class="pillrow"><button class="btn light" data-export="csv">Export CSV</button><button class="btn gold" data-export="xlsx">Export Excel</button></div>')+
+ '<div class="stats"><div class="stat"><label>Open requests</label><b>'+k.open+'</b></div>'+
+ '<div class="stat"><label>Resolved this week</label><b>'+k.resolvedWeek+'</b></div>'+
+ '<div class="stat"><label>Within SLA</label><b>'+sample+'</b><small>'+k.slaSample+' measured responses</small></div>'+
+ '<div class="stat"><label>Average first response</label><b style="font-size:20px">'+avg+'</b></div></div>'+
+ '<div class="stats"><div class="stat"><label>Ticket resolution rate</label><b>'+k.resolutionRate.toFixed(1)+'%</b><small>'+k.resolved+' of '+k.total+' tickets resolved</small></div>'+
+ '<div class="stat"><label>Consultants</label><b>'+rows.length+'</b></div><div class="stat"><label>Total tickets</label><b>'+k.total+'</b></div>'+
+ '<div class="stat"><label>Time logged</label><b>'+(data.timeEntries.reduce((a,x)=>a+Number(x.minutes||0),0)/60).toFixed(1)+'h</b></div></div>'+
+ '<div class="columns"><div class="card pad"><h3>Open requests by consultant</h3>'+
+ rows.map(x=>'<div class="list-item"><div class="space" style="margin:0"><b>'+esc(x.name)+'</b><span>'+x.open+' open</span></div>'+
+ '<div class="progress"><div style="width:'+(k.open?x.open/k.open*100:0)+'%"></div></div></div>').join('')+'</div>'+
+ '<div class="card pad"><h3>Requests by priority</h3><div class="progress" style="height:18px;display:flex">'+byP.map((p,i)=>
+ '<div title="'+p[0]+': '+p[1]+'" style="height:100%;width:'+(k.total?100*p[1]/k.total:0)+'%;background:'+['#FF7B72','#F5A35B','#9FB8D9','#9AA3AE'][i]+'"></div>').join('')+'</div>'+
+ byP.map(p=>'<div class="list-item"><b>'+p[0]+'</b> · '+p[1]+'</div>').join('')+'</div></div>'+
+ '<div class="card pad" style="margin-top:15px"><div class="space"><h3>Ticket performance details</h3>'+
+ '<input class="input" id="reportSearch" placeholder="Filter exported requests" value="'+esc(window.reportSearch||'')+'"></div>'+
+ '<div class="table-wrap"><table><thead><tr><th>Ticket</th><th>Client</th><th>Owner</th><th>Priority</th><th>Status</th><th>First response</th></tr></thead><tbody>'+
+ reportFiltered().map(t=>'<tr><td>'+esc(t.ticket_no)+'</td><td>'+esc(t.client_org)+'</td><td>'+esc(byid(t.assigned_to).name||'Unassigned')+
+ '</td><td>'+esc(t.priority)+'</td><td>'+esc(t.status)+'</td><td>'+(t.first_response_at?pretty(t.first_response_at):'Not recorded')+'</td></tr>').join('')+
+ '</tbody></table></div></div>'}
+function csvExport(){
+ const cols=['ID','Subject','Client','Requester','Category','Priority','Status','Assignee','Created','First response','Due','SLA status','Hours logged'];
+ const quote=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+ const lines=[cols,...reportFiltered().map(t=>requestData(t))].map(row=>row.map(quote).join(',')).join('\r\n');
+ downloadBlob(new Blob([lines],{type:'text/csv;charset=utf-8'}),'cogent-service-desk-'+today()+'.csv');
+}
+function requestData(t){
+ const time=data.timeEntries.filter(e=>e.ticket_id===t.id).reduce((a,x)=>a+Number(x.minutes||0),0)/60;
+ const deadline=t.response_due_at||t.sla_due, sla=t.first_response_at?(deadline&&new Date(t.first_response_at)<=new Date(deadline)?'Met':'Breached'):
+ deadline&&new Date(deadline)<new Date()?'Breached':'Open';
+ return [t.ticket_no,t.subject,t.client_org,byid(t.client_user_id).name||'',t.category,t.priority,t.status,
+ byid(t.assigned_to).name||'',t.created_at,t.first_response_at||'',deadline||'',sla,time];
+}
+const today=()=>new Date().toISOString().slice(0,10);
+function downloadBlob(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
+async function xlsxExport(){
+ const Excel=window.ExcelJS;
+ if(!Excel){note('Excel library is unavailable. Exporting CSV instead.');csvExport();return}
+ const book=new Excel.Workbook();book.creator=user.name;book.created=new Date();
+ const k=workStats(),cols=['ID','Subject','Client','Requester','Category','Priority','Status','Assignee','Created','First response','Due','SLA status','Hours logged'];
+ const add=(name,headers,rows)=>{const s=book.addWorksheet(name);s.addRow(headers);rows.forEach(r=>s.addRow(r));s.views=[{state:'frozen',ySplit:1}];
+ s.autoFilter={from:'A1',to:s.getRow(1).getCell(headers.length).address};
+ s.getRow(1).height=27;s.getRow(1).eachCell(c=>{c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF15161A'}};c.font={bold:true,color:{argb:'FFF3D27C'}};c.alignment={vertical:'middle'}});
+ s.columns.forEach((c,i)=>c.width=Math.max(14,Math.min(42,headers[i].length+10)));
+ return s};
+ add('Summary',['Metric','Value'],[['Open requests',k.open],['Resolved this week',k.resolvedWeek],['Within SLA %',k.sla===null?'Unknown':k.sla/100],['Average first response (min)',k.avgFirstMinutes??'Unknown'],['Period','All demo records'],['Exported at',new Date().toISOString()],['Exported by',user.name]]);
+ const rr=reportFiltered();
+ const s=add('Requests',cols,rr.map(t=>requestData(t)));
+ s.getColumn(13).numFmt='0.00';
+ s.eachRow((r,idx)=>{if(idx===1)return;const status=r.getCell(12).value;
+ if(status==='Breached')r.eachCell(c=>c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFFFEBEA'}});
+ r.getCell(6).font={bold:true,color:{argb:r.getCell(6).value==='Urgent'?'FFFF7B72':'FFD9AE3F'}};
+ });
+ const selected=new Set(rr.map(t=>t.id));
+ add('Time Log',['Request ID','Staff','Date','Minutes','Note'],data.timeEntries.filter(e=>selected.has(e.ticket_id)).map(e=>[data.tickets.find(t=>t.id===e.ticket_id)?.ticket_no||'',byid(e.user_id).name||'',e.created_at,e.minutes,e.note||'']));
+ add('Projects',['Project','Client','Owner','Due','Tasks done','Total tasks','Progress %'],data.projects.map(p=>{const tasks=data.tasks.filter(t=>t.project_id===p.id);return[p.name,p.client_org,byid(p.owner_user_id).name||'',p.target_date||'',tasks.filter(t=>t.status==='Complete').length,tasks.length,p.progress/100]}));
+ add('Tasks',['Project','Task','Owner','Due','Status','Completed'],data.tasks.map(t=>[data.projects.find(p=>p.id===t.project_id)?.name||'',t.title,byid(t.assigned_to).name||'',t.due_date||'',t.status,t.status==='Complete'?'Complete':'']));
+ add('Workload',['Owner','Open','High + Critical','Breaching soon'],consultantRows().map(x=>[x.name,x.open,x.high,x.breach]));
+ const bytes=await book.xlsx.writeBuffer();
+ downloadBlob(new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),'cogent-service-desk-'+today()+'.xlsx');
+}
 function clients(){let orgs=[...new Set([...data.tickets.map(x=>x.client_org),...projects().map(x=>x.client_org),...invoices().map(x=>x.client_org)])];return title('Client 360','Service requests, delivery and billing context by institution.')+'<div class="cards">'+orgs.map(o=>'<div class="card pad"><h3>'+esc(o)+'</h3><div class="list-item"><b>'+data.tickets.filter(t=>t.client_org===o).length+' tickets</b></div><div class="list-item"><b>'+projects().filter(p=>p.client_org===o).length+' projects</b></div>'+(finance()?'<div class="list-item"><b>'+money(invoices().filter(i=>i.client_org===o).reduce((a,i)=>a+balance(i),0))+' due</b></div>':'')+'</div>').join('')+'</div>'}
 function mock(name){return title(name,'This commercial workspace is available for Cogent service operations.')+'<div class="card pad"><h3>'+name+'</h3><p class="section-sub">Service desk tickets, project plans and invoices are connected to Supabase. This additional business workflow can be integrated with the live data model next.</p></div>'}
 function messages(){return title('Messages','External replies and internal collaboration notes.')+'<div class="card pad"><div class="list">'+data.messages.slice().reverse().map(m=>'<div class="list-item"><b>'+esc(byid(m.author_user_id).name||'User')+'</b><span class="badge">'+esc(m.visibility)+'</span><p>'+esc(m.body)+'</p></div>').join('')+'</div></div>'}
-function render(){if(!data)return;let labels={overview:'Overview',tickets:'Tickets',projects:'Projects',invoices:'Invoices',sms:'SMS Centre',smsalerts:'SMS Alerts',knowledge:'Help Centre',assistant:'Cogent Assist',reports:'Reports',clients:'Client 360',messages:'Messages',crm:'CRM Pipeline'};$('title').textContent=labels[view]||'Cogent Desk';nav();let map={overview,tickets,projects:projectContent,invoices:billing,sms,smsalerts,knowledge:help,assistant,reports,clients,messages,crm:()=>mock('CRM Pipeline')};$('content').innerHTML=(map[view]||overview)();if(view==='assistant'){let el=$('chatFeed');el.scrollTop=el.scrollHeight}}
+function render(){if(!data)return;let labels={overview:'Overview',tickets:'Tickets',projects:'Projects',invoices:'Invoices',sms:'SMS Centre',smsalerts:'SMS Alerts',knowledge:'Help Centre',assistant:'Cogent Assist',reports:'Reports',clients:'Client 360',consultants:'Consultants',board:'Ticket Board',messages:'Messages',crm:'CRM Pipeline'};$('title').textContent=labels[view]||'Cogent Desk';nav();let map={overview,tickets,consultants,board,projects:projectContent,invoices:billing,sms,smsalerts,knowledge:help,assistant,reports,clients,messages,crm:()=>mock('CRM Pipeline')};$('content').innerHTML=(map[view]||overview)();if(view==='assistant'){let el=$('chatFeed');el.scrollTop=el.scrollHeight}}
 async function refresh(silent=false){try{const j=await api('bootstrap');data=j;user=j.user;store.setItem('cogent_demo_user',JSON.stringify(user));$('who').textContent=user.name;$('org').textContent=user.organization;const sig=JSON.stringify([j.tickets.map(x=>[x.id,x.updated_at]),j.projects.map(x=>[x.id,x.status,x.progress]),j.tasks.map(x=>[x.id,x.updated_at]),j.invoices.map(x=>[x.id,x.updated_at]),j.sms.length,(j.notification_events||[]).map(x=>[x.id,x.status]),j.notification_prefs]);if(sig!==lastSig){lastSig=sig;if(!$('modal').classList.contains('show'))render();else nav()}}catch(e){if(!silent)$('content').innerHTML='<div class="card pad"><strong>Connection problem</strong><p>'+esc(e.message)+'</p><button class="btn gold" onclick="refresh()">Retry</button></div>'}}
 function showModal(title,content){$('mtitle').textContent=title;$('mbody').innerHTML=content;$('modal').classList.add('show')}
 function closeModal(){$('modal').classList.remove('show')}
@@ -102,6 +213,7 @@ function newTask(id){showModal('Add Task','<form id="newTaskForm" class="kv" dat
 async function ask(q){chatHistory.push({who:'user',content:esc(q)});render();try{const d=await api('ask_support',{question:q});let html='<strong>'+esc(d.answer)+'</strong>'+(d.matches||[]).map(a=>'<div class="sep"></div><b>'+esc(a.title)+'</b><ol class="faq-steps">'+(a.steps||[]).map(x=>'<li>'+esc(x)+'</li>').join('')+'</ol><p class="section-sub">'+esc(a.caution)+'</p>').join('');chatHistory.push({who:'bot',content:html})}catch(e){chatHistory.push({who:'bot',content:esc(e.message)})}render()}
 document.addEventListener('click',async e=>{let b=e.target.closest('button');if(!b)return;try{
 if(b.dataset.view){view=b.dataset.view;render()}
+else if(b.dataset.export){if(b.dataset.export==="csv")csvExport();else await xlsxExport()}
 else if(b.dataset.projectTab){filter=b.dataset.projectTab;render()}
 else if(b.dataset.projectMode){viewMode=b.dataset.projectMode;render()}
 else if(b.dataset.openProject)projectModal(b.dataset.openProject)
@@ -123,11 +235,11 @@ if(t.id==='projectPick'){selectedProject=t.value;render()}
 else if(t.dataset.projectStatus){await api('update_project',{project_id:t.dataset.projectStatus,status:t.value});note('Project status updated');await refresh()}
 else if(t.dataset.taskStage){await api('update_task',{task_id:t.dataset.taskStage,status:t.value});note('Task moved');await refresh()}
 }catch(err){note(err.message)}});
-document.addEventListener('input',e=>{if(e.target.id==='kbSearch'){window.helpQuery=e.target.value;let caret=e.target.selectionStart;render();let node=$('kbSearch');node?.focus();node?.setSelectionRange(caret,caret)}});
-document.addEventListener('dragstart',e=>{const story=e.target.closest('.story');if(story&&user.role!=='client'){e.dataTransfer.setData('text/plain',story.dataset.taskId)}});
-document.addEventListener('dragover',e=>{const lane=e.target.closest('.lane');if(lane&&user.role!=='client'){e.preventDefault();lane.classList.add('drop')}});
+document.addEventListener('input',e=>{if(e.target.id==='reportSearch'){window.reportSearch=e.target.value;render();const node=$('reportSearch');node?.focus();return}if(e.target.id==='kbSearch'){window.helpQuery=e.target.value;let caret=e.target.selectionStart;render();let node=$('kbSearch');node?.focus();node?.setSelectionRange(caret,caret)}});
+document.addEventListener('dragstart',e=>{const t=e.target.closest('[data-ticket-drag]');if(t&&user.role!=='client'){e.dataTransfer.setData('application/cogent-ticket',t.dataset.ticketDrag);return}const story=e.target.closest('.story');if(story&&user.role!=='client'){e.dataTransfer.setData('text/plain',story.dataset.taskId)}});
+document.addEventListener('dragover',e=>{if(e.target.closest('[data-ticket-lane]')&&user.role!=='client'){e.preventDefault();return}const lane=e.target.closest('.lane');if(lane&&user.role!=='client'){e.preventDefault();lane.classList.add('drop')}});
 document.addEventListener('dragleave',e=>{const lane=e.target.closest('.lane');if(lane)lane.classList.remove('drop')});
-document.addEventListener('drop',async e=>{const lane=e.target.closest('.lane');if(!lane||user.role==='client')return;e.preventDefault();lane.classList.remove('drop');const id=e.dataTransfer.getData('text/plain');if(!id)return;try{await api('update_task',{task_id:id,status:lane.dataset.stage});note('Storyboard updated');await refresh()}catch(err){note(err.message)}});
+document.addEventListener('drop',async e=>{const laneTicket=e.target.closest('[data-ticket-lane]');if(laneTicket&&user.role!=='client'){e.preventDefault();const id=e.dataTransfer.getData('application/cogent-ticket');if(id){try{await api('update_ticket',{ticket_id:id,status:laneTicket.dataset.ticketLane==='New'?'Open':laneTicket.dataset.ticketLane==='Waiting on client'?'Waiting on Client':laneTicket.dataset.ticketLane});await refresh();note('Ticket moved')}catch(err){note(err.message)}}return}const lane=e.target.closest('.lane');if(!lane||user.role==='client')return;e.preventDefault();lane.classList.remove('drop');const id=e.dataTransfer.getData('text/plain');if(!id)return;try{await api('update_task',{task_id:id,status:lane.dataset.stage});note('Storyboard updated');await refresh()}catch(err){note(err.message)}});
 document.addEventListener('submit',async e=>{const f=e.target;if(!['newTicketForm','replyForm','chatForm','invoiceForm','payForm','smsForm','newProjectForm','newTaskForm','smsPrefsForm'].includes(f.id))return;e.preventDefault();try{
 if(f.id==='newTicketForm')await api('create_ticket',{subject:$('subject').value,category:$('category').value,priority:$('priority').value,description:$('description').value});
 if(f.id==='replyForm'){await api('add_message',{ticket_id:f.dataset.ticket,body:$('reply').value,visibility:user.role==='client'?'external':$('visibility').value});if(user.role!=='client'&&Number($('minutes').value)>0)await api('add_time',{ticket_id:f.dataset.ticket,minutes:Number($('minutes').value),note:'Ticket response'})}
