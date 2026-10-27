@@ -1,0 +1,121 @@
+/* Cogent Technology Associates | public website charcoal, gold and silver theme */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
+:root{
+ --g:#D9AE3F!important;--gold:#D9AE3F!important;--gold2:#F3D27C!important;
+ --ink:#F4F2EE!important;--text:#F4F2EE!important;--muted:#BDC1CA!important;
+ --line:rgba(255,255,255,.14)!important;--cream:#111216!important;--bg:#0D0E11!important;
+ --dark:#111216!important;
+}
+html{color-scheme:dark;scroll-behavior:smooth}
+body{
+ font-family:'Montserrat',Arial,sans-serif!important;
+ color:#F4F2EE!important;background:#0D0E11!important;min-height:100vh;
+ background-image:radial-gradient(ellipse 46% 34% at 2% 12%,rgba(217,174,63,.15),transparent),
+ radial-gradient(ellipse 42% 50% at 90% 34%,rgba(86,104,138,.18),transparent),
+ linear-gradient(140deg,#1B1C21 0%,#111216 42%,#08090B 100%)!important;
+}
+body:before{content:"";position:fixed;inset:-20%;pointer-events:none;z-index:0;
+ background:radial-gradient(circle at 18% 36%,rgba(217,174,63,.20),transparent 17%),
+ radial-gradient(circle at 85% 12%,rgba(196,204,216,.12),transparent 19%),
+ radial-gradient(circle at 71% 78%,rgba(86,104,138,.15),transparent 18%);
+ filter:blur(55px);animation:cogentDrift 29s ease-in-out infinite alternate;
+}
+@keyframes cogentDrift{to{transform:translate3d(2%,-2%,0) scale(1.05)}}
+nav,header,section,footer,main{position:relative;z-index:1}
+.nav,.site-nav,nav:not(.inside){
+ background:rgba(13,14,17,.89)!important;
+ border-bottom:1px solid rgba(255,255,255,.16)!important;
+ backdrop-filter:blur(30px) saturate(160%)!important;
+ color:#F4F2EE!important;
+}
+.menu,.nav-links,.navlinks,.links{color:#DDE3EC!important}
+.menu a,.nav-links a,.navlinks a,.links a{color:#DDE3EC!important}
+.menu a:hover,.nav-links a:hover,.navlinks a:hover,.links a:hover{color:#F3D27C!important}
+.brand,.logo,.site-logo,.brand-logo,.footer-logo-plate,.logoPlate{background:#FBFBFA!important;border-radius:12px!important;padding:6px 10px!important;box-shadow:0 8px 28px rgba(0,0,0,.22)!important}
+.brand img,.logo img,.brand-logo,.footer-logo,.footLogo{
+ filter:none!important;mix-blend-mode:normal!important;object-fit:contain!important;
+}
+.brandText,.brand-fallback{color:#17191D!important}
+.login,.nav-login{background:transparent!important;color:#F4F2EE!important;border:1px solid rgba(243,210,124,.72)!important}
+.cta,.nav-cta,.btn.gold,.button:not(.white):not(.outline){
+ background:linear-gradient(120deg,#F6DA8C,#D9AE3F 62%,#B8862A)!important;
+ color:#18140A!important;border-color:#D9AE3F!important;
+ box-shadow:0 12px 26px rgba(217,174,63,.17)!important;
+}
+.button.white,.button.outline,.btn.light,.btn.outline{
+ background:rgba(255,255,255,.09)!important;color:#F4F2EE!important;
+ border:1px solid rgba(243,210,124,.5)!important;
+}
+.btn,.button,.cta,.nav-login,.login{transition:transform .2s ease,box-shadow .2s ease,background .2s ease}
+.btn:hover,.button:hover,.cta:hover,.nav-cta:hover{transform:translateY(-2px);box-shadow:0 16px 28px rgba(217,174,63,.22)!important}
+.hero{background:#08090B!important}
+.hero:after{background:linear-gradient(90deg,rgba(7,8,10,.90),rgba(9,10,12,.78) 48%,rgba(9,10,12,.32))!important}
+.hero h1{color:#F4F2EE!important}
+.hero p,.hero .lead{color:#DDE3EC!important}
+.eyebrow,.num{color:#F3D27C!important}
+h1,h2,h3,h4,h5,strong,b{color:inherit}
+h1,h2,h3,h4{letter-spacing:-.038em}
+h2{color:#F4F2EE!important}
+h2 em,h2 span.gold,.text-gold{color:#F3D27C!important}
+.pageHero,.page-hero{
+ background:radial-gradient(ellipse at 14% 18%,rgba(217,174,63,.18),transparent 43%),
+ linear-gradient(125deg,#242227,#13151A 61%,#0D0E11)!important;
+ border-bottom:1px solid rgba(255,255,255,.09)!important;color:#F4F2EE!important
+}
+.pageHero h1,.page-hero h1{color:#F4F2EE!important}
+section,.cream,.pattern,.surface,.about-section{
+ background-color:transparent!important;color:#F4F2EE!important;
+}
+.cream,.pattern{
+ background-image:linear-gradient(125deg,rgba(255,255,255,.03),rgba(255,255,255,.015))!important;
+ border-block:1px solid rgba(255,255,255,.045);
+}
+section p,.lead,.bodycopy,.section-head p,.head p,.pageHero p,.page-hero p,
+.card p,.panel p,.project p,.news p,.newsBody p,.news-body p,
+.contact-card p,.detail p,.industry p,.article p,.article li{
+ color:#BDC1CA!important;line-height:1.75;
+}
+.card,.panel,.dash,.console,.detail,.stat,.stats .stat,.cm,.industry,.contact-card,
+.news,.news-card,.newsGrid>.article,.news-grid>.news,
+.card-grid>.card,.service-card,.feature-card,.contact-grid>.panel,.g2>.panel,.g3>.panel,.g4>.panel{
+ background:linear-gradient(150deg,rgba(255,255,255,.12),rgba(255,255,255,.045) 42%,rgba(255,255,255,.07))!important;
+ border:1px solid rgba(255,255,255,.15)!important;color:#F4F2EE!important;
+ backdrop-filter:blur(30px) saturate(160%)!important;
+ box-shadow:0 30px 90px -34px rgba(0,0,0,.70),inset 0 1px 0 rgba(255,255,255,.16)!important;
+ border-radius:22px!important;
+}
+.card:hover,.news:hover,.news-card:hover,.partner:hover{border-color:rgba(243,210,124,.5)!important}
+.dark,.panel.dark,.cogbi-copy{background:linear-gradient(145deg,rgba(35,35,39,.9),rgba(18,19,23,.9))!important;border-color:rgba(243,210,124,.22)!important}
+.cm,.dash .stat,.console-metrics .cm{background:rgba(255,255,255,.055)!important;border:1px solid rgba(255,255,255,.09)!important}
+.cm small,.stat span,.stat small,.stat label{color:#C9CED6!important}
+.stat strong,.cm strong{color:#F3D27C!important}
+.bars{background:rgba(255,255,255,.055)!important}
+.bars i{background:linear-gradient(#F3D27C,#B8862A)!important}
+.chip{background:rgba(243,210,124,.09)!important;color:#F3D27C!important;border:1px solid rgba(243,210,124,.26)!important}
+.more,.card-link,.news a,.news-body a,.newsBody a{color:#F3D27C!important}
+.partner-grid .partner,.logoGrid .logoCard,.logo-row .logo-box,.logos .logo-box,.partner-grid a{
+ background:rgba(250,250,249,.97)!important;color:#1D2127!important;
+ border:1px solid rgba(243,210,124,.27)!important;
+ box-shadow:0 15px 38px rgba(0,0,0,.25)!important;
+}
+.partner-grid small,.logoCard small,.partner small{color:#414650!important}
+.partner-grid img,.logoGrid img,.logos img{filter:none!important}
+.news img,.news-card img,.article img{filter:saturate(.90)!important}
+input,select,textarea{
+ background:rgba(255,255,255,.09)!important;color:#F4F2EE!important;
+ border:1px solid rgba(255,255,255,.2)!important;border-radius:13px!important;
+}
+input::placeholder,textarea::placeholder{color:rgba(244,242,238,.47)!important}
+input:focus,select:focus,textarea:focus{outline:2px solid #D9AE3F!important;outline-offset:2px!important}
+select option{background:#1B1C21;color:#F4F2EE}
+label,.contact-row b,.contactRow b{color:#DDE3EC!important}
+.contact-row,.contactRow{border-color:rgba(255,255,255,.12)!important}
+footer,.footer,.site-footer{
+ background:#08090B!important;border-top:1px solid rgba(243,210,124,.17)!important;
+ color:#F4F2EE!important;
+}
+footer a,.footer a,.site-footer a,footer p,.footer p,.site-footer p{color:#C9CED6!important}
+footer h4,.footer h4,.site-footer h4{color:#F3D27C!important}
+.fab{background:linear-gradient(120deg,#F6DA8C,#D9AE3F)!important;color:#17140A!important}
+@media(max-width:700px){.nav,.site-nav{background:rgba(13,14,17,.96)!important}}
+@media(prefers-reduced-motion:reduce){body:before{animation:none!important}.partner{animation:none!important}}
