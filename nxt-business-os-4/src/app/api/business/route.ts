@@ -30,6 +30,7 @@ export async function POST(req:NextRequest){
   const parsed=z.object({id:z.uuid(),action:z.enum(['issue','convert','payment','close','finalise','recur']),amount:money.optional(),payment_method:z.enum(['bank','cash']).optional(),reference:z.string().trim().min(1).max(160).optional(),period:z.iso.date().optional()}).strict().safeParse(raw);
   if(!parsed.success)return NextResponse.json({error:'Invalid action details'},{status:400});
   const {data,error}=await ctx.db.rpc('business_action',{t:ctx.workspace.id,r:parsed.data.id,a:parsed.data.action,v:parsed.data});
+  if(!error&&parsed.data.action==='payment'){const payment=await ctx.db.from('invoice_payments').select('id').eq('tenant_id',ctx.workspace.id).eq('invoice_id',parsed.data.id).eq('reference',parsed.data.reference).maybeSingle();return NextResponse.json({...data,notification_payment_id:payment.data?.id??null});}
   return NextResponse.json(error?{error:error.message}:data,{status:error?400:200});
  }
  const parsed=create.safeParse(raw);if(!parsed.success)return NextResponse.json({error:parsed.error.issues.map(i=>i.message).join('; ')},{status:400});
