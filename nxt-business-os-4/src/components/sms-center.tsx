@@ -1,6 +1,8 @@
 'use client';
 import {useEffect,useState} from 'react';
 import SmsTemplates from './sms-templates';
+import SmsComposer from './sms-composer';
+import type {SmsDraft} from '@/lib/sms-template';
 import type {Workspace} from '@/lib/types';
 
 type State={
@@ -10,14 +12,14 @@ type State={
  recent:{status:string;source_type:string;created_at:string;delivered_at:string|null;error:string|null}[];
 };
 
-export default function SmsCenter({workspace}:{workspace:Workspace}){
- const [tab,setTab]=useState('Overview');
+export default function SmsCenter({workspace,initialDraft}:{workspace:Workspace;initialDraft?:SmsDraft}){
+ const [tab,setTab]=useState('Send message');
  const [state,setState]=useState<State|null>(null),[error,setError]=useState(''),[notice,setNotice]=useState(''),[busy,setBusy]=useState(false),[recipient,setRecipient]=useState(''),[message,setMessage]=useState('NXT Business OS SMS test. If you received this message, Gikko SMS is working.');
  useEffect(()=>{let live=true;async function load(){try{const r=await fetch('/api/sms?workspace='+workspace.id,{cache:'no-store'}),b=await r.json();if(!r.ok)throw Error(b.error);if(live){setState(b);setError('');}}catch(e){if(live)setError((e as Error).message);}}load();const timer=setInterval(load,15000);return()=>{live=false;clearInterval(timer);};},[workspace.id]);
  if(error)return <p className="notice error">{error}</p>;
  if(!state)return <section className="panel"><p>Loading SMS integration status…</p></section>;
  const ready=state.enabled;
- return <div><div className="action-row spaced" role="tablist" aria-label="SMS sections">{['Overview','Templates','Delivery History'].map(t=><button key={t} type="button" role="tab" aria-selected={tab===t} className={tab===t?'primary':'secondary'} onClick={()=>setTab(t)}>{t}</button>)}</div>{tab==='Templates'?<SmsTemplates workspace={workspace.id}/>:<>
+ return <div><div className="action-row spaced" role="tablist" aria-label="SMS sections">{['Send message','Templates','Delivery History','Overview'].map(t=><button key={t} type="button" role="tab" aria-selected={tab===t} className={tab===t?'primary':'secondary'} onClick={()=>setTab(t)}>{t}</button>)}</div>{tab==='Send message'?<SmsComposer workspace={workspace.id} initialDraft={initialDraft}/>:tab==='Templates'?<SmsTemplates workspace={workspace.id}/>:<>
   {tab==='Overview'&&<><section className="sms-provider-card">
    <div><span className="eyebrow">SMS PROVIDER</span><h3>Gikko Mobile Messaging</h3>
     <p>{ready?'Automated client SMS delivery is enabled. Approved client-facing work can be queued to Gikko using the saved contact number.':'The Gikko workflow is installed but live sending is disabled until the API key is stored securely and the integration is enabled.'}</p>
