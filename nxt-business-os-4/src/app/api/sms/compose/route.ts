@@ -15,7 +15,7 @@ export async function GET(req:NextRequest){
  const admin=service();if(!admin)return reply({error:'SMS is temporarily unavailable.'},503);
  const tenant=c.workspace.id;
  const [templates,clients]=await Promise.all([
- c.db.from('sms_templates').select('event,name,context_kind,body,enabled').eq('tenant_id',tenant).order('name'),
+ c.db.from('sms_templates').select('event,name,context_kind,body,enabled').eq('tenant_id',tenant).in('context_kind',['general','invoice','project','ticket']).order('name'),
  admin.from('clients').select('id,title,phone,approval_sms_enabled').eq('tenant_id',tenant).is('archived_at',null).order('title')]);
  if(templates.error||clients.error)return reply({error:'Message options could not load.'},503);
  let records:{id:string;label:string}[]=[];
@@ -59,11 +59,11 @@ export async function POST(req:NextRequest){
  const values:Record<string,string>={name:contact.title,portal_link:'https://os.nxt-workforce.com/login'};
  let recordId=v.record_id??null,recordLabel='';
  if(t.context_kind==='invoice'){
-  let q=admin.from('business_items').select('id,reference').eq('tenant_id',tenant).eq('client_id',contact.id).eq('kind','invoice').in('status',['issued','paid']).is('deleted_at',null);
+  let q=admin.from('business_items').select('id,reference,total,paid,currency,due_date').eq('tenant_id',tenant).eq('client_id',contact.id).eq('kind','invoice').in('status',['issued','paid']).is('deleted_at',null);
   if(recordId)q=q.eq('id',recordId);
   const r=await q.order('created_at',{ascending:false}).limit(1).maybeSingle();
   if(r.error)throw r.error;if(!r.data)return reply({error:'No issued invoice found for this client.'},400);
-  recordId=r.data.id;recordLabel=r.data.reference;values.invoice_number=r.data.reference;
+  recordId=r.data.id;recordLabel=r.data.reference;values.invoice_number=r.data.reference;values.invoice_total=r.data.currency+' '+Number(r.data.total).toFixed(2);values.balance=r.data.currency+' '+Math.max(0,Number(r.data.total)-Number(r.data.paid)).toFixed(2);values.due_date=r.data.due_date??'Not specified';if(t.event==='invoice_reminder'&&Number(r.data.total)<=Number(r.data.paid))return reply({error:'This invoice is fully paid. A reminder cannot be sent.'},400);
  }else if(t.context_kind==='project'){
   let q=admin.from('projects').select('id,title,status').eq('tenant_id',tenant).eq('client_id',contact.id).eq('client_visible',true).in('status',t.event==='project_completed'?['completed']:['approved','completed']).is('archived_at',null);if(recordId)q=q.eq('id',recordId);
   const r=await q.order('updated_at',{ascending:false}).limit(1).maybeSingle();if(r.error)throw r.error;if(!r.data)return reply({error:'No matching published project found for this client.'},400);
