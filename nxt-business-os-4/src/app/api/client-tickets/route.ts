@@ -8,7 +8,7 @@ export async function GET(req:NextRequest){
  const c=await context(req.nextUrl.searchParams.get('workspace'));
  if(!c?.workspace||c.workspace.role!=='client'||!c.workspace.client_id)return reply({error:'Client access required.'},403);
  const [tickets,comments,projects]=await Promise.all([
- c.db.from('it_tickets').select('id,reference,title,description,status,priority,resolution,created_at,updated_at,due_date,project_id').eq('tenant_id',c.workspace.id).eq('requester_id',c.user.id).order('created_at',{ascending:false}),
+ c.db.from('it_tickets').select('id,reference,title,description,status,priority,resolution,created_at,updated_at,due_date,project_id').eq('tenant_id',c.workspace.id).eq('requester_id',c.user.id).is('archived_at',null).order('created_at',{ascending:false}),
  c.db.from('it_ticket_comments').select('id,ticket_id,body,created_at').eq('tenant_id',c.workspace.id).eq('internal',false).order('created_at'),
  c.db.from('projects').select('id,title').eq('tenant_id',c.workspace.id).eq('client_id',c.workspace.client_id).eq('client_visible',true).is('archived_at',null)]);
  if(tickets.error||comments.error||projects.error)return reply({error:'Support requests could not load.'},503);
