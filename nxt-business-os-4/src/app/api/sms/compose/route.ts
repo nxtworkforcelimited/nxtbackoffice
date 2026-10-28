@@ -43,7 +43,7 @@ export async function POST(req:NextRequest){
  try{
  const c=await context(req.nextUrl.searchParams.get('workspace'));
  if(!c?.workspace||c.workspace.role==='client'||!allowed(c.workspace.role,c.workspace.permissions??[],'sms'))return reply({error:'SMS access required.'},403);
- const p=z.object({action:z.enum(['preview','send']),template:z.string().min(1).max(100),client_id:z.uuid(),record_id:z.uuid().nullable().optional(),request_id:z.uuid().optional(),expected_body:z.string().max(1600).optional(),expected_recipient:z.string().max(20).optional()}).safeParse(await req.json().catch(()=>null));
+ const p=z.object({action:z.enum(['preview','send']),template:z.string().min(1).max(100),client_id:z.uuid(),record_id:z.uuid().nullable().optional(),request_id:z.uuid().optional(),body_override:z.string().trim().min(1).max(480).optional(),expected_body:z.string().max(1600).optional(),expected_recipient:z.string().max(20).optional()}).safeParse(await req.json().catch(()=>null));
  if(!p.success)return reply({error:'Choose a template and client.'},400);
  const v=p.data,tenant=c.workspace.id,admin=service();if(!admin)return reply({error:'SMS is temporarily unavailable.'},503);
  const [template,client,settings]=await Promise.all([
@@ -51,8 +51,9 @@ export async function POST(req:NextRequest){
  admin.from('clients').select('id,title,phone,approval_sms_enabled').eq('tenant_id',tenant).eq('id',v.client_id).is('archived_at',null).maybeSingle(),
  admin.from('sms_settings').select('enabled').eq('tenant_id',tenant).maybeSingle()]);
  if(template.error||client.error||settings.error)return reply({error:'The message could not be prepared.'},503);
- if(!template.data||!client.data)return reply({error:'Template or client not found.'},404);
- const contact=client.data,t=template.data as SmsTemplate;
+ if((!template.data&&v.template!=='manual_message')||!client.data)return reply({error:'Template or client not found.'},404);
+ const contact=client.data,t=(v.template==='manual_message'?{event:'manual_message',context_kind:'general',name:'Custom message',body:v.body_override??'',enabled:false}:{...template.data,body:v.body_override??template.data?.body}) as SmsTemplate;
+ if(!['general','invoice','project','ticket'].includes(t.context_kind))return reply({error:'Open this template from the invoice or quotation messaging actions.'},400);
  if(!settings.data?.enabled)return reply({error:'Gikko delivery is disabled.'},400);
  if(!contact.approval_sms_enabled)return reply({error:'Enable SMS alerts on this contact before sending.'},400);
  if(!/^[+][1-9][0-9]{7,14}$/.test(contact.phone??''))return reply({error:'This client needs a valid international mobile number.'},400);
