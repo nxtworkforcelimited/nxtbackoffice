@@ -1,5 +1,6 @@
 'use client';
 import {useEffect,useState} from 'react';
+import SmsTemplates from './sms-templates';
 import type {Workspace} from '@/lib/types';
 
 type State={
@@ -10,13 +11,14 @@ type State={
 };
 
 export default function SmsCenter({workspace}:{workspace:Workspace}){
+ const [tab,setTab]=useState('Overview');
  const [state,setState]=useState<State|null>(null),[error,setError]=useState(''),[notice,setNotice]=useState(''),[busy,setBusy]=useState(false),[recipient,setRecipient]=useState(''),[message,setMessage]=useState('NXT Business OS SMS test. If you received this message, Gikko SMS is working.');
  useEffect(()=>{let live=true;async function load(){try{const r=await fetch('/api/sms?workspace='+workspace.id,{cache:'no-store'}),b=await r.json();if(!r.ok)throw Error(b.error);if(live){setState(b);setError('');}}catch(e){if(live)setError((e as Error).message);}}load();const timer=setInterval(load,15000);return()=>{live=false;clearInterval(timer);};},[workspace.id]);
  if(error)return <p className="notice error">{error}</p>;
  if(!state)return <section className="panel"><p>Loading SMS integration status…</p></section>;
  const ready=state.enabled;
- return <div>
-  <section className="sms-provider-card">
+ return <div><div className="action-row spaced" role="tablist" aria-label="SMS sections">{['Overview','Templates','Delivery History'].map(t=><button key={t} type="button" role="tab" aria-selected={tab===t} className={tab===t?'primary':'secondary'} onClick={()=>setTab(t)}>{t}</button>)}</div>{tab==='Templates'?<SmsTemplates workspace={workspace.id}/>:<>
+  {tab==='Overview'&&<><section className="sms-provider-card">
    <div><span className="eyebrow">SMS PROVIDER</span><h3>Gikko Mobile Messaging</h3>
     <p>{ready?'Automated client SMS delivery is enabled. Approved client-facing work can be queued to Gikko using the saved contact number.':'The Gikko workflow is installed but live sending is disabled until the API key is stored securely and the integration is enabled.'}</p>
    </div><span className={'badge '+(ready?'active':'')}>{ready?'Enabled':'Setup required'}</span>
@@ -38,9 +40,9 @@ export default function SmsCenter({workspace}:{workspace:Workspace}){
    {state.enabled_without_phone>0&&<p className="notice error">{state.enabled_without_phone} contact(s) have SMS alerts enabled but no valid mobile number.</p>}
    {!ready&&<p className="notice">Next activation step: store the Gikko API key in Supabase Vault as <code>gikko_api_key</code>, verify the API host/sender ID, then enable the provider and run one controlled internal test.</p>}
   </section>
-  <section className="panel">
+  </>}<section className="panel">
    <h3>Recent SMS activity</h3>
    {!state.recent.length?<p>No SMS has been queued yet.</p>:state.recent.map((row,i)=><div className="report-row" key={i}><span>{row.source_type||'SMS'}</span><strong>{row.status}</strong><small>{new Date(row.created_at).toLocaleString()}{row.error?' · '+row.error:''}</small></div>)}
   </section>
- </div>;
+ </>}</div>;
 }
