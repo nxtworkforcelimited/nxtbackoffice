@@ -2,7 +2,7 @@
 import {useEffect,useState,useCallback} from 'react';
 import {createBrowserClient} from '@supabase/ssr';
 type Attachment={id:string;name:string;mime:string;object_path:string;url:string|null;position:number};
-export default function Attachments({workspace,parent,kind,editable,demo=false}:{workspace:string;parent:string;kind:'post'|'request';editable:boolean;demo?:boolean}){
+export default function Attachments({workspace,parent,kind,editable,canDelete=false,demo=false}:{workspace:string;parent:string;kind:'post'|'request';editable:boolean;canDelete?:boolean;demo?:boolean}){
  const [files,setFiles]=useState<Attachment[]>([]),[error,setError]=useState(''),[busy,setBusy]=useState(false);
  const base=`/api/attachments?workspace=${workspace}&kind=${kind}&id=${parent}`;
  const load=useCallback(async()=>{if(demo)return;try{const r=await fetch(base,{cache:'no-store'});const b=await r.json();if(!r.ok)throw new Error(b.error);setFiles(b);}catch(e){setError((e as Error).message);}},[base,demo]);
@@ -21,7 +21,7 @@ export default function Attachments({workspace,parent,kind,editable,demo=false}:
  }catch(e){setError((e as Error).message);}finally{setBusy(false);await load();}
  }
  return <section className="work-attachments"><h3>{kind==='post'?'Artwork and video':'Attachments'}</h3><p className="footnote">{kind==='post'?'Images appear in carousel order. Approval covers the caption and these files.':'Files are shared with the people who can access this request.'}</p>
- <div className="attachment-grid">{files.map((f,i)=><figure key={f.id}>{f.url?f.mime.startsWith('image/')?<a href={f.url} target="_blank" rel="noreferrer"><img src={f.url} alt={f.name}/></a>:f.mime.startsWith('video/')?<video controls preload="metadata" src={f.url}/>:<a href={f.url} target="_blank" rel="noreferrer">Open document</a>:<p>Upload incomplete</p>}<figcaption>{i+1}. {f.name}</figcaption>{editable&&<button type="button" disabled={busy} className="text-button" onClick={async()=>{setBusy(true);try{const r=await fetch(`/api/attachments?workspace=${workspace}&id=${f.id}`,{method:'DELETE'});const b=await r.json();if(!r.ok)throw new Error(b.error);await load();}catch(e){setError((e as Error).message);}finally{setBusy(false);}}}>Remove</button>}</figure>)}</div>
+ <div className="attachment-grid">{files.map((f,i)=><figure key={f.id}>{f.url?f.mime.startsWith('image/')?<a href={f.url} target="_blank" rel="noreferrer"><img src={f.url} alt={f.name}/></a>:f.mime.startsWith('video/')?<video controls preload="metadata" src={f.url}/>:<a href={f.url} target="_blank" rel="noreferrer">Open document</a>:<p>Upload incomplete</p>}<figcaption>{i+1}. {f.name}</figcaption>{editable&&canDelete&&<button type="button" disabled={busy} className="text-button" onClick={async()=>{setBusy(true);try{const r=await fetch(`/api/attachments?workspace=${workspace}&id=${f.id}`,{method:'DELETE'});const b=await r.json();if(!r.ok)throw new Error(b.error);await load();}catch(e){setError((e as Error).message);}finally{setBusy(false);}}}>Remove</button>}</figure>)}</div>
  {!files.length&&<p className="footnote">No attachments yet.</p>}
  {editable&&<label>{busy?'Uploading…':'Add files (up to 50 MB each)'}<input type="file" multiple disabled={busy} accept={kind==='post'?'.jpg,.jpeg,.png,.webp,.mp4,.webm':'.jpg,.jpeg,.png,.webp,.mp4,.webm,.pdf,.txt,.docx,.xlsx'} onChange={e=>{upload(e.target.files);e.target.value='';}}/></label>}{error&&<p className="notice error" role="alert">{error}</p>}</section>;
 }
