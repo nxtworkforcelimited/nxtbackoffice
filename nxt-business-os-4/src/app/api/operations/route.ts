@@ -27,7 +27,7 @@ export async function GET(req:NextRequest){
  if(!c?.workspace||c.workspace.role==='client')return NextResponse.json({error:'Staff access required'},{status:403});
  const out:Record<string,unknown>={user_id:c.user.id};
  const tables=['staff_directory','clients','projects','tasks','it_tickets','it_ticket_comments','cold_call_prospects','cold_call_activities'];
- const results=await Promise.all(tables.map(table=>c.db.from(table).select('*').eq('tenant_id',c.workspace!.id)));
+ const results=await Promise.all(tables.map(table=>{const q=c.db.from(table).select('*').eq('tenant_id',c.workspace!.id);return table==='it_tickets'?q.is('archived_at',null):q;}));
  for(let i=0;i<tables.length;i++){if(results[i].error)return NextResponse.json({error:'Install upgrade-team-operations.sql before opening Operations.'},{status:400});out[tables[i]]=results[i].data??[];}
  return NextResponse.json(out,{headers:{'Cache-Control':'private, no-store'}});
 }
@@ -51,7 +51,7 @@ export async function POST(req:NextRequest){
  if(v.logo_path&&!v.logo_path.startsWith(tenant_id+'/'+v.id+'/'))return NextResponse.json({error:'Invalid logo path'},{status:400});
  r=await c.db.from('clients').update({logo_path:v.logo_path}).eq('tenant_id',tenant_id).eq('id',v.id).select().single();
  }else if(v.action==='delete'){
- if(!(v.module==='tasks'?can('task_admin'):c.workspace.role==='owner'))return NextResponse.json({error:'Owner access required'},{status:403});
+ if(!c.workspace.can_delete)return NextResponse.json({error:'Only nyasha@nxt-workforce.com can remove records'},{status:403});
  r=await c.db.from(v.module).delete().eq('tenant_id',tenant_id).eq('id',v.id).not('archived_at','is',null).select().single();
  }else if(v.action==='archive'){
  if(!can(v.module==='clients'?'crm':v.module==='tasks'?'task_admin':'delivery'))return NextResponse.json({error:'Manager access required'},{status:403});
