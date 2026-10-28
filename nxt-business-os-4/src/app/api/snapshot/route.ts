@@ -20,7 +20,7 @@ export async function GET(req:NextRequest){
  for(const [index,result] of [items,comments,payments,rules,memberRows,grants].entries())if(result.error){console.warn('Business snapshot read failed',{query:index,code:result.error.code});throw new Error('Workspace data temporarily unavailable.');}
  const directory=await ctx.db.from('staff_directory').select('user_id,name,email').eq('tenant_id',ctx.workspace.id);
  const invoiceReviewer=await ctx.db.from('accounting_reviewers').select('user_id').eq('tenant_id',ctx.workspace.id).eq('user_id',ctx.user.id).maybeSingle();
- const business:BusinessData={canRemoveInvoices:!invoiceReviewer.error&&!!invoiceReviewer.data,items:items.data??[],comments:comments.data??[],payments:payments.data??[],rules:rules.data?.rules??{},members:(memberRows.data??[]).map(m=>({...m,...(directory.data??[]).find(d=>d.user_id===m.user_id),permissions:(grants.data??[]).filter(g=>g.user_id===m.user_id).map(g=>g.capability)}))};
+ const business:BusinessData={canRemoveInvoices:ctx.workspace.can_delete===true,items:items.data??[],comments:comments.data??[],payments:payments.data??[],rules:rules.data?.rules??{},members:(memberRows.data??[]).map(m=>({...m,...(directory.data??[]).find(d=>d.user_id===m.user_id),permissions:(grants.data??[]).filter(g=>g.user_id===m.user_id).map(g=>g.capability)}))};
  return reply({data:Object.fromEntries(pairs),business,workspace:ctx.workspace});
  }catch{return reply({error:'Updates are temporarily unavailable. Your account has not been signed out. Please retry when your connection returns.',code:'TEMPORARILY_UNAVAILABLE'},503);}
 }
