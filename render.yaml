@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: nxt-workforce-coming-soon
+    runtime: static
+    buildCommand: echo "No build required"
+    staticPublishPath: ./render-site
