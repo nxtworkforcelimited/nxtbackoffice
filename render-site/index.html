@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NXT Workforce | Website Upgrade in Progress</title>
+<meta name="description" content="NXT Workforce is open and operating. Our upgraded digital platform is coming soon.">
+<meta name="theme-color" content="#ffffff">
+<style>
+:root{--ink:#111115;--muted:#68666f;--purple:#5c42c7;--purple2:#8e79ee;--lav:#f6f3ff;--line:#e9e5f2;--white:#fff}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;background:#fff;color:var(--ink)}body{overflow-x:hidden}
+.page{min-height:100vh;position:relative;display:flex;flex-direction:column}
+.bg-grid{position:fixed;inset:0;pointer-events:none;opacity:.55;background-image:linear-gradient(rgba(92,66,199,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(92,66,199,.05) 1px,transparent 1px);background-size:48px 48px;mask-image:linear-gradient(to bottom,#000 0%,rgba(0,0,0,.45) 65%,transparent 100%)}
+.orb{position:fixed;border-radius:50%;pointer-events:none}.orb.one{width:520px;height:520px;right:-220px;top:30px;background:radial-gradient(circle at 35% 35%,rgba(142,121,238,.28),rgba(92,66,199,.08) 55%,transparent 72%)}.orb.two{width:380px;height:380px;left:-190px;bottom:-80px;background:radial-gradient(circle,rgba(92,66,199,.12),transparent 68%)}
+header{height:88px;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(22px,5vw,72px);border-bottom:1px solid var(--line);position:relative;z-index:3;background:rgba(255,255,255,.84);backdrop-filter:blur(16px)}
+.logo{display:flex;align-items:baseline;gap:8px;font-weight:800;letter-spacing:-.04em;font-size:28px;color:#111115}.logo small{font-size:11px;letter-spacing:.18em;color:#5c42c7;font-weight:700}.status{display:flex;align-items:center;gap:9px;color:#49454f;font-size:13px;font-weight:700}.dot{width:9px;height:9px;border-radius:50%;background:#29a765;box-shadow:0 0 0 6px rgba(41,167,101,.10)}
+main{flex:1;display:grid;grid-template-columns:1.08fr .92fr;align-items:stretch;position:relative;z-index:2}.copy{padding:clamp(58px,8vw,120px) clamp(24px,7vw,110px);display:flex;flex-direction:column;justify-content:center;min-height:650px}
+.kicker{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--purple);font-weight:700}h1{font-size:clamp(48px,7vw,92px);line-height:.98;letter-spacing:-.055em;font-weight:600;margin:18px 0 26px;max-width:850px}.lead{font-size:19px;line-height:1.7;color:var(--muted);max-width:720px;margin:0}
+.note{margin-top:26px;padding:16px 18px;border-left:3px solid var(--purple);background:var(--lav);border-radius:0 10px 10px 0;color:#4b4554;max-width:700px;line-height:1.6;font-size:14px}.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:32px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 20px;border-radius:10px;text-decoration:none;font-size:14px;font-weight:700;transition:.2s ease}.btn.primary{background:var(--purple);color:white;box-shadow:0 12px 28px rgba(92,66,199,.19)}.btn.secondary{border:1px solid #d6d0df;color:var(--ink);background:#fff}.btn:hover{transform:translateY(-1px)}
+.visual{position:relative;min-height:650px;background:linear-gradient(145deg,#17121e 0%,#2b2051 43%,#5c42c7 100%);overflow:hidden;display:flex;align-items:flex-end;padding:48px}.visual:before,.visual:after{content:"";position:absolute;border:1px solid rgba(255,255,255,.15);border-radius:50%}.visual:before{width:570px;height:570px;right:-180px;top:-60px}.visual:after{width:340px;height:340px;right:70px;top:150px}
+.panel{position:relative;z-index:2;color:#fff;max-width:510px}.panel .kicker{color:#d9d0ff}.panel h2{font-size:36px;line-height:1.12;letter-spacing:-.035em;font-weight:500;margin:12px 0 18px}.panel p{color:#ded9e8;line-height:1.7;margin:0}.services{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:26px}.services span{padding:11px 12px;border:1px solid rgba(255,255,255,.18);border-radius:9px;color:#f1edf9;font-size:12px;background:rgba(255,255,255,.045)}
+footer{position:relative;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:22px clamp(22px,5vw,72px);border-top:1px solid var(--line);font-size:12px;color:#73707a;background:#fff}footer .right{display:flex;gap:18px;flex-wrap:wrap}footer a{color:#4e4658;text-decoration:none}
+@media(max-width:900px){main{grid-template-columns:1fr}.copy{min-height:auto;padding-top:72px;padding-bottom:72px}.visual{min-height:480px}h1{font-size:58px}}
+@media(max-width:600px){header{height:74px;padding:0 18px}.logo{width:145px}.status span:last-child{display:none}.copy{padding:58px 20px}h1{font-size:44px}.lead{font-size:17px}.visual{padding:28px 20px;min-height:430px}.panel h2{font-size:30px}footer{display:block;padding:20px}footer .right{margin-top:10px;gap:10px;flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="page"><div class="bg-grid"></div><div class="orb one"></div><div class="orb two"></div>
+<header><div class="logo" aria-label="NXT Workforce">NXT <small>WORKFORCE</small></div><div class="status"><span class="dot"></span><span>We are open & operating</span></div></header>
+<main>
+<section class="copy"><span class="kicker">NXT Workforce · Digital Upgrade</span><h1>Something better is coming.</h1><p class="lead">Our website is being rebuilt into a faster, smarter NXT digital platform. While we make the move, our team is fully operational and available to support your business.</p><div class="note"><strong>Website upgrade in progress.</strong><br>Our services, projects and client support continue as normal. The full NXT Workforce website and Business OS experience will be back online soon.</div><div class="actions"><a class="btn primary" href="https://wa.me/263790050483?text=Hello%20NXT%20Workforce%2C%20I%27d%20like%20to%20make%20an%20enquiry." target="_blank" rel="noopener">WhatsApp NXT</a><a class="btn secondary" href="tel:+26386777186342">Call 0867 771 863 42</a></div></section>
+<section class="visual"><div class="panel"><span class="kicker">Outsourced Growth, Delivered.</span><h2>Your growth partner, built for Zimbabwe and beyond.</h2><p>Digital presence, customer support, sales, systems and outsourced operations brought together under one partner.</p><div class="services"><span>Websites & Apps</span><span>CRM & Business Systems</span><span>Marketing & Content</span><span>Contact Centre</span><span>Virtual Assistants</span><span>Outbound Sales</span></div></div></section>
+</main>
+<footer><div>© 2026 NXT Workforce Limited. Zimbabwe.</div><div class="right"><a href="https://www.linkedin.com/company/nxtworkforce-limited" target="_blank" rel="noopener">LinkedIn</a><span>WhatsApp +263 79 005 0483</span><span>Mon–Thu 08:30–16:30 · Fri 08:30–14:30</span></div></footer></div>
+</body></html>
