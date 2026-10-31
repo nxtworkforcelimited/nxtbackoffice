@@ -4,3 +4,6 @@ services:
     runtime: static
     buildCommand: echo "No build required"
     staticPublishPath: ./render-site
+    domains:
+      - nxt-workforce.com
+      - www.nxt-workforce.com
