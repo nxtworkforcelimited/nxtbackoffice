@@ -1,0 +1,422 @@
+/* NXT Business OS — clean macOS-inspired interface layer
+   Preserves existing navigation, hero image, tabs, modules and behaviours. */
+
+:root{
+  --nxt-purple:#6846d6;
+  --nxt-purple-2:#8067e8;
+  --nxt-purple-soft:#f3efff;
+  --nxt-bg:#f7f7fa;
+  --nxt-card:#ffffff;
+  --nxt-ink:#23212a;
+  --nxt-muted:#77717f;
+  --nxt-line:#ece8f1;
+  --nxt-shadow:0 10px 30px rgba(41,31,62,.06);
+}
+
+html{background:var(--nxt-bg)}
+body{
+  background:var(--nxt-bg)!important;
+  color:var(--nxt-ink)!important;
+  font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Segoe UI",sans-serif!important;
+  letter-spacing:-.01em;
+}
+
+.studio-shell,.studio-app{background:var(--nxt-bg)!important}
+.studio-main{
+  background:var(--nxt-bg)!important;
+  padding:28px 34px 42px!important;
+  min-height:100vh;
+}
+.reference-side{
+  width:224px!important;
+  background:rgba(255,255,255,.96)!important;
+  border-right:1px solid var(--nxt-line)!important;
+  box-shadow:8px 0 28px rgba(46,36,69,.025)!important;
+  backdrop-filter:blur(20px);
+}
+.reference-logo{
+  margin:8px 12px 14px!important;
+  border-radius:16px!important;
+  background:#fff!important;
+  border:1px solid transparent!important;
+}
+.reference-logo img{width:132px!important}
+.reference-side nav{
+  display:grid!important;
+  gap:4px!important;
+  padding:0 10px!important;
+}
+.reference-side nav button{
+  min-height:42px!important;
+  padding:10px 12px!important;
+  border-radius:11px!important;
+  color:#6f6878!important;
+  font-size:13px!important;
+  font-weight:550!important;
+  transition:.15s ease!important;
+}
+.reference-side nav button:hover{
+  background:#f7f4fc!important;
+  color:var(--nxt-purple)!important;
+  transform:none!important;
+}
+.reference-side nav button.active{
+  background:linear-gradient(90deg,#f0eaff,#f7f4ff)!important;
+  color:var(--nxt-purple)!important;
+  box-shadow:inset 3px 0 0 var(--nxt-purple)!important;
+  font-weight:700!important;
+}
+.reference-side-help{
+  margin:14px!important;
+  padding:15px!important;
+  border-radius:14px!important;
+  background:#faf8ff!important;
+  border:1px solid #eee8fb!important;
+  box-shadow:none!important;
+}
+.side-end{
+  margin:8px 12px 4px!important;
+  padding:14px 10px!important;
+  border-top:1px solid var(--nxt-line)!important;
+}
+
+.reference-page-heading,.studio-heading{
+  align-items:flex-end!important;
+  margin:0 0 22px!important;
+}
+.reference-page-heading h1,.studio-heading h1{
+  font-size:30px!important;
+  line-height:1.05!important;
+  font-weight:760!important;
+  letter-spacing:-.04em!important;
+  color:#201d27!important;
+}
+.reference-page-heading p:not(.eyebrow),.studio-heading p:not(.eyebrow){
+  color:#817a88!important;
+  font-size:13px!important;
+}
+.eyebrow{
+  color:#8a7ca0!important;
+  font-size:10px!important;
+  letter-spacing:.12em!important;
+  font-weight:700!important;
+}
+
+.reference-hero{
+  min-height:264px!important;
+  margin-bottom:22px!important;
+  border-radius:24px!important;
+  overflow:hidden!important;
+  box-shadow:0 18px 45px rgba(42,31,67,.12)!important;
+}
+.reference-hero-copy{
+  padding:34px 38px!important;
+  max-width:680px!important;
+}
+.reference-hero-copy>span{
+  font-size:11px!important;
+  letter-spacing:.06em!important;
+  text-transform:none!important;
+}
+.reference-hero h1{
+  font-size:40px!important;
+  line-height:1.02!important;
+  letter-spacing:-.045em!important;
+  margin:10px 0 8px!important;
+}
+.reference-hero p{
+  font-size:14px!important;
+  line-height:1.6!important;
+  max-width:520px!important;
+}
+.reference-hero-copy label{
+  height:48px!important;
+  border-radius:14px!important;
+  margin-top:20px!important;
+  padding:0 15px!important;
+  box-shadow:0 10px 30px rgba(31,22,48,.12)!important;
+}
+.reference-hero-copy label input{
+  font-size:13px!important;
+}
+.reference-hero-tag{
+  border-radius:16px!important;
+  padding:14px 16px!important;
+}
+
+.reference-body{
+  gap:20px!important;
+}
+.reference-app-panel,.panel,.table-wrap,.calendar-panel,
+.client-support-preview-head,.directory-card,.metric-card,
+.social-provider,.social-schedule-card,.social-queue,.calling-list,
+.calling-detail,.daily-call-report,.ticket-create-panel{
+  background:#fff!important;
+  border:1px solid var(--nxt-line)!important;
+  box-shadow:var(--nxt-shadow)!important;
+}
+.reference-app-panel,.panel,.calendar-panel,.directory-card,.metric-card{
+  border-radius:18px!important;
+}
+.reference-panel-head,.panel-head{
+  padding:20px 22px!important;
+}
+.reference-panel-head h2,.panel-head h2{
+  font-size:16px!important;
+  font-weight:760!important;
+  letter-spacing:-.02em!important;
+}
+.reference-panel-head span,.panel-head p{
+  color:#8a8390!important;
+}
+
+.reference-app-grid{
+  gap:14px!important;
+  padding:0 20px 20px!important;
+}
+.reference-app-tile{
+  min-height:132px!important;
+  border-radius:16px!important;
+  background:#fff!important;
+  border:1px solid #eeeaf2!important;
+  box-shadow:none!important;
+  padding:17px!important;
+  transition:transform .14s ease,border-color .14s ease,box-shadow .14s ease!important;
+}
+.reference-app-tile:hover{
+  transform:translateY(-2px)!important;
+  border-color:#d8ccf3!important;
+  box-shadow:0 10px 25px rgba(69,48,121,.07)!important;
+}
+.launchpad-icon{
+  width:44px!important;
+  height:44px!important;
+  border-radius:13px!important;
+  display:grid!important;
+  place-items:center!important;
+  background:linear-gradient(145deg,#f1edff,#e9e2ff)!important;
+  color:var(--nxt-purple)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9)!important;
+}
+.reference-app-tile strong{
+  color:#2c2832!important;
+  font-size:13px!important;
+  font-weight:720!important;
+}
+.reference-app-tile small{
+  color:#8a838f!important;
+  line-height:1.45!important;
+}
+.launchpad-toggle,.text-button{
+  color:var(--nxt-purple)!important;
+  font-weight:650!important;
+}
+
+.reference-metrics,.metric-grid,.client-support-summary{
+  gap:12px!important;
+}
+.reference-metrics>*,.metric-card,.client-support-summary>div{
+  border-radius:15px!important;
+  background:#fff!important;
+  border:1px solid var(--nxt-line)!important;
+  box-shadow:none!important;
+}
+.reference-metrics strong,.metric-card strong{
+  color:#26222c!important;
+  font-weight:760!important;
+}
+
+.primary{
+  background:linear-gradient(180deg,#7454df,#6545d1)!important;
+  border:1px solid #6242cf!important;
+  color:#fff!important;
+  border-radius:10px!important;
+  min-height:38px!important;
+  padding:9px 14px!important;
+  box-shadow:0 6px 16px rgba(104,70,214,.18)!important;
+  font-weight:700!important;
+}
+.primary:hover{filter:brightness(1.03)}
+.secondary,.filter-control,.search,.client-filter,.view-switch{
+  background:#fff!important;
+  border:1px solid #e3ddeb!important;
+  border-radius:10px!important;
+  box-shadow:none!important;
+}
+.search{height:40px!important}
+.search input{font-size:12.5px!important}
+
+.module-toolbar{
+  margin-bottom:18px!important;
+  gap:8px!important;
+}
+.view-switch{padding:3px!important}
+.view-switch button{
+  border-radius:7px!important;
+  min-height:30px!important;
+}
+.view-switch button.active{
+  background:#f0ebff!important;
+  color:var(--nxt-purple)!important;
+}
+
+.table-wrap{
+  border-radius:16px!important;
+  overflow:auto!important;
+}
+table{background:#fff!important}
+th{
+  background:#fbfafc!important;
+  color:#77707e!important;
+  text-transform:none!important;
+  letter-spacing:0!important;
+  font-weight:700!important;
+  font-size:11.5px!important;
+  padding:14px 16px!important;
+}
+td{
+  color:#5f5965!important;
+  padding:15px 16px!important;
+  border-top:1px solid #f0edf3!important;
+}
+tbody tr:hover{background:#fcfbfe!important}
+.table-title{
+  color:#302b36!important;
+  font-weight:700!important;
+}
+
+.kanban{
+  gap:14px!important;
+}
+.kanban-column{
+  background:#faf9fc!important;
+  border:1px solid var(--nxt-line)!important;
+  border-radius:16px!important;
+  padding:12px!important;
+}
+.work-card,.kanban-card{
+  border-radius:13px!important;
+  background:#fff!important;
+  border:1px solid #e9e4ee!important;
+  box-shadow:none!important;
+}
+.work-card:hover,.kanban-card:hover{
+  border-color:#d7cbef!important;
+  box-shadow:0 8px 18px rgba(55,41,83,.05)!important;
+}
+.record-title{color:#302b35!important;font-weight:700!important}
+.card-excerpt{color:#77707e!important}
+.status,.badge{
+  border-radius:999px!important;
+  padding:5px 9px!important;
+  font-weight:650!important;
+}
+
+.ticket-board.ticket-kanban-board{
+  gap:14px!important;
+}
+.ticket-stage{
+  border-radius:16px!important;
+  background:#faf9fc!important;
+  border:1px solid var(--nxt-line)!important;
+}
+.ticket-card{
+  border-radius:13px!important;
+  box-shadow:none!important;
+}
+.ticket-card:hover{
+  box-shadow:0 8px 18px rgba(55,41,83,.05)!important;
+}
+
+.calendar-panel{border-radius:18px!important}
+.calendar-heading{padding:18px 20px!important}
+.calendar-day{background:#fff!important}
+.calendar-day.outside{background:#fbfafc!important}
+.calendar-post{border-radius:8px!important}
+
+input,select,textarea{
+  background:#fff!important;
+  border-color:#ded8e7!important;
+  border-radius:10px!important;
+}
+input:focus,select:focus,textarea:focus{
+  outline:none!important;
+  border-color:#b8a7e8!important;
+  box-shadow:0 0 0 3px rgba(104,70,214,.08)!important;
+}
+
+dialog{
+  border-radius:20px!important;
+  border:1px solid var(--nxt-line)!important;
+  box-shadow:0 30px 90px rgba(27,20,39,.22)!important;
+}
+
+.team-chat-fab{
+  box-shadow:0 10px 28px rgba(73,45,151,.22)!important;
+}
+.team-chat-panel{
+  border-radius:20px!important;
+  border:1px solid var(--nxt-line)!important;
+}
+
+footer{
+  color:#aaa3af!important;
+  border-top:1px solid var(--nxt-line)!important;
+}
+
+/* Keep existing tabs, but make them visually lighter and more consistent. */
+[role="tablist"],.tabs,.module-tabs,.subtabs{
+  gap:6px!important;
+}
+[role="tab"],.tabs button,.module-tabs button,.subtabs button{
+  border-radius:9px!important;
+  font-weight:650!important;
+}
+[role="tab"][aria-selected="true"],.tabs button.active,.module-tabs button.active,.subtabs button.active{
+  color:var(--nxt-purple)!important;
+  background:#f1edff!important;
+}
+
+/* Dark mode remains supported without changing the module structure. */
+html[data-theme="dark"] body,
+html[data-theme="dark"] .studio-shell,
+html[data-theme="dark"] .studio-app,
+html[data-theme="dark"] .studio-main{
+  background:#15131a!important;
+  color:#f4f1f7!important;
+}
+html[data-theme="dark"] .reference-side,
+html[data-theme="dark"] .panel,
+html[data-theme="dark"] .reference-app-panel,
+html[data-theme="dark"] .reference-app-tile,
+html[data-theme="dark"] .table-wrap,
+html[data-theme="dark"] table,
+html[data-theme="dark"] .metric-card,
+html[data-theme="dark"] .kanban-card,
+html[data-theme="dark"] .work-card,
+html[data-theme="dark"] .ticket-card{
+  background:#1d1a22!important;
+  border-color:#302b38!important;
+}
+html[data-theme="dark"] .reference-side nav button{color:#bdb6c6!important}
+html[data-theme="dark"] .reference-side nav button.active{
+  background:#292337!important;
+  color:#c7b6ff!important;
+}
+html[data-theme="dark"] th{background:#211d26!important;color:#aaa2b2!important}
+html[data-theme="dark"] td{color:#cec7d4!important;border-color:#2d2833!important}
+
+@media(max-width:1100px){
+  .studio-main{padding:22px 20px 36px!important}
+  .reference-body{grid-template-columns:1fr!important}
+  .reference-app-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+}
+@media(max-width:760px){
+  .studio-main{padding:16px 14px 30px!important}
+  .reference-hero{min-height:230px!important;border-radius:18px!important}
+  .reference-hero-copy{padding:26px 22px!important}
+  .reference-hero h1{font-size:32px!important}
+  .reference-app-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;padding:0 14px 14px!important}
+  .reference-app-tile{min-height:122px!important}
+  .reference-page-heading,.studio-heading{align-items:flex-start!important}
+}
