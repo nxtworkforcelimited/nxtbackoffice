@@ -3,6 +3,8 @@ import {join} from 'node:path';
 import {createClient} from '@supabase/supabase-js';
 import {siteFiles,v6UrlByFile,slugForUrl} from '@/lib/v6-page-map';
 
+import {businessOsUrl,footerSignature} from '@/lib/public-footer';
+
 const assetBase='/v6/';
 const htmlEscape=(value:string)=>value.replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]||ch));
 
@@ -85,6 +87,9 @@ export async function renderV6Page(path:string){
   html=rewriteLinks(html,file);
   html=html.replace('<div class="navlinks">','<button class="site-menu" type="button" aria-controls="site-links" aria-expanded="false">Menu</button><div class="navlinks" id="site-links">');
   html=html.replace('<a href="/contact">Contact</a>','<a href="/#clients">Our clients</a><a href="/contact">Contact Us</a><a class="nav-extra" href="/free-audits">Free audit</a><a class="nav-extra" href="/login">Client login</a>');
+  html=html.replace('<div class="footer-cta-copy">',footerSignature+'<div class="footer-cta-copy">');
+  html=html.replace('</head>','<link rel="stylesheet" href="/v6/footer-trace.css"><script defer src="/v6/footer-trace.js"></script></head>');
+  html=html.replaceAll('href="/login"', 'href="'+businessOsUrl+'"');
   html=attachFormBridge(html);
   const url=process.env.NEXT_PUBLIC_SUPABASE_URL,key=process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   if(url&&key){

@@ -525,3 +525,17 @@ body:not(.has-reveal) :is(.reveal-left,.reveal-right,.reveal-up),
 @media(prefers-reduced-motion:no-preference){.nxt-entered{animation:nxt-section-in .44s ease-out both}}
 
 @keyframes nxt-dialog-in{from{transform:translateY(6px)}to{transform:translateY(0)}}
+
+/* Separate the product launch banner from the general newsletter invitation. */
+.os-band{background:#30265c;color:#faf8ff}.os-copy h2{color:white}.os-copy>.kicker{color:#dcccff}.os-copy>p{color:#ebe5f9}
+.os-product{background:#f3effa}.os-copy .feature-actions>.btn{background:#fff;border-color:#fff;color:#362b64}.os-copy .feature-actions>.btn:not(.primary){background:transparent;color:white;border-color:#b6a9d4}
+.crm-interest{border-top:1px solid #ffffff36;margin-top:24px;padding-top:20px}
+.crm-interest>label:first-child{display:block;font-size:20px;font-weight:650;color:white}.crm-interest>p{margin:5px 0 12px;color:#e8e1f5;font-size:14px}
+.crm-interest-row{display:flex;gap:8px}.crm-interest-row input{min-width:0;flex:1;background:white;color:#292039;border:1px solid #d6cfe2;border-radius:8px;padding:12px;font:inherit}
+.crm-interest-row button{border-color:#eee6ff;background:#eee6ff;color:#332654}
+.crm-interest-consent{display:flex;align-items:flex-start;gap:8px;color:#f8f4ff;font-size:12px;margin-top:10px}.crm-interest-consent input{flex:none;margin-top:2px;accent-color:#cbb0ff}
+.crm-interest .crm-interest-status:empty{display:none}.crm-interest .crm-interest-status:not(:empty){font-weight:600;color:#fff;margin-top:12px}
+.news-dialog .news-mark img{width:128px;height:auto}.footer-join-news{background:transparent;color:white;font:inherit;font-size:13px;font-weight:600;border:1px solid #a496bb;border-radius:22px;padding:8px 14px;cursor:pointer;margin-top:14px}
+@media(max-width:450px){.crm-interest-row{flex-direction:column}.crm-interest-row button{align-self:flex-start}.os-product{order:2}}
+@media(min-width:721px){.os-band .os-layout{grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr)}}
+.os-band .os-copy h2{font-size:clamp(34px,3.45vw,52px)}.os-product img{display:block;margin-inline:auto}

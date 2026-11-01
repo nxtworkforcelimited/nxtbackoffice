@@ -25,12 +25,44 @@
     }
   }
 
-  const dialog = document.querySelector('#os-newsletter');
+  const rpcBase = 'https://cbcgpxtlxqmuzhxkutso.supabase.co/rest/v1/rpc/';
+  const publicKey = 'sb_publishable_RYpkY8vkkmcDPmxv2w6WVQ_c_vww3CD';
+
+  function wireSignup(form, rpc, status, saved) {
+    const submit = form.querySelector('[type="submit"]');
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      if (submit.disabled || form.elements.website.value) return;
+      submit.disabled = true;
+      status.textContent = 'Saving your signup…';
+      try {
+        const response = await fetch(rpcBase + rpc, {
+          method:'POST', headers:{'Content-Type':'application/json',apikey:publicKey},
+          body:JSON.stringify({p_email:form.elements.email.value.trim(),p_consent:form.elements.consent.checked}),
+          signal:AbortSignal.timeout(20000)
+        });
+        if (!response.ok) throw new Error('Could not save');
+        form.reset();
+        saved();
+      } catch {
+        status.textContent = 'We could not confirm your signup. Please try again.';
+      } finally { submit.disabled = false; }
+    });
+  }
+
+  const crm = document.querySelector('#crm-interest-form');
+  if (crm) {
+    const status = crm.querySelector('[role="status"]');
+    wireSignup(crm, 'nxt_newsletter_subscribe', status, () => {
+      status.textContent = 'Thank you. You’re on the NXT Business OS product updates list.';
+    });
+  }
+
+  const dialog = document.querySelector('#nxt-newsletter');
   if (!dialog || typeof dialog.showModal !== 'function') return;
   const form = dialog.querySelector('form');
   const status = dialog.querySelector('.news-status');
-  const signup = form.querySelector('button[type="submit"]');
-  const key = 'nxt.business-os.newsletter.v1';
+  const key = 'nxt.workforce.newsletter.v1';
   const readPreference = () => {
     try { return JSON.parse(localStorage.getItem(key) || '{}') || {}; }
     catch { return {}; }
@@ -41,7 +73,7 @@
     const preference = readPreference();
     if (!manual && (preference.joined || preference.laterUntil > Date.now())) return;
     form.hidden = Boolean(preference.joined);
-    status.textContent = preference.joined ? 'You’ve joined the newsletter on this device.' : '';
+    status.textContent = preference.joined ? 'You’ve joined the NXT Workforce newsletter on this device.' : '';
     dialog.querySelector('[data-dismiss-news]').textContent = preference.joined ? 'Close' : 'Maybe later';
     dialog.showModal();
   };
@@ -59,27 +91,12 @@
   dialog.addEventListener('close', () => {
     if (!readPreference().joined) remember({laterUntil: Date.now() + 30 * 86400000});
   });
-
-  form.addEventListener('submit', async event => {
-    event.preventDefault();
-    if (signup.disabled || form.elements.website.value) return;
-    signup.disabled = true;
-    status.textContent = 'Saving your signup…';
-    try {
-      const response = await fetch('https://cbcgpxtlxqmuzhxkutso.supabase.co/rest/v1/rpc/nxt_newsletter_subscribe', {
-        method:'POST', headers:{'Content-Type':'application/json',apikey:'sb_publishable_RYpkY8vkkmcDPmxv2w6WVQ_c_vww3CD'},
-        body:JSON.stringify({p_email:form.elements.email.value.trim(),p_consent:form.elements.consent.checked}),
-        signal:AbortSignal.timeout(20000)
-      });
-      if (!response.ok) throw new Error('Could not save');
-      remember({joined:true});
-      form.hidden = true;
-      status.textContent = 'You’re on the list. Thank you for following the NXT Business OS build.';
-      dialog.querySelector('[data-dismiss-news]').textContent = 'Close';
-      dialog.querySelector('[data-dismiss-news]').focus();
-    } catch {
-      status.textContent = 'We could not confirm your signup. Please try again.';
-    } finally { signup.disabled = false; }
+  wireSignup(form, 'nxt_company_newsletter_subscribe', status, () => {
+    remember({joined:true});
+    form.hidden = true;
+    status.textContent = 'You’re on the list. Thank you for joining the NXT Workforce newsletter.';
+    dialog.querySelector('[data-dismiss-news]').textContent = 'Close';
+    if (dialog.open) dialog.querySelector('[data-dismiss-news]').focus();
   });
   if (!location.hash) window.setTimeout(() => open(false), 700);
 })();
