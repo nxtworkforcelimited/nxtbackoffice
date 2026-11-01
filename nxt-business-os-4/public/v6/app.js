@@ -76,6 +76,9 @@
 
   const prefix='/';
   const items=[
+    ['AI integration and automation','WhatsApp bots, CRM handoff and workflow automation','services/ai-integration'],
+    ['Custom back-office development','Staff workspaces, portals, invoices and approvals','services/back-office-systems.html'],
+    ['NXT Business OS','A CRM built for Africa','index.html#business-os'],
     ['Domain registration','Register or set up your domain','domains'],
     ['Managed Data Storage & Protection','Monthly storage, record handling and POPIA support','services/data-protection'],
     ['SME digital packages','Website, local search and lead follow-up','services/sme-digital-packages'],
@@ -173,4 +176,15 @@ if (menuToggle && navLinks) {
       menuToggle.focus();
     }
   });
+}
+
+if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  const entrances = new IntersectionObserver(entries => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue;
+      entry.target.classList.add('nxt-entered');
+      entrances.unobserve(entry.target);
+    }
+  }, {threshold:0.15});
+  document.querySelectorAll('.client-heading,.os-product,.offer-group-title,.data-scope h2').forEach(el => entrances.observe(el));
 }

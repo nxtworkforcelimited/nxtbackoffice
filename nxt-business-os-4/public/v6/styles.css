@@ -486,3 +486,42 @@ main{overflow-x:clip}
 body:not(.has-reveal) :is(.reveal-left,.reveal-right,.reveal-up),
 .hero :is(.reveal-left,.reveal-right,.reveal-up),
 .service-page-hero :is(.reveal-left,.reveal-right,.reveal-up){opacity:1;transform:none}
+
+/* Homepage motion and product features */
+.feature-actions{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:24px}
+.bot-band,.os-band,.logo-shell,#whatsapp{scroll-margin-top:106px}
+.bot-band{background:#252047;color:#fff;padding:clamp(36px,5vw,70px) 0}
+.bot-layout,.os-layout{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,.88fr);gap:clamp(28px,6vw,90px);align-items:center}
+.bot-copy{max-width:590px}.bot-copy h2,.os-copy h2,.news-dialog h2{font-size:clamp(34px,4vw,58px);line-height:1.04;letter-spacing:-.045em;margin:14px 0 16px}
+.bot-copy h2{color:white}.bot-copy p,.os-copy p{line-height:1.65;max-width:58ch}.bot-copy p{color:#e5e1f2}
+.feature-kicker{display:inline-flex;gap:9px;align-items:center;letter-spacing:.11em;text-transform:uppercase;font-size:11px;font-weight:700;color:#eeeafa}
+.feature-kicker i{width:9px;height:9px;background:#91e0b4;border-radius:50%}
+.bot-primary,.bot-secondary{font-size:14px;font-weight:650}.bot-primary{border-radius:24px;background:#fff;color:#30265a;padding:12px 20px}.bot-secondary{color:#fff;text-decoration:underline;text-underline-offset:4px}
+.chat-card{background:#f4f2fa;color:#211c37;padding:18px 20px;border-radius:18px;max-width:455px;width:100%;justify-self:end}
+.chat-title,.chat-lines{display:flex}.chat-title{align-items:center;gap:10px;border-bottom:1px solid #d5d1df;padding-bottom:10px}.chat-title b,.chat-title small{display:block}.chat-title small{color:#655e76;font-size:12px}
+.chat-icon{background:#453784;color:white;border-radius:50%;width:36px;height:36px;display:grid;place-items:center;font-weight:750}
+.chat-lines{padding:0;margin:13px 0;list-style:none;gap:8px;flex-direction:column}.chat-lines li{align-self:flex-start;background:white;padding:8px 13px;border-radius:13px 13px 13px 3px;max-width:86%;font-size:13px;line-height:1.4}.chat-lines li.from-visitor{align-self:flex-end;background:#ddf2e4;border-radius:13px 13px 3px 13px}
+.chat-replay,.logo-pause,.news-bottom button{background:none;border:0;padding:5px;color:#47368a;font:inherit;font-size:12px;font-weight:650;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+@keyframes nxt-chat-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.chat-playing .chat-lines li{animation:nxt-chat-in .35s both}.chat-playing .chat-lines li:nth-child(2){animation-delay:.55s}.chat-playing .chat-lines li:nth-child(3){animation-delay:1.1s}.chat-playing .chat-lines li:nth-child(4){animation-delay:1.65s}
+.logo-shell{margin:18px 0 22px}.logo-window{overflow:hidden;background:#fff;border:1px solid #e1ddec;border-radius:14px;direction:ltr}
+.logo-track{display:flex;width:max-content}.logo-set{display:flex;align-items:center;list-style:none;padding:0;margin:0;flex:none}
+.logo-set li{box-sizing:border-box;width:clamp(165px,17vw,222px);height:114px;display:grid;place-items:center;padding:16px 20px}
+.logo-set img{display:block;width:100%;height:80px;object-fit:contain}
+@keyframes nxt-logo-drift{to{transform:translateX(-50%)}}
+@media(prefers-reduced-motion:no-preference){.logo-track{animation:nxt-logo-drift 35s linear infinite}.logo-shell.paused .logo-track,.logo-window:hover .logo-track{animation-play-state:paused}}
+.logo-pause{display:block;margin:4px 0 0 auto}
+.os-band{background:white;padding:clamp(44px,6vw,82px) 0}.os-product{background:#f7f5fc;border:1px solid #ded8ed;border-radius:20px;padding:clamp(20px,4vw,54px);text-align:center}.os-product img{max-width:100%;height:auto;background:white;border-radius:10px;padding:14px}.os-pipeline{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:7px;margin:18px 0 0}.os-pipeline span{background:#fff;color:#423573;border:1px solid #ded8ed;border-radius:25px;padding:5px 11px;font-size:12px;font-weight:600}
+.news-dialog{padding:0;border:1px solid #ddd6eb;border-radius:20px;width:min(490px,calc(100% - 28px));max-height:calc(100dvh - 32px);overflow:auto;margin:auto;color:#211c37;background:white;box-shadow:0 24px 90px #18132745}
+.news-dialog::backdrop{background:#15102899}.news-inside{position:relative;padding:clamp(23px,4vw,34px)}.news-mark{padding:0 35px 15px 0}.news-mark img{width:215px;height:auto;max-width:100%}.news-dialog h2{font-size:clamp(31px,5vw,43px)}
+.news-dialog p{font-size:15px;line-height:1.55}.news-close{position:absolute;top:12px;right:12px;border:1px solid #d9d4e4;width:35px;height:35px;border-radius:50%;background:white;color:#30244b;font-size:22px;line-height:1;cursor:pointer}
+.news-label{display:block;font-weight:650;font-size:13px;margin:16px 0 6px}.news-dialog input[type=email]{width:100%;padding:12px;border:1px solid #b6b0c4;border-radius:8px;font:inherit}.news-consent{display:flex;align-items:flex-start;gap:9px;margin:12px 0;font-size:13px;line-height:1.4}.news-consent input{margin-top:2px;flex:none;width:16px;height:16px;accent-color:#453784}.news-dialog [hidden],.news-trap{display:none!important}
+.news-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:15px}.news-bottom a{text-decoration:underline;font-size:12px}.news-status:not(:empty){color:#362777;font-weight:600;margin-top:14px}.news-dialog :focus-visible,.logo-pause:focus-visible,.chat-replay:focus-visible{outline:3px solid #7766b8;outline-offset:3px}
+@media(prefers-reduced-motion:no-preference){.news-dialog[open]{animation:nxt-dialog-in .22s ease-out}.os-product,.offer-card{transition:transform .22s ease,box-shadow .22s ease}.offer-card:focus-within{transform:translateY(-3px);box-shadow:0 7px 18px #33295012}}
+@media(hover:hover) and (prefers-reduced-motion:no-preference){.offer-card:hover{transform:translateY(-3px);box-shadow:0 7px 18px #33295012}}
+@media(max-width:720px){.bot-layout,.os-layout{grid-template-columns:1fr}.chat-card{justify-self:start;max-width:100%}.os-product{order:2}}
+@media(prefers-reduced-motion:reduce){.logo-track{width:100%;display:block;animation:none}.logo-set{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(140px,100%),1fr))}.logo-set li{width:100%;height:92px}.logo-set img{height:58px}.logo-set[aria-hidden],.logo-pause,.chat-replay{display:none}.chat-playing .chat-lines li{animation:none}}
+@keyframes nxt-section-in{from{opacity:.72;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:no-preference){.nxt-entered{animation:nxt-section-in .44s ease-out both}}
+
+@keyframes nxt-dialog-in{from{transform:translateY(6px)}to{transform:translateY(0)}}
