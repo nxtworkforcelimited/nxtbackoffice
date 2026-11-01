@@ -143,6 +143,10 @@ export const serviceCatalogue = [
     "name": "SME digital packages",
     "path": "/services/sme-digital-packages",
     "description": "Bring the essentials together in an affordable scope agreed up front. Choose a starting mix of website, local search, social content and lead follow-up, then add support as you grow."
+  },
+  {
+    id: 'nxt-business-os', name: 'NXT Business OS waiting list', path: '/#crm-waiting-list',
+    description: 'Our CRM built for Africa is coming 1 January 2027. Join the waiting list to hear about access.'
   }
 ];
 
@@ -171,6 +175,7 @@ const commonTerms: Record<string, RegExp> = {
   '21': /\b(virtual assistants?|admin takes too long|manage my inbox)\b/i,
   '22': /\b(data entry|data captur(?:e|ing)|data processing)\b/i,
   '23': /\b(data (storage|protection)|store records|holding data|potraz)\b/i,
+  'nxt-business-os': /\b(nxt (business os|crm)|business os)\b/i,
   '24': /\b(sme|small business package|digital package)\b/i,
 };
 

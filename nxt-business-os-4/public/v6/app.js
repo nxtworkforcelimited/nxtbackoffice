@@ -84,7 +84,7 @@
     ['NXT blog','Articles from the NXT team','blog'],
     ['AI integration and automation','WhatsApp bots, CRM handoff and workflow automation','services/ai-integration'],
     ['Custom back-office development','Staff workspaces, portals, invoices and approvals','services/back-office-systems.html'],
-    ['NXT Business OS','A CRM built for Africa','index.html#business-os'],
+    ['NXT Business OS waiting list','A CRM built for Africa. Coming 1 January 2027.','index.html#crm-waiting-list'],
     ['Domain registration','Register or set up your domain','domains'],
     ['Managed Data Storage & Protection','Monthly storage, record handling and Zimbabwe data protection requirements under POTRAZ','services/data-protection'],
     ['SME digital packages','Website, local search and lead follow-up','services/sme-digital-packages'],
@@ -141,6 +141,7 @@ const serviceSelect = enquiry?.querySelector('select[data-field="service"]');
 if (serviceSelect) {
   const params = new URLSearchParams(location.search);
   const requested = params.get('service');
+  if (requested === 'NXT Business OS walkthrough') location.replace('/#crm-waiting-list');
   const topic = requested === 'Monthly data protection' ? 'Managed Data Storage & Protection' : requested;
   if ([...serviceSelect.options].some(option => option.value === topic)) serviceSelect.value = topic;
   const message = enquiry.querySelector('[data-field="challenge"]');

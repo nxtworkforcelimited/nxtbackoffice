@@ -12,7 +12,7 @@
     const box=document.createElement('div');box.className=role==='user'?'nxt-chat-user':'nxt-chat-reply';
     const p=document.createElement('p');p.textContent=text;box.append(p);
     for(const service of services){
-      if(typeof service.path!=='string'||!/^\/(services\/[-a-z0-9/]+|domains)$/.test(service.path))continue;
+      if(typeof service.path!=='string'||(service.path!=='/#crm-waiting-list'&&!/^\/(services\/[-a-z0-9/]+|domains)$/.test(service.path)))continue;
       const a=document.createElement('a');a.href=service.path;a.textContent=service.name+' ↗';box.append(a);
     }
     messages.append(box);messages.scrollTop=messages.scrollHeight;

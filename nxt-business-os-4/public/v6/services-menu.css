@@ -25,13 +25,13 @@
 .nxt-nav-left {justify-content:flex-end}
 .nxt-nav-right {justify-content:flex-start}
 .nxt-nav-disclosure {position:relative}
-.nxt-nav-disclosure>summary,.nxt-sectors-link {
+.nxt-nav-disclosure>summary,.nxt-nav-direct {
   display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:9px 6px;min-height:40px;
   border-radius:6px;font:inherit;font-size:15px;font-weight:650;line-height:1.25;white-space:nowrap;
   cursor:pointer;list-style:none;
 }
 .nxt-nav-disclosure>summary::-webkit-details-marker {display:none}
-.nxt-nav-disclosure>summary:hover,.nxt-sectors-link:hover,.nxt-nav-disclosure[open]>summary {background:#f5effb;color:#622d92}
+.nxt-nav-disclosure>summary:hover,.nxt-nav-direct:hover,.nxt-nav-disclosure[open]>summary {background:#f5effb;color:#622d92}
 .nxt-nav-disclosure[open]>summary svg {transform:rotate(180deg)}
 .nxt-nav-panel {
   position:absolute;z-index:2;top:calc(100% + 5px);left:0;display:grid;gap:1px;padding:7px;
@@ -78,23 +78,26 @@
   .nxt-utility {justify-content:center;gap:12px;font-size:11px}
   .nxt-nav-row {gap:10px}
   .nxt-nav-side {gap:7px}
-  .nxt-nav-disclosure>summary,.nxt-sectors-link {padding:8px 4px;font-size:14px}
+  .nxt-nav-disclosure>summary,.nxt-nav-direct {padding:8px 4px;font-size:14px}
   .nxt-nav-brand .header-brand-stack {width:69px}
   .nxt-nav-disclosure {position:static}
   .nxt-nav-panel {top:100%;left:0;right:0;width:auto;max-width:none;max-height:calc(100dvh - 115px)}
   .nxt-purpose>div {grid-template-columns:1fr;gap:10px}
 }
+@media(max-width:660px) {
+  .nxt-nav-row {grid-template-columns:minmax(0,.62fr) minmax(0,1.04fr) minmax(0,1.23fr) minmax(0,1.13fr) minmax(0,1.08fr);gap:0;padding:0 0 3px}
+  .nxt-nav-brand {grid-area:1/1/2/6}
+  .nxt-nav-brand .header-brand-stack {width:67px}
+  .nxt-nav-side {display:contents}
+  .nxt-nav-disclosure,.nxt-nav-direct {grid-row:2;text-align:center;min-width:0}
+  .nxt-nav-panel {text-align:left}
+  .nxt-nav-disclosure>summary {width:100%;box-sizing:border-box}
+  .nxt-nav-disclosure>summary svg {width:9px;flex:none}
+  .nxt-nav-disclosure>summary,.nxt-nav-direct {min-height:42px;font-size:12px;padding:6px 1px;gap:2px;white-space:normal}
+}
 @media(max-width:500px) {
   .nxt-utility {min-height:28px;gap:12px;white-space:nowrap}
   .nxt-utility .nxt-utility-audit {display:none}
-  .nxt-nav-row {grid-template-columns:minmax(0,.8fr) minmax(0,1.08fr) minmax(0,1fr) minmax(0,1.12fr);gap:0;padding:0 0 3px}
-  .nxt-nav-brand {grid-area:1/1/2/5}
-  .nxt-nav-brand .header-brand-stack {width:67px}
-  .nxt-nav-side {display:contents}
-  .nxt-nav-disclosure,.nxt-sectors-link {grid-row:2;text-align:center}
-  .nxt-nav-panel {text-align:left}
-  .nxt-nav-disclosure>summary,.nxt-sectors-link {min-height:41px;font-size:12px;padding:8px 1px;gap:2px}
-  .nxt-sectors-link {white-space:normal}
   .nxt-sector-hero {padding-inline:8px}
   .nxt-sector-map {height:292px}
   .nxt-sector-node {width:clamp(84px,25vw,110px);min-height:40px;padding:6px 3px;font-size:12px}
@@ -105,3 +108,5 @@
 }
 
 #industry-news {scroll-margin-top:130px}
+
+#crm-waiting-list {scroll-margin-top:135px}

@@ -1,8 +1,8 @@
 // All links in these menus are company-owned destinations or links within the website.
 type NavLink = readonly [string, string];
-const homeLinks: NavLink[] = [
-  ['Home', '/'], ['About Us', '/about'], ['Why NXT', '/#why'],
-  ['Who We Serve', '/industries'], ['Our Vision and Mission', '/about#vision-and-mission'],
+const aboutLinks: NavLink[] = [
+  ['Company overview', '/about'], ['Why NXT', '/#why'],
+  ['Our Vision and Mission', '/about#vision-and-mission'],
   ['Our Clients', '/#clients'], ['Free audit', '/free-audits#audit-form'],
 ];
 const serviceLinks: NavLink[] = [
@@ -33,9 +33,9 @@ export function publicNavigation(brand: string, showSearch = false) {
   return `<nav class="nxt-global-nav" aria-label="Main navigation">
     <div class="nxt-utility"><a href="/contact">Contact us</a><a href="https://nxt-business-os.vercel.app/app">Client login</a><a class="nxt-utility-audit" href="/free-audits#audit-form">Free audit</a><a class="nxt-domain-link" href="/domains">Register a domain</a>${search}</div>
     <div class="nxt-nav-row">
-      <div class="nxt-nav-side nxt-nav-left">${dropdown('Home', homeLinks)}${dropdown('Services', serviceLinks, '<a class="nxt-adviser-link" data-open-adviser href="/#services">Help me choose · Ask AI</a>')}</div>
+      <div class="nxt-nav-side nxt-nav-left"><a class="nxt-nav-direct" href="/">Home</a>${dropdown('About Us', aboutLinks)}${dropdown('Services', serviceLinks, '<a class="nxt-adviser-link" data-open-adviser href="/#services">Help me choose · Ask AI</a>')}</div>
       <a class="nxt-nav-brand" href="/" aria-label="NXT Workforce home">${brand}</a>
-      <div class="nxt-nav-side nxt-nav-right">${dropdown('Articles', articleLinks)}<a class="nxt-sectors-link" href="/industries">Who We Serve</a></div>
+      <div class="nxt-nav-side nxt-nav-right">${dropdown('Articles', articleLinks)}<a class="nxt-nav-direct" href="/industries">Who We Serve</a></div>
     </div>
   </nav>`;
 }
@@ -65,7 +65,7 @@ export function withServicesMenu(html: string, brand: string, page: string): str
   html = html.replace(/<header\b[^>]*>[\s\S]*?<\/header>/, () => header);
   html = html.replace(/<link rel="stylesheet" href="\/v6\/services-menu\.css(?:\?[^"]*)?">/g, '')
     .replace(/<script defer src="\/v6\/services-menu\.js(?:\?[^"]*)?"><\/script>/g, '')
-    .replace('</head>', '<link rel="stylesheet" href="/v6/services-menu.css?v=2"><script defer src="/v6/services-menu.js?v=2"></script></head>');
+    .replace('</head>', '<link rel="stylesheet" href="/v6/services-menu.css?v=3"><script defer src="/v6/services-menu.js?v=2"></script></head>');
   const route = page.replace(/^\//, '').replace(/\.html$/, '');
   if (route === 'insights' && !html.includes('id="industry-news"')) {
     html = html.replace('data-news-card="News"', 'id="industry-news" data-news-card="News"');
@@ -76,5 +76,6 @@ export function withServicesMenu(html: string, brand: string, page: string): str
   if (route === 'industries' || route === 'who-we-serve') {
     html = html.replace(/(<main>\s*)<section class="(?:service-page-hero|nxt-sector-hero)"[^>]*>[\s\S]*?<\/section>/, (_section, main) => main + sectorHero(brand));
   }
-  return html;
+  // The supplementary static pages also promote Business OS in their footer.
+  return html.replaceAll('<h2>A CRM built for Africa.</h2><a href="https://nxt-business-os.vercel.app/app">Open NXT Business OS</a>', '<h2>A CRM built for Africa.</h2><p>Coming 1 January 2027</p><a href="/#crm-waiting-list">Join the waiting list</a>');
 }

@@ -40,11 +40,11 @@
     });
   }
 
-  const crm = document.querySelector('#crm-interest-form');
+  const crm = document.querySelector('#crm-waiting-list');
   if (crm) {
     const status = crm.querySelector('[role="status"]');
-    wireSignup(crm, 'nxt_newsletter_subscribe', status, () => {
-      status.textContent = 'Thank you. You’re on the NXT Business OS product updates list.';
+    wireSignup(crm, 'nxt_crm_waitlist_join', status, () => {
+      status.textContent = 'Thank you. You’re on the NXT Business OS waiting list. We’ll email you about access.';
     });
   }
 
