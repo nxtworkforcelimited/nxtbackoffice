@@ -1,0 +1,64 @@
+'use client';
+import {useCallback,useEffect,useRef,useState} from 'react';
+import {Globe,RefreshCw,Search,X,ArrowUpRight,Clock,CheckCircle2} from 'lucide-react';
+import {domainStatusLabels,domainStatuses,domainTransitions,type DomainContact,type DomainEvent,type DomainOrder,type DomainQueue,type DomainStatus} from '@/lib/domain-operations';
+import styles from './domain-registrations.module.css';
+
+const empty:DomainQueue={orders:[],total:0,counts:{pending:0,processing:0,needs_attention:0,registered:0,cancelled:0},unpaid:0};
+const money=(cents:number)=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(cents/100);
+const date=(value:string|null)=>value?new Date(value).toLocaleString('en-GB',{timeZone:'Africa/Harare',day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):'—';
+function Contact({title,contact}:{title:string;contact:DomainContact}){return <section className={styles.contact}><h3>{title}</h3><strong>{contact.name}</strong><p>{contact.organisation}</p><p>{contact.email}<br/>{contact.phone}</p><p>{contact.physical}<br/>{contact.city}, {contact.country}</p><small>Postal address: {contact.postal}</small></section>;}
+async function jsonRequest(url:string,options?:RequestInit){const r=await fetch(url,{cache:'no-store',...options}),b=await r.json();if(!r.ok)throw new Error(b.error||'The request could not be completed.');return b;}
+export default function DomainRegistrations({workspace,demo=false}:{workspace:string;demo?:boolean}){
+ const [queue,setQueue]=useState<DomainQueue>(empty),[loading,setLoading]=useState(true),[error,setError]=useState(''),[refresh,setRefresh]=useState(0);
+ const [query,setQuery]=useState(''),[search,setSearch]=useState(''),[filter,setFilter]=useState(''),[payment,setPayment]=useState(''),[page,setPage]=useState(0);
+ const [selected,setSelected]=useState<string|null>(null),[order,setOrder]=useState<DomainOrder|null>(null),[events,setEvents]=useState<DomainEvent[]>([]),[detailLoading,setDetailLoading]=useState(false),[detailError,setDetailError]=useState('');
+ const [status,setStatus]=useState<DomainStatus>('pending'),[note,setNote]=useState(''),[reference,setReference]=useState(''),[saving,setSaving]=useState(false),[saved,setSaved]=useState('');
+ const dialog=useRef<HTMLDialogElement>(null),detailButton=useRef<HTMLButtonElement|null>(null);
+ const base='/api/domain-registrations?workspace='+encodeURIComponent(workspace);
+ useEffect(()=>{
+  if(demo){setQueue(empty);setLoading(false);return;}
+  const controller=new AbortController();let stopped=false,inFlight=false;
+  setLoading(true);setError('');
+  const load=async()=>{if(inFlight||document.hidden)return;inFlight=true;try{const params=new URLSearchParams({q:search,status:filter,payment,page:String(page)});const b=await jsonRequest(base+'&'+params,{signal:controller.signal});if(!stopped){setQueue(b);setError('');}}catch(e){if(!stopped)setError((e as Error).message);}finally{inFlight=false;if(!stopped)setLoading(false);}};
+  void load();const timer=window.setInterval(load,15000);window.addEventListener('focus',load);document.addEventListener('visibilitychange',load);
+  return()=>{stopped=true;controller.abort();window.clearInterval(timer);window.removeEventListener('focus',load);document.removeEventListener('visibilitychange',load);};
+ },[base,demo,search,filter,payment,page,refresh]);
+ const loadDetail=useCallback(async(id:string,signal?:AbortSignal)=>{
+  const b=await jsonRequest(base+'&id='+encodeURIComponent(id),{signal});setOrder(b.order);setEvents(b.events);setStatus(b.order.fulfilment_status);return b;
+ },[base]);
+ useEffect(()=>{
+  if(!selected){dialog.current?.close();detailButton.current?.focus();return;}
+  dialog.current?.showModal();setOrder(null);setEvents([]);setNote('');setReference('');setDetailError('');setSaved('');setDetailLoading(true);
+  const controller=new AbortController();void loadDetail(selected,controller.signal).catch(e=>{if(!controller.signal.aborted)setDetailError(e.message);}).finally(()=>{if(!controller.signal.aborted)setDetailLoading(false);});
+  return()=>controller.abort();
+ },[selected,loadDetail]);
+ async function save(e:React.FormEvent){
+  e.preventDefault();if(!order||saving)return;setSaving(true);setDetailError('');setSaved('');
+  try{const b=await jsonRequest(base,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:order.id,version:order.fulfilment_version,status,note,reference})});setOrder(b.order);setStatus(b.order.fulfilment_status);setNote('');setReference('');setSaved('Registration updated.');setRefresh(x=>x+1);await loadDetail(order.id);}catch(e){setDetailError((e as Error).message);}finally{setSaving(false);}
+ }
+ const options=order?[order.fulfilment_status,...domainTransitions[order.fulfilment_status]]:[];
+ return <section className={styles.root}>
+  <div className={styles.intro}><div><span className={styles.eyebrow}>DOMAIN OPERATIONS</span><h2>Every domain. One queue.</h2><p>Website orders appear here automatically. Manage registration progress and keep the customer informed.</p></div><button className="secondary" onClick={()=>setRefresh(v=>v+1)} disabled={loading}><RefreshCw size={16}/> Refresh</button></div>
+  {demo&&<p className="notice">Preview only. Live customer orders are available to NXT administrators after signing in.</p>}
+  <div className={styles.stats}>
+   <button onClick={()=>{setFilter('pending');setPayment('');setPage(0);}}><Globe size={20}/><span>New requests</span><strong>{queue.counts.pending??0}</strong></button>
+   <button onClick={()=>{setFilter('processing');setPayment('');setPage(0);}}><Clock size={20}/><span>In progress</span><strong>{queue.counts.processing??0}</strong></button>
+   <button onClick={()=>{setFilter('needs_attention');setPayment('');setPage(0);}}><span className={styles.attentionDot}/><span>Needs attention</span><strong>{queue.counts.needs_attention??0}</strong></button>
+   <button onClick={()=>{setFilter('registered');setPayment('');setPage(0);}}><CheckCircle2 size={20}/><span>Registered</span><strong>{queue.counts.registered??0}</strong></button>
+  </div>
+  <div className={styles.filters}><form onSubmit={e=>{e.preventDefault();setSearch(query.trim());setPage(0);}}><label className={styles.search}><Search size={17}/><input aria-label="Search domain registrations" value={query} maxLength={100} onChange={e=>setQuery(e.target.value)} placeholder="Search domain, customer or company"/></label><button className="secondary" type="submit">Search</button></form><label>Status<select value={filter} onChange={e=>{setFilter(e.target.value);setPage(0);}}><option value="">All registrations</option>{domainStatuses.map(s=><option key={s} value={s}>{domainStatusLabels[s]}</option>)}</select></label><label>Payment<select value={payment} onChange={e=>{setPayment(e.target.value);setPage(0);}}><option value="">All payments</option><option value="unpaid">Unpaid</option><option value="paid">Paid</option><option value="refunded">Refunded</option></select></label></div>
+  {error&&<p role="alert" className="notice error">{error}</p>}
+  {loading?<p role="status" className={styles.empty}>Loading domain registrations…</p>:queue.orders.length===0?<div className={styles.empty}><Globe size={38}/><h3>{search||filter||payment?'No matching registrations':'No domain orders yet'}</h3><p>{search||filter||payment?'Try another search or filter.':'Customer orders will appear here when submitted through website checkout.'}</p></div>:<div className={styles.tableWrap}><table><thead><tr><th>Domain / order</th><th>Customer</th><th>Payment</th><th>Registration</th><th>Received</th><th><span className={styles.srOnly}>View order</span></th></tr></thead><tbody>{queue.orders.map(o=><tr key={o.id}><td><strong>{o.items.map(i=>i.domain).join(', ')}</strong><small>#{o.id.slice(0,8).toUpperCase()} · {money(o.total_cents)}</small></td><td>{o.details.owner.name}<small>{o.details.owner.organisation}</small></td><td><span className={styles.badge+' '+(o.payment_status==='paid'?styles.paid:styles.unpaid)}>{o.payment_status==='paid'?'Paid':o.payment_status==='refunded'?'Refunded':'Unpaid'}</span></td><td><span className={styles.badge+' '+(o.fulfilment_status==='registered'?styles.paid:o.fulfilment_status==='needs_attention'?styles.unpaid:'')}>{domainStatusLabels[o.fulfilment_status]}</span></td><td>{date(o.created_at)}</td><td><button className="secondary" aria-label={'View '+o.items.map(i=>i.domain).join(', ')} onClick={e=>{detailButton.current=e.currentTarget;setSelected(o.id);}}>View <ArrowUpRight size={16}/></button></td></tr>)}</tbody></table></div>}
+  <div className={styles.footer}><span>{queue.total} matching order{queue.total===1?'':'s'} · {queue.unpaid} awaiting payment</span><div><button className="secondary" disabled={page===0||loading} onClick={()=>setPage(p=>p-1)}>Previous</button><span>Page {page+1}</span><button className="secondary" disabled={(page+1)*50>=queue.total||loading} onClick={()=>setPage(p=>p+1)}>Next</button></div></div>
+  <dialog ref={dialog} className={styles.dialog} aria-labelledby="domain-order-title" onCancel={e=>{if(saving)e.preventDefault();else setSelected(null);}}><div className={styles.dialogHead}><div><span className={styles.eyebrow}>DOMAIN REGISTRATION</span><h2 id="domain-order-title">{order?'Order #'+order.id.slice(0,8).toUpperCase():'Order details'}</h2></div><button className="secondary" aria-label="Close registration details" disabled={saving} onClick={()=>setSelected(null)}><X size={20}/></button></div>
+   {detailLoading&&<p role="status">Loading order…</p>}{detailError&&<div role="alert" className="notice error">{detailError} {order&&<button className="secondary" disabled={saving} onClick={()=>{setDetailError('');void loadDetail(order.id).catch(e=>setDetailError(e.message));}}>Reload order</button>}</div>}{saved&&<p role="status" className="notice">{saved}</p>}
+   {order&&<><div className={styles.orderBanner}><div>{order.items.map(i=><h3 key={i.domain}>{i.domain}</h3>)}<p>{domainStatusLabels[order.fulfilment_status]} · Received {date(order.created_at)}</p></div><div><strong>{money(order.total_cents)}</strong><span className={styles.badge+' '+(order.payment_status==='paid'?styles.paid:styles.unpaid)}>{order.payment_status.toUpperCase()}</span></div></div>
+    <div className={styles.contactGrid}><Contact title="Domain owner" contact={order.details.owner}/><Contact title="Billing contact" contact={order.details.billing}/></div>
+    <dl className={styles.facts}><div><dt>Account email</dt><dd>{order.customer_email}</dd></div><div><dt>Core business</dt><dd>{order.details.description}</dd></div><div><dt>Domain use</dt><dd>{order.details.usage}</dd></div><div><dt>Legal notices address</dt><dd>{order.details.notices}</dd></div><div><dt>Payment reference</dt><dd>{order.payment_reference||'Not paid'}</dd></div><div><dt>Registered</dt><dd>{date(order.registered_at)}</dd></div>{order.details.notes&&<div><dt>Customer notes</dt><dd>{order.details.notes}</dd></div>}</dl>
+    <form onSubmit={save} className={styles.update}><h3>Update registration</h3><p>Registration is completed with the registrar. Record its confirmation here once the domain is registered.</p><div className={styles.formGrid}><label>Registration status<select value={status} onChange={e=>setStatus(e.target.value as DomainStatus)} disabled={saving}>{options.map(s=><option key={s} value={s} disabled={['processing','registered'].includes(s)&&s!==order.fulfilment_status&&order.payment_status!=='paid'}>{domainStatusLabels[s]}</option>)}</select></label><label>Registrar confirmation reference<input value={reference} onChange={e=>setReference(e.target.value)} maxLength={120} required={status==='registered'&&status!==order.fulfilment_status} disabled={saving}/></label></div><label>Internal note<textarea value={note} onChange={e=>setNote(e.target.value)} maxLength={2000} rows={3} disabled={saving} required={status!==order.fulfilment_status&&['needs_attention','cancelled'].includes(status)} placeholder="Record the action taken or what needs attention."/></label><button className="primary" disabled={saving||demo}>{saving?'Saving…':'Save update'}</button></form>
+    <section className={styles.history}><h3>Activity history</h3><div><strong>Order received</strong><small>{date(order.created_at)}</small></div>{order.paid_at&&<div><strong>Payment confirmed</strong><small>{date(order.paid_at)}</small></div>}{events.slice().reverse().map(event=><div key={event.id}><strong>{event.from_status===event.to_status?'Note added':domainStatusLabels[event.from_status]+' → '+domainStatusLabels[event.to_status]}</strong><small>{date(event.created_at)} · {event.actor_label}</small>{event.note&&<p>{event.note}</p>}{event.registration_reference&&<p>Registrar reference: {event.registration_reference}</p>}</div>)}</section>
+   </>}
+  </dialog>
+ </section>;
+}
