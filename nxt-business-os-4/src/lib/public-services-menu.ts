@@ -14,7 +14,7 @@ const serviceLinks: NavLink[] = [
   ['WhatsApp &amp; messaging', '/services/whatsapp-business'], ['Domain registration', '/domains'],
   ['Browse all services', '/services#service-directory'],
 ];
-const articleLinks: NavLink[] = [['News', '/insights'], ['Blogs', '/blog']];
+const articleLinks: NavLink[] = [['News', '/insights?view=news#industry-news'], ['Blogs', '/blog']];
 const sectorLinks: NavLink[] = [
   ['SMEs &amp; entrepreneurs','smes-entrepreneurs'], ['Property &amp; real estate','property-real-estate'],
   ['Mining','mining'], ['Agriculture','agriculture'], ['Financial services','financial-services'],
@@ -67,6 +67,9 @@ export function withServicesMenu(html: string, brand: string, page: string): str
     .replace(/<script defer src="\/v6\/services-menu\.js(?:\?[^"]*)?"><\/script>/g, '')
     .replace('</head>', '<link rel="stylesheet" href="/v6/services-menu.css?v=2"><script defer src="/v6/services-menu.js?v=2"></script></head>');
   const route = page.replace(/^\//, '').replace(/\.html$/, '');
+  if (route === 'insights' && !html.includes('id="industry-news"')) {
+    html = html.replace('data-news-card="News"', 'id="industry-news" data-news-card="News"');
+  }
   if (route === 'about' && !html.includes('id="vision-and-mission"')) {
     html = html.replace('<section class="split content-section">', visionAndMission + '<section class="split content-section">');
   }

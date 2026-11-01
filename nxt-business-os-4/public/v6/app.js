@@ -38,6 +38,9 @@
     });
   }));
 
+  const newsButton = document.querySelector('.news-filter button[data-news="News"]');
+  if (newsButton && new URLSearchParams(location.search).get('view') === 'news') newsButton.click();
+
   const waBtn=document.getElementById('waBtn'),waPanel=document.getElementById('waPanel');
   if(waBtn&&waPanel)waBtn.addEventListener('click',()=>waPanel.classList.toggle('show'));
 
