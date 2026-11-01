@@ -145,3 +145,43 @@ export const serviceCatalogue = [
     "description": "Bring the essentials together in an affordable scope agreed up front. Choose a starting mix of website, local search, social content and lead follow-up, then add support as you grow."
   }
 ];
+
+// These are search terms for the directory, not AI-generated advice.
+const commonTerms: Record<string, RegExp> = {
+  '1': /\b(social media|instagram|facebook|tiktok)\b/i,
+  '2': /\b(email marketing|email campaigns?|newsletters?)\b/i,
+  '3': /\b(content writing|copywriting|articles|blog posts?)\b/i,
+  '4': /\b(brand(?:ing)?|logos?|packaging|graphic design)\b/i,
+  '5': /\b(paid ads?|paid advertising|ad campaigns?)\b/i,
+  '6': /\b(seo|search engine|organic search)\b/i,
+  '7': /\b(google maps|google business|local listing)\b/i,
+  '8': /\b(website|web design|web development)\b/i,
+  '9': /\b(portals?|web apps?|web applications?)\b/i,
+  '10': /\b(crm|pipeline|follow(?:s|ed)?[ -]?up|track(?:ing)? leads)\b/i,
+  '11': /\b(domain|registrar|web address|co\.zw)\b/i,
+  '12': /\b(ai|artificial intelligence|automate|automation)\b/i,
+  '13': /\b(whats[ -]?app|wa bots?)\b/i,
+  '14': /\b(sms|text messages?|appointment reminders?)\b/i,
+  '15': /\b(back[ -]?office|staff system|approval workflow)\b/i,
+  '16': /\b(call cent(?:re|er)|contact cent(?:re|er))\b/i,
+  '17': /\b(customer (support|service)|support tickets?)\b/i,
+  '18': /\b(cold call(?:ing|s)?|telemarketing|outbound sales)\b/i,
+  '19': /\b(lead generation|lead list|prospect list|more customers|new customers)\b/i,
+  '20': /\b(market research|competitor research|buyer research)\b/i,
+  '21': /\b(virtual assistants?|admin takes too long|manage my inbox)\b/i,
+  '22': /\b(data entry|data captur(?:e|ing)|data processing)\b/i,
+  '23': /\b(data (storage|protection)|store records|holding data|potraz)\b/i,
+  '24': /\b(sme|small business package|digital package)\b/i,
+};
+
+export function directoryReply(question: string) {
+  const matches = serviceCatalogue.filter(item => commonTerms[item.id]?.test(question))
+    .sort((a,b) => Number(question.toLowerCase().includes(b.name.toLowerCase())) -
+                   Number(question.toLowerCase().includes(a.name.toLowerCase())))
+    .slice(0,2);
+  const prefix = 'The AI adviser is unavailable. ';
+  const message = prefix + (matches.length
+    ? 'From the NXT service directory: ' + matches.map(item => item.name + ' — ' + item.description).join(' ')
+    : 'Try the two-question service finder below, or tell us which area you need: marketing, WhatsApp, CRM, domains or data storage.');
+  return {source:'service-directory',message,services:matches.map(({id,name,path})=>({id,name,path}))};
+}

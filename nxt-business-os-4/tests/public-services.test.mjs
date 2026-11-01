@@ -34,3 +34,14 @@ test('missing mail credentials provides an ASCII download without claiming deliv
 test('per-instance throttling rejects repeated requests from the same address',async()=>{const {takeQuota}=await import(helper);const r=request({},'service-assistant',{'x-vercel-forwarded-for':'192.0.2.220'});for(let i=0;i<12;i++)await takeQuota(r,'ai');await assert.rejects(takeQuota(r,'ai'),e=>e.status===429);});
 
 test('Vercel requests use the current runtime identity instead of an old build token',async t=>{env(t);process.env.VERCEL='1';delete process.env.AI_GATEWAY_API_KEY;const {calls}=upstream(t);const r=await assistant.POST(request({messages:[{role:'user',content:'Help me organise sales leads.'}]},'service-assistant',{'x-vercel-oidc-token':'runtime-test-token'}));assert.equal(r.status,200);assert.equal(calls.find(([u])=>u.includes('ai-gateway'))[1].headers.Authorization,'Bearer runtime-test-token');});
+
+test('unverified AI account gives labelled directory matches and never invents an answer', async t=>{
+  env(t);
+  t.mock.method(globalThis,'fetch',async()=>Response.json({error:{code:'customer_verification_required'}},{status:403}));
+  const lookup=async content=>(await assistant.POST(request({messages:[{role:'user',content}]},'service-assistant'))).json();
+  const result=await lookup('Nobody follows up on WhatsApp enquiries.');
+  assert.equal(result.source,'service-directory');
+  assert.match(result.message,/AI adviser is unavailable/);
+  assert.deepEqual(new Set(result.services.map(s=>s.id)),new Set(['10','13']));
+  assert.deepEqual((await lookup('What is the weather?')).services,[]);
+});

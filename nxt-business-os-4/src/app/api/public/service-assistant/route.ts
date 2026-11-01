@@ -1,5 +1,5 @@
 import {PublicError, readPublicJson, reply, takeQuota, publicFailure} from '../../../../lib/public-services';
-import {serviceCatalogue} from '../../../../lib/public-service-catalogue';
+import {directoryReply, serviceCatalogue} from '../../../../lib/public-service-catalogue';
 
 const prompt = `You are the NXT Workforce website AI service adviser. Help a visitor describe a business problem and select relevant NXT services. Use only the catalogue and facts below. Keep replies conversational, specific, friendly and under 100 words. Ask one focused follow-up question when the problem is unclear. Recommend up to three services only when they actually fit. Explain briefly why. Consider conversation context, not just the last message. Do not force a sale or recommend every service.
 NXT provides marketing, sales, customer support, technology and operational support for businesses, including SMEs in Zimbabwe and across Africa. NXT Business OS is its CRM built for Africa. Public login: https://nxt-business-os.vercel.app/app. Contact: hello@nxt-workforce.com, WhatsApp +263790050483. Scope and pricing are quoted by the team; never invent prices, savings, guarantees, opening hours, client results or certifications. Managed data work is scoped in Zimbabwe's POTRAZ context; never claim regulatory approval or give legal advice. Domain applications go to NXT's domain team; you cannot register or reserve domains, make purchases, send messages, open customer accounts or inspect availability. Send domain questions to the domain service. Do not request payment card data, passwords, ID documents or confidential business records. You have no access to private CRM/customer data.
@@ -32,6 +32,9 @@ export async function POST(request: Request) {
       const failure=await response.json().catch(()=>null);
       const code=failure?.error?.code||failure?.error?.type;
       console.warn('NXT AI Gateway request failed',{status:response.status,code:typeof code==='string'?code.slice(0,80):'unknown'});
+      if (code === 'customer_verification_required' || code === 'insufficient_funds' || code === 'quota_for_entity_exceeded') {
+        return reply(directoryReply(messages[messages.length-1].content));
+      }
       throw new PublicError('Our AI adviser is temporarily unavailable. You can still use the service finder or WhatsApp.',503);
     }
     const result=await response.json();let answer;
