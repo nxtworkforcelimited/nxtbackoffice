@@ -3,7 +3,7 @@ import {context} from '@/lib/context';
 import {allowed} from '@/lib/business';
 import {z} from 'zod';
 const text=z.string().trim();
-const schema=z.object({id:z.uuid().optional(),title:text.min(1).max(160),description:text.max(5000),url:z.union([z.url().refine(s=>/^https?:\/\//.test(s)),z.literal('')]),status:z.enum(['Not started','In progress','Under review','Complete']),assignee_id:z.uuid().nullable(),client_id:z.uuid().nullable(),target_date:z.iso.date().nullable(),review_notes:text.max(5000)});
+const schema=z.object({id:z.uuid().optional(),title:text.min(1).max(160),description:text.max(5000),url:z.union([z.url().refine(s=>/^https?:\/\//.test(s)),z.literal('')]),status:z.enum(['Not started','In progress','Under review','Testing mode','Testing passed','Testing failed']),assignee_id:z.uuid().nullable(),assignee_ids:z.array(z.uuid()).max(25),client_id:z.uuid().nullable(),target_date:z.iso.date().nullable(),review_notes:text.max(5000)});
 export async function GET(req:NextRequest){
  const c=await context(req.nextUrl.searchParams.get('workspace'));
  if(!c?.workspace||c.workspace.role==='client')return NextResponse.json({error:'Staff access required'},{status:403});

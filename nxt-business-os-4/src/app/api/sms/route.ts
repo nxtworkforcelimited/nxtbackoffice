@@ -2,6 +2,8 @@ import {NextRequest,NextResponse} from 'next/server';
 import {createClient} from '@supabase/supabase-js';
 import {context} from '@/lib/context';
 import {allowed} from '@/lib/business';
+import {trustedRequest} from '@/lib/request-origin';
+import {z} from 'zod';
 
 export const dynamic='force-dynamic';
 
@@ -56,4 +58,25 @@ export async function GET(req:NextRequest){
  }catch{
   return reply({error:'SMS integration status is temporarily unavailable.'},503);
  }
+}
+
+
+export async function POST(req:NextRequest){
+ if(!trustedRequest(req))return reply({error:'Open the back office directly and retry.'},403);
+ try{
+  const c=await context(req.nextUrl.searchParams.get('workspace'));
+  if(!c?.workspace||c.workspace.role==='client')return reply({error:'Staff access required.'},403);
+  if(!allowed(c.workspace.role,c.workspace.permissions??[],'sms'))return reply({error:'SMS access required.'},403);
+  const p=z.object({recipient:z.string().trim().regex(/^\+?[1-9][0-9]{7,14}$/),message:z.string().trim().min(1).max(480)}).safeParse(await req.json().catch(()=>null));
+  if(!p.success)return reply({error:'Enter a valid international mobile number and a message.'},400);
+  const url=process.env.NEXT_PUBLIC_SUPABASE_URL,secret=process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if(!url||!secret)return reply({error:'SMS service is unavailable.'},503);
+  const admin=createClient(url,secret,{auth:{persistSession:false,autoRefreshToken:false}});
+  const source=crypto.randomUUID(),recipient=p.data.recipient.startsWith('+')?p.data.recipient:'+'+p.data.recipient;
+  const row=await admin.from('sms_outbox').insert({
+   tenant_id:c.workspace.id,client_id:null,source_type:'manual_test',source_id:source,
+   approval_key:'manual-test:'+source,recipient,body:p.data.message,provider:'gikko',status:'queued'
+  }).select('id,status,recipient,created_at').single();
+  return reply(row.error?{error:row.error.message}:{...row.data,note:'Queued. The SMS worker runs every minute.'},row.error?400:201);
+ }catch{return reply({error:'Test SMS could not be queued.'},503);}
 }

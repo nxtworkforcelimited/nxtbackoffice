@@ -1,0 +1,447 @@
+{
+  "captured": "2026-11-01",
+  "source": "https://lambent-dango-30e63f.netlify.app/",
+  "scope": "77 mapped pages and same-host assets referenced by those pages or their stylesheets. Hashes describe the bytes recovered before migration edits.",
+  "files": {
+    "app.js": {
+      "bytes": 8007,
+      "sha256": "d15b5d55a8569afffaa132b1b2a28e4c930a61c5c59f157d4d26dd25ac378557"
+    },
+    "assets/africa-digital-network.svg": {
+      "bytes": 1848,
+      "sha256": "7984625aa5176dbb6622c4aac45f628f2ea9debb3c2e43ec7673fec8edb6e0c8"
+    },
+    "assets/agri.png": {
+      "bytes": 2008351,
+      "sha256": "70ca1e2c21d215f051d6de971dc2b79862c38fabf5162e2896d4c24bff7be484"
+    },
+    "assets/bpo.webp": {
+      "bytes": 138946,
+      "sha256": "1dc02d23234dc89163b7c2f1fc5e9ce9343e22f46fa2b019030355ead3037ce5"
+    },
+    "assets/business-team.webp": {
+      "bytes": 168074,
+      "sha256": "bce7bfbd8e53f095c124db3cf96724f8ef7451668669861c6b6aba12b67aea88"
+    },
+    "assets/consult.png": {
+      "bytes": 1773972,
+      "sha256": "24f1a9f1be77ec161ac71d1432379da25bccee21fc4035cab58d31f2503bc61a"
+    },
+    "assets/customer-service-2.webp": {
+      "bytes": 108796,
+      "sha256": "4e121373399ec39accd10ec7d467a07eec3e48bc7e5fa44ce908af1b02e9c9c7"
+    },
+    "assets/customer-service.webp": {
+      "bytes": 169862,
+      "sha256": "46d7bbf6315db553b9d615e93633d375b8d111fd2ef5537606a71ca1fae04011"
+    },
+    "assets/email-marketing.webp": {
+      "bytes": 47832,
+      "sha256": "e01e233478e7af12924526550845f8b6ae3ef347c8430be8b343a2e47da425e0"
+    },
+    "assets/finance2.png": {
+      "bytes": 1773972,
+      "sha256": "24f1a9f1be77ec161ac71d1432379da25bccee21fc4035cab58d31f2503bc61a"
+    },
+    "assets/health.png": {
+      "bytes": 1841561,
+      "sha256": "ca7f31d6070c494abf5073b9547c1660431d35fa07adbcf3cf945a347361e528"
+    },
+    "assets/hero-cover.webp": {
+      "bytes": 97116,
+      "sha256": "9772e0baf9923a69387657dbace5028b8eca5c22fc780baa3679d30c6437f1e5"
+    },
+    "assets/hospitality.png": {
+      "bytes": 1917203,
+      "sha256": "aec6177bb80e3f2501664a7c9b4e8846d3caa613f6fc52dfca13b354d99e6b48"
+    },
+    "assets/mining.png": {
+      "bytes": 2005155,
+      "sha256": "55e373fd8572df35423cc47048f764f838387c89dc6b48f68119bb16c23f0aed"
+    },
+    "assets/mobile-app.webp": {
+      "bytes": 217882,
+      "sha256": "383028050a0278ac5f9496cb937ffad400a6fee268e406552a5ef31d2b4879c0"
+    },
+    "assets/nxt-logo-transparent.png": {
+      "bytes": 160225,
+      "sha256": "baf22855af6fb837585076751a11f6607fd53a8e064b821b2c3113e1f5a20cfc"
+    },
+    "assets/nxt-logo-white.png": {
+      "bytes": 21220,
+      "sha256": "ce79533b50adb1eaf77c0a42cd2cb8466debc001407d835ab1e36b99f9adfc2a"
+    },
+    "assets/office-team.webp": {
+      "bytes": 228846,
+      "sha256": "fed98926dee2d8f87e9814ed2abf9c232b9b87e920e1f9fdb308df47f69bda66"
+    },
+    "assets/process-account-manager.webp": {
+      "bytes": 60258,
+      "sha256": "1b68115a1e0f1ade9d5a2a14c38a3582fddb78bef98078c3f2d0043e79c454eb"
+    },
+    "assets/process-report.webp": {
+      "bytes": 48750,
+      "sha256": "359ec337d5487f86fb666ba47fbec8b5c9dc6daa38ff08179e04068e86d7116f"
+    },
+    "assets/process-scope.webp": {
+      "bytes": 54434,
+      "sha256": "1e3a87e8bf20cb6da38c552656cfdcdb487ae7da4eb3f7caa674e65e31c019ab"
+    },
+    "assets/process-understand.webp": {
+      "bytes": 44024,
+      "sha256": "76b52d468039b17d59a5cc663c596c5202e4b96effddb8d0bd88eb0471771dad"
+    },
+    "assets/property.png": {
+      "bytes": 1965261,
+      "sha256": "e78bf71051b1337aea4e922bf65c5df28618146d7ba15e4161c51d8ddecb2ba9"
+    },
+    "assets/retail.png": {
+      "bytes": 1948657,
+      "sha256": "2eb5e0460b27b94cfada172674b196bc5cd24de49db9d43470d95ee8fa0a2b0d"
+    },
+    "assets/sector-agriculture.webp": {
+      "bytes": 136566,
+      "sha256": "452f26defdd5f0a5cdd3d9534b4ae052b079c0a93c63f140020bc63932ed1935"
+    },
+    "assets/sector-finance.webp": {
+      "bytes": 94360,
+      "sha256": "f101286f2bf67439abcad5d77614c127e3227e4f30682edc0a037dc4dfadb2f0"
+    },
+    "assets/sector-health.webp": {
+      "bytes": 108716,
+      "sha256": "f5283e1b5b575b58b19a1717b277c718a8aa243153a7e6f1078bfed99940f128"
+    },
+    "assets/sector-hospitality.webp": {
+      "bytes": 120618,
+      "sha256": "c732ac6587cd7b7ff6981ffbd41123a2b827321234f6c063834782272f10ec4f"
+    },
+    "assets/sector-mining.webp": {
+      "bytes": 159050,
+      "sha256": "86cf026328a5d89d7b9c251f8c77128811dbfd3b923fb39afb045029281e71ab"
+    },
+    "assets/sector-property.webp": {
+      "bytes": 144770,
+      "sha256": "bfd9de0eb0a8d34286d97989b0a0363ff1fa1f8d40fe8043465385468fb532b1"
+    },
+    "assets/strategy-team.webp": {
+      "bytes": 148476,
+      "sha256": "5bfa0c0224c515ff3665145b89a33967a3cbf48fb4890cc10832b9780b9d1108"
+    },
+    "assets/web-development.webp": {
+      "bytes": 116492,
+      "sha256": "7b8c948b27a48f1ede034565c81e05b16541383bf3d7250667e2cb94655d3c86"
+    },
+    "contact.html": {
+      "bytes": 11162,
+      "sha256": "a918e028b12f9c6b60f1695403bc556b6915b6d1a82472a1c69911aec34dd5f8"
+    },
+    "free-audits.html": {
+      "bytes": 11216,
+      "sha256": "bf69db9639d17543a2351750cf2466afdded832af07f65efaf794e55e6c84f2b"
+    },
+    "index.html": {
+      "bytes": 33618,
+      "sha256": "453e4686d02d5b954bef51bafdc56a10315b94ba32d43d7cd3de5df9058c6b32"
+    },
+    "industries.html": {
+      "bytes": 10938,
+      "sha256": "0d69e0afa0ebcba2eddbc45367f585b12d883e9d9d96ef038e26bbbc08e97510"
+    },
+    "industries/agriculture.html": {
+      "bytes": 8106,
+      "sha256": "b59a946c4d509390e6a99e8d4229db2bbb8720c83b30b36cb6002a0c2079c3a8"
+    },
+    "industries/financial-services.html": {
+      "bytes": 8110,
+      "sha256": "9426e95db951552b75435cb409165610ec5c049c016db3efec436f30ffbea719"
+    },
+    "industries/healthcare.html": {
+      "bytes": 8168,
+      "sha256": "becddbc9d75492cd375b4133573b0059b2d4021e626083ac78f940e64c7e8bac"
+    },
+    "industries/mining.html": {
+      "bytes": 8115,
+      "sha256": "b51a60b7a44afddc03d5ee92bba7a22aed00436e97d07b4cfaba2b243863be44"
+    },
+    "industries/property.html": {
+      "bytes": 8117,
+      "sha256": "a278c49883b69455f3c04fd406db8d0fda908f171e1286c4833b8d24ed392047"
+    },
+    "industries/smes.html": {
+      "bytes": 8167,
+      "sha256": "87eb9b9ceb991b06462a69d5a541a8739fc5b750e678aac6e16c59e54321a33b"
+    },
+    "industries/travel-hospitality.html": {
+      "bytes": 8136,
+      "sha256": "025122d79688bb0e7b7607b55af73d955cd7676f6a3fc82c29dbf3d72b981c84"
+    },
+    "insights.html": {
+      "bytes": 14776,
+      "sha256": "cbe63a76fb77a59c328490679355543d608018b453c109cdc2285a79d12b3bd8"
+    },
+    "insights/email-marketing-repeat-business.html": {
+      "bytes": 9378,
+      "sha256": "f1983494302cd8236e64dae6d8051c2f72f60914a08248c0970229b88c8218cc"
+    },
+    "insights/fast-lead-follow-up.html": {
+      "bytes": 9661,
+      "sha256": "199f83343825b177130d146fba087676a852bde62dad9a66e7a1c0326d1f9237"
+    },
+    "insights/google-business-profile-checklist.html": {
+      "bytes": 9413,
+      "sha256": "b9fc921c31ff91dfda3eb5cdf9ad8fbff5280919bd9243f04653c0b57004ff10"
+    },
+    "insights/more-than-social-media.html": {
+      "bytes": 9708,
+      "sha256": "ed7d6860458092a672f71fd93e68e8f3093163b21eda2dc08e8772f5c642ebb7"
+    },
+    "insights/outgrown-spreadsheets.html": {
+      "bytes": 9394,
+      "sha256": "ef933ee092bffb9e81f1c64307eb28ea8f93a334dd119787bb2f4bc4e7fee588"
+    },
+    "insights/outsourcing-vs-hiring.html": {
+      "bytes": 9525,
+      "sha256": "d5571d4b2d63e3ef2a3e6f0cccf486c79278223b0483d602bbca8a51b58052e1"
+    },
+    "insights/someone-filled-your-form-now-what.html": {
+      "bytes": 9816,
+      "sha256": "47c2d8a3972d315f04fbf9894d07249070dce1d52852d639a07f9e5daf9fd657"
+    },
+    "insights/stop-losing-leads-crm.html": {
+      "bytes": 9877,
+      "sha256": "2b60f91b6fb0b585060d1be7732553b28f675b278763e4db41633a3fc61ae173"
+    },
+    "insights/why-your-business-isnt-showing-on-google.html": {
+      "bytes": 10509,
+      "sha256": "5be4e3f681c6e7cc55246355aeddab4255474f23bd06442b17d79dff2993aeac"
+    },
+    "markets/ghana.html": {
+      "bytes": 8148,
+      "sha256": "8b69b92df18e1d150dbf9f84c4d287d88c399c1875dba2567d9c1d4a9d24a3c8"
+    },
+    "markets/nigeria.html": {
+      "bytes": 8170,
+      "sha256": "4c22fe46edf70b0bf28806a551852daa33e5cba71144407efed796fb332f5a27"
+    },
+    "markets/south-africa.html": {
+      "bytes": 8166,
+      "sha256": "04984f8baf05642076fb36cd8046dc19decccd02d5ebf5999eb129a08c56857c"
+    },
+    "markets/uk.html": {
+      "bytes": 8192,
+      "sha256": "07d60422e46ade0f360213a1b70fe28b71b9b7acfdba32d120effc6fc6a860a3"
+    },
+    "markets/zimbabwe.html": {
+      "bytes": 8206,
+      "sha256": "b835d25d88a8682c2b8380029d41347277963305989f549c79178e94503c873e"
+    },
+    "privacy.html": {
+      "bytes": 14627,
+      "sha256": "2bf163b58d4ab126409f50698d9472d453c2065e16cf67b10c7a97c6c6417da6"
+    },
+    "services.html": {
+      "bytes": 15325,
+      "sha256": "e245c9b2a9ba9ae49909b5fc65af994464dab3e28d0c271dbb91ab9d9dc928cc"
+    },
+    "services/apps-portals.html": {
+      "bytes": 9649,
+      "sha256": "205942b99640ef2aa4298623a93897ed1e9fa0f5ffbd5f591eabf8c676cd17e0"
+    },
+    "services/back-office-systems.html": {
+      "bytes": 9522,
+      "sha256": "b727d90270b16673465fea281ec695bf26f729643ca79176f87e7be5e345bb54"
+    },
+    "services/cold-calling.html": {
+      "bytes": 9482,
+      "sha256": "e9ae28059fef480b26e678e66ff2779138f1cb2854c58fa7230866475e3ef4f0"
+    },
+    "services/contact-centre.html": {
+      "bytes": 9553,
+      "sha256": "180b2820cb9a8a7e7ac9e1157ccfac2aeba52e80c8e0c25afa0620d965f6c8f4"
+    },
+    "services/content-writing.html": {
+      "bytes": 9555,
+      "sha256": "8a05b15814fc92b4117639e9314303c80e857186a2c30c7921b1765f9fe27358"
+    },
+    "services/crm-setup.html": {
+      "bytes": 9504,
+      "sha256": "cdab6bf28e62b5fad8ad1d6b3ef7a6b8d745dad499807975af26384a7247bc7f"
+    },
+    "services/customer-service.html": {
+      "bytes": 9534,
+      "sha256": "f6e666b4bb5d982d33d52c96a5dd7c49a74e4be1ea9b42d854a6d6a92112a051"
+    },
+    "services/data-capturing.html": {
+      "bytes": 9518,
+      "sha256": "589868e51a18141006c9728188a552972fbb53011bbca6fe6da8eb7735a989e8"
+    },
+    "services/data-mining.html": {
+      "bytes": 9515,
+      "sha256": "0eb9a82d863604ccd4228f6e18347d84d80346dfe4018d343a2de73558f4611b"
+    },
+    "services/digital/content-writing.html": {
+      "bytes": 12983,
+      "sha256": "7e8165fa1e13a0fd3744c64747a41fdb59ef8c7bbb3be06a75dc21d13ea75317"
+    },
+    "services/digital/email-marketing.html": {
+      "bytes": 13532,
+      "sha256": "a303c538c1c31cf3b450b9cc91a9247f5aeb3ce3ae1ca79d296d904dfe5784bb"
+    },
+    "services/digital/google-business-profile.html": {
+      "bytes": 13091,
+      "sha256": "493aa13036f8260bd0b64d75f79144ab0cff93ee8affe019c7a0c106297062ec"
+    },
+    "services/digital/graphic-design.html": {
+      "bytes": 13162,
+      "sha256": "e66eead5bdab2304277a6307559566821c48c9880caf15fa6eeb32572aae54b8"
+    },
+    "services/digital/linkedin-marketing.html": {
+      "bytes": 12960,
+      "sha256": "4339550d15d1ece62060179b72f0c60d5bedc1f2cf028d440b1977c14ab46713"
+    },
+    "services/digital/paid-advertising.html": {
+      "bytes": 12972,
+      "sha256": "2ed74ed87e2c1471e4be10906fda582f73d1592e4e741f50abc13eeed109b1eb"
+    },
+    "services/digital/seo.html": {
+      "bytes": 13256,
+      "sha256": "bddb9cee5b014130d5dbe0708a8d5f2afa6e2dc298de31351faa3a0196d8e339"
+    },
+    "services/digital/social-media-management.html": {
+      "bytes": 13028,
+      "sha256": "230f78e6a1d62d4ad3056b349cd2fd84af36ac4be8e36448efe7cc8398eef3a0"
+    },
+    "services/email-marketing.html": {
+      "bytes": 9697,
+      "sha256": "f440998a13f69de775bbe070015065548f9a1ddc03e3e92b8f94896fb76819ca"
+    },
+    "services/google-business-profile.html": {
+      "bytes": 9608,
+      "sha256": "6a743d41d75a6d4ae0d757c38731b99ad13a3c7bc32bc583ebbb6dccde69ec7e"
+    },
+    "services/graphic-design.html": {
+      "bytes": 9495,
+      "sha256": "746c0670ca808f99d73197a65b08e025dd8f53874125b0e096fe440fb272e15c"
+    },
+    "services/lead-list-sourcing.html": {
+      "bytes": 9560,
+      "sha256": "74c0159d03b712fdd6521ba0bada639643f53f4b46c24060ae4b2f9b34df4535"
+    },
+    "services/linkedin-marketing.html": {
+      "bytes": 9516,
+      "sha256": "5113e4b823e81c3d5c7617beec77facb58d014ac8a055449bae337a7f7cdc097"
+    },
+    "services/outbound-sales.html": {
+      "bytes": 9631,
+      "sha256": "232127a04029332c901ef22759595abd7a2cdac1b6838a0a4005d166fbcaf8c7"
+    },
+    "services/outsourcing/business-support.html": {
+      "bytes": 13018,
+      "sha256": "fe73d9d8c2d2dc93cefb58da7197758e5fc1e9f62096d5b5bb68edd99f01d2d2"
+    },
+    "services/outsourcing/contact-centre.html": {
+      "bytes": 12897,
+      "sha256": "ffaecc9f19a53f929293d1d0588c4fde0f6e54317b1b7206f59d55c1d88b04b7"
+    },
+    "services/outsourcing/customer-support.html": {
+      "bytes": 13024,
+      "sha256": "08d96a7a509164b31ea3039bc046d121df03eb7760c36e448ea7304c87c1c7a4"
+    },
+    "services/outsourcing/data-capture.html": {
+      "bytes": 12902,
+      "sha256": "fd292f2654d6008fc5fe8209d8ec1f7679688ba05025f03af6d08f3c980151e4"
+    },
+    "services/paid-advertising.html": {
+      "bytes": 9508,
+      "sha256": "e1928b72913f9bb5e7dc2cbcaa6b47b5358d984eaeff578c4fd470ab4a7772a9"
+    },
+    "services/sales/lead-generation.html": {
+      "bytes": 13101,
+      "sha256": "f0892bcb9e567a0395687ff5aab766b8bca3e10267546dfb8c0b63c33dcefab8"
+    },
+    "services/sales/market-research.html": {
+      "bytes": 12942,
+      "sha256": "47295b56144274d293f2138c6880f1a06115d9c916fe20ecf02c6168d9c6146b"
+    },
+    "services/sales/outbound-calling.html": {
+      "bytes": 12851,
+      "sha256": "5bf51d592cf4169789192ab643f9e9732116cc3beccc0a0cdefefb13084a7ac2"
+    },
+    "services/sales/telemarketing.html": {
+      "bytes": 13048,
+      "sha256": "81c4673cf91ceb4e447cbef375fd4f37cc6728548d01f22e8e6ac6d9d819bd79"
+    },
+    "services/seo.html": {
+      "bytes": 9542,
+      "sha256": "1665713ddaef445200914982f73ac0c466d46803b4909d9014334baa6500a7ee"
+    },
+    "services/social-media.html": {
+      "bytes": 9611,
+      "sha256": "3cbb276a2b4efb8eb6c0d65c9cb3a3f0f2e129971806be4048c8456f47afd21c"
+    },
+    "services/technology/business-systems.html": {
+      "bytes": 12964,
+      "sha256": "2bd370d0c0dabd35212e706b905d3bb18409ebbf75c77c715a42a836787ca5ad"
+    },
+    "services/technology/crm-setup.html": {
+      "bytes": 12868,
+      "sha256": "31480feefe4932d991088507753bd29efad431f08e442863d0362d512158b06f"
+    },
+    "services/technology/portals-and-apps.html": {
+      "bytes": 13228,
+      "sha256": "c43f897a5c0f1e80ce5ef201bfc9114e8121bf0c8da17d68a1daac9204bd6427"
+    },
+    "services/technology/website-design.html": {
+      "bytes": 12988,
+      "sha256": "ebc99ca41486b208cd59988703f4421f8c9d276b48d5e72858ab6a8912cab45a"
+    },
+    "services/virtual-assistants.html": {
+      "bytes": 9519,
+      "sha256": "72aedb0ef6762cfaca4f81bbfd7ab50442285f203e3a93fb76bdae4b3c7a4f8d"
+    },
+    "services/website-development.html": {
+      "bytes": 9583,
+      "sha256": "2ad7b21e78b3d84167d08773f52cd459155e00efe0fbeb06bda2916532a07f60"
+    },
+    "styles.css": {
+      "bytes": 28791,
+      "sha256": "beba46d047688e783d20a541a39735ffb9c482957c8e3a589b262deaef70b5b8"
+    },
+    "terms.html": {
+      "bytes": 8046,
+      "sha256": "f559cebde2d70a069de833b7a7a8239696e356eb0a2e9c5e48999a8d1a090f3f"
+    },
+    "who-we-serve.html": {
+      "bytes": 10938,
+      "sha256": "0d69e0afa0ebcba2eddbc45367f585b12d883e9d9d96ef038e26bbbc08e97510"
+    },
+    "who-we-serve/agriculture.html": {
+      "bytes": 9465,
+      "sha256": "54ae4433fd430aab257ba751051531031b38cc7a021cc699b00e553b0c722c12"
+    },
+    "who-we-serve/financial-services.html": {
+      "bytes": 9452,
+      "sha256": "734cc98a5bc0d099fa1de56239046f0619b6a23536147b0863e601c56d1ad963"
+    },
+    "who-we-serve/healthcare.html": {
+      "bytes": 9618,
+      "sha256": "e4eb1df847e80e3ece1df25a4b0b8156f38f333b500593c51fdfecfe2da5bfb5"
+    },
+    "who-we-serve/mining.html": {
+      "bytes": 9551,
+      "sha256": "727cfb9d8d4a27a5fd14d928abf9bf44e02402065f72fdaebe526a728637163e"
+    },
+    "who-we-serve/property-real-estate.html": {
+      "bytes": 9497,
+      "sha256": "28e18a9a80829b9ac57983c957e8f8de7f5be353f1329a37e3a6e22fe6e24176"
+    },
+    "who-we-serve/smes-entrepreneurs.html": {
+      "bytes": 9722,
+      "sha256": "56b3148d51051b92949eb4fabfc0ffa060a0d3247ba4c1933e4ef4fbc5e51d17"
+    },
+    "who-we-serve/travel-hospitality.html": {
+      "bytes": 9494,
+      "sha256": "a38fc3b79d6b4f2cfa9bd4b83759bb2a6e628c4c3be00a12bff41c33e900a371"
+    }
+  }
+}

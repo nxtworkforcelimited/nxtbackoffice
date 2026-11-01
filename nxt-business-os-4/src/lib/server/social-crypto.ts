@@ -1,0 +1,4 @@
+import {createCipheriv,createDecipheriv,createHash,randomBytes} from 'node:crypto';
+function key(){const secret=process.env.SOCIAL_TOKEN_ENCRYPTION_KEY;if(!secret)throw new Error('Social token encryption is not configured.');return createHash('sha256').update(secret).digest();}
+export function encryptSocialSecret(value:string){const iv=randomBytes(12),cipher=createCipheriv('aes-256-gcm',key(),iv),body=Buffer.concat([cipher.update(value,'utf8'),cipher.final()]),tag=cipher.getAuthTag();return Buffer.concat([iv,tag,body]).toString('base64url');}
+export function decryptSocialSecret(value:string){const raw=Buffer.from(value,'base64url'),iv=raw.subarray(0,12),tag=raw.subarray(12,28),body=raw.subarray(28),decipher=createDecipheriv('aes-256-gcm',key(),iv);decipher.setAuthTag(tag);return Buffer.concat([decipher.update(body),decipher.final()]).toString('utf8');}
