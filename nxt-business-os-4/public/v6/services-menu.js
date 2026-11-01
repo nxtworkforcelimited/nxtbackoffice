@@ -1,36 +1,25 @@
 (() => {
-  const menu = document.querySelector('header .nxt-services-menu');
-  if (!menu) return;
-  const trigger = menu.querySelector('summary');
-  const nav = menu.closest('nav');
-  const other = nav.querySelector('.site-menu,.menu-toggle');
-  menu.addEventListener('toggle', () => {
-    if (menu.open && other?.getAttribute('aria-expanded') === 'true') {
-      other.setAttribute('aria-expanded', 'false');
-      nav.querySelector('.links')?.classList.remove('open');
-    }
-  });
-  other?.addEventListener('click', () => { menu.open = false; });
-  document.addEventListener('pointerdown', event => {
-    if (menu.open && !menu.contains(event.target)) menu.open = false;
-  });
-  document.addEventListener('focusin', event => {
-    if (menu.open && !menu.contains(event.target)) menu.open = false;
-  });
+  const opened = () => document.querySelector('header details.nxt-nav-disclosure[open]');
+  function dismissOutside(event) {
+    const menu = opened();
+    if (menu && !menu.contains(event.target)) menu.open = false;
+  }
+  document.addEventListener('pointerdown', dismissOutside);
+  document.addEventListener('focusin', dismissOutside);
   document.addEventListener('keydown', event => {
-    if (event.key === 'Escape' && menu.open) {
+    const menu = opened();
+    if (event.key === 'Escape' && menu) {
       menu.open = false;
-      trigger.focus();
+      menu.querySelector('summary').focus();
     }
   });
-  menu.addEventListener('click', event => {
-    const link = event.target.closest('a');
+  document.addEventListener('click', event => {
+    const link = event.target.closest('header .nxt-nav-panel a');
     if (!link) return;
-    menu.open = false;
-    const adviser = document.querySelector('.nxt-ask-ai');
-    if (link.hasAttribute('data-open-adviser') && adviser) {
-      event.preventDefault();
-      adviser.click();
+    link.closest('details').open = false;
+    if (link.hasAttribute('data-open-adviser')) {
+      const adviser = document.querySelector('.nxt-ask-ai');
+      if (adviser) { event.preventDefault(); adviser.click(); }
     }
   });
 })();
