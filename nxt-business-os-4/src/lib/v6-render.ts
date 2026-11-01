@@ -3,6 +3,7 @@ import {join} from 'node:path';
 import {createClient} from '@supabase/supabase-js';
 import {siteFiles,v6UrlByFile,slugForUrl} from '@/lib/v6-page-map';
 
+import {withServicesMenu} from '@/lib/public-services-menu';
 import {businessOsUrl,footerSignature,headerBrand} from '@/lib/public-footer';
 
 const assetBase='/v6/';
@@ -95,6 +96,7 @@ export async function renderV6Page(path:string){
   html=html.replace('</head>','<link rel="stylesheet" href="/v6/footer-trace.css"><script defer src="/v6/footer-trace.js"></script></head>');
   html=html.replaceAll('href="/login"', 'href="'+businessOsUrl+'"');
   html=html.replace('</head>','<link rel="stylesheet" href="/v6/service-chat.css"><script defer src="/v6/service-chat.js"></script></head>');
+  html=withServicesMenu(html);
   html=attachFormBridge(html);
   const url=process.env.NEXT_PUBLIC_SUPABASE_URL,key=process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   if(url&&key){

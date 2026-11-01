@@ -21,3 +21,5 @@ The bridge reads bundled HTML from `content/v6`. Assets are served from `public/
 2. After owner approval, move only the apex and www web records. On 1 November the apex A record was `216.24.57.1` and the www CNAME was `nxt-workforce-coming-soon.onrender.com`. Preserve Microsoft 365 records and the Business OS subdomain.
 3. Check HTTPS and redirects for both public hosts, the 77 routes and both service enquiry journeys. Verify the Business OS login separately.
 4. If checks fail, restore the recorded apex/www targets and previous working website deployment. Verify the Render page and email/OS records again. Retain any successfully recorded enquiries for reconciliation.
+
+For the standalone marketing export, run `node scripts/add-services-menu-to-export.mjs PATH_TO_EXPORT` from this app after rendering the pages. This applies the shared Services header to supplementary static pages as well. The menu opens without JavaScript; JavaScript adds Escape, outside-click dismissal and the Ask AI shortcut.

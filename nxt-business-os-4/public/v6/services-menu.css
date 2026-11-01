@@ -1,0 +1,15 @@
+.nxt-services-menu{position:relative;flex:none;font-family:inherit;z-index:2}
+.nxt-services-menu>summary{box-sizing:border-box;display:inline-flex;list-style:none;align-items:center;gap:6px;min-height:40px;padding:8px 12px;border:1px solid #d9c9ef;border-radius:9px;background:#f8f4ff;color:#402166;line-height:1.2;font-family:inherit;font-size:14px;font-weight:650;cursor:pointer;white-space:nowrap}
+.nxt-services-menu>summary::-webkit-details-marker{display:none}
+.nxt-services-menu[open]>summary{background:#efe7fd;border-color:#8e69bc}
+.nxt-services-menu[open]>summary svg{transform:rotate(180deg)}
+.nxt-services-menu :focus-visible{outline:3px solid #6b39a4;outline-offset:2px}
+.nxt-services-panel{box-sizing:border-box;position:absolute;top:calc(100% + 9px);left:0;width:min(306px,calc(100vw - 24px));max-height:calc(100dvh - 94px);overflow-y:auto;overscroll-behavior:contain;display:grid;gap:1px;padding:9px;border:1px solid #dfd5e9;border-radius:14px;background:#fff;color:#211b2a;box-shadow:0 14px 38px #29173c24}
+.nxt-services-panel>p{font-size:11px;font-weight:750;letter-spacing:.08em;text-transform:uppercase;margin:6px 10px 4px;color:#695a77}
+header nav .nxt-services-panel>a{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:37px;padding:8px 10px;border-radius:6px;font-size:14px;line-height:1.3;font-weight:550;color:#2a2133;text-decoration:none}
+header nav .nxt-services-panel>a:hover,header nav .nxt-services-panel>a:focus-visible{background:#f5f1fa;color:#58238c}
+header nav .nxt-services-panel>a.nxt-browse-all{border-top:1px solid #ece6f1;border-radius:0;margin-top:2px;color:#58238c}
+header nav .nxt-services-panel>a.nxt-adviser-link{background:#f0e7fa;color:#512787;font-weight:700}
+@media(max-width:1150px){header nav:has(>.nxt-services-menu){position:relative}.nxt-services-menu{margin-left:auto}.header .site-menu{margin-left:0}}
+@media(min-width:601px) and (max-width:1150px){.nxt-services-panel{left:auto;right:0}}
+@media(max-width:600px){.header .nav:has(>.nxt-services-menu){grid-template-columns:minmax(35px,1fr) auto auto auto;gap:5px}.nxt-services-menu{position:static;margin:0}.nxt-services-menu>summary{padding:8px;gap:4px;font-size:13px}.nxt-services-panel{top:calc(100% + 1px);left:0;right:0;width:auto;max-height:calc(100dvh - 90px)}header nav.wrap .nxt-services-menu{margin-left:auto}}
