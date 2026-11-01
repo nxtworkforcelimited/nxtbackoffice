@@ -14,8 +14,6 @@
 @keyframes nxt-footer-trace{from{stroke-dashoffset:21}to{stroke-dashoffset:-79}}
 .nxt-trace-toggle{position:absolute;width:1px;height:1px;margin:0;clip-path:inset(50%);overflow:hidden}
 .nxt-trace-label{display:inline-block;border:1px solid #ffffff25;background:#110d19;color:#d9d0e7;border-radius:20px;padding:4px 10px;font:500 11px/1.5 Montserrat,Arial,sans-serif;cursor:pointer}
-.nxt-trace-label span:nth-child(2),.nxt-trace-toggle:checked~.nxt-trace-label span:first-child{display:none}
-.nxt-trace-toggle:checked~.nxt-trace-label span:nth-child(2){display:inline}
 .nxt-trace-toggle:checked~svg .nxt-trace-run{animation-play-state:paused}
 .nxt-trace-toggle:checked~svg .nxt-trace-pointer{opacity:0}
 .nxt-trace-toggle:focus-visible~.nxt-trace-label{outline:2px solid #dcc6ff;outline-offset:4px}
@@ -29,3 +27,19 @@ footer.nxt-supplement-footer .footer-bottom{border-color:#42364c}
 @media(max-width:940px) and (min-width:701px){.footer-v5 .footer-cta{grid-template-columns:minmax(160px,.75fr) minmax(240px,1fr);gap:18px 36px}.footer-v5 .footer-cta-brand{grid-column:1;grid-row:1}.footer-v5 .nxt-footer-signature{grid-column:2;grid-row:1 / span 2}.footer-v5 .footer-cta-copy{grid-column:1;grid-row:2}}
 @media(max-width:700px){.footer-v5 .footer-cta{grid-template-columns:1fr;gap:22px}.nxt-trace-art{max-height:280px}.footer-v5 .footer-cta-brand img{max-width:170px}.footer-signature-extension{grid-template-columns:1fr}.footer-signature-extension .nxt-trace-art{max-height:225px}}
 @media(prefers-reduced-motion:reduce){.nxt-trace-run{animation:none}.nxt-trace-pointer,.nxt-trace-label,.nxt-trace-toggle{display:none}.nxt-trace-halo{opacity:.3}}
+
+/* The header trace is registered to the coordinates of the original logo. */
+.header-brand-stack{display:block;position:relative;width:clamp(104px,8.5vw,132px);aspect-ratio:1125/644}
+.header-brand-stack img,.nav .brand .header-brand-stack img{display:block;width:100%;height:100%;max-width:none;max-height:none;object-fit:contain}
+.header-brand-stack .header-x{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.header-brand-stack .hx-base{stroke:#6745a1;stroke-width:8}
+.header-brand-stack .hx-run{animation:nxt-header-edge 3.6s linear infinite}
+.hx-halo{stroke:#ae74ff;stroke-width:27;stroke-dasharray:36 64;filter:blur(9px)}
+.hx-edge{stroke:#a878fc;stroke-width:12;stroke-dasharray:24 76}
+@keyframes nxt-header-edge{from{stroke-dashoffset:25}to{stroke-dashoffset:-75}}
+.nxt-trace-label{width:28px;height:28px;border-radius:50%;padding:0;display:inline-grid;place-items:center}
+.nxt-trace-label .motion-icon{display:block;width:8px;height:9px;border-inline:2px solid #d9cbe8}
+.nxt-trace-toggle:checked~.nxt-trace-label .motion-icon{display:block;width:0;height:0;border-inline:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:8px solid #d9cbe8}
+html:has(.nxt-trace-toggle:checked) :is(.logo-track,.nxt-trace-run,.hx-run,.os-streak,.chat-lines li,.nxt-entered){animation-play-state:paused}
+@media(max-width:760px){.header-brand-stack{width:90px}}
+@media(prefers-reduced-motion:reduce){.header-brand-stack .hx-run{animation:none}.nxt-trace-label{display:none}}

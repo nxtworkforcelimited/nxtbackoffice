@@ -3,7 +3,7 @@ import {join} from 'node:path';
 import {createClient} from '@supabase/supabase-js';
 import {siteFiles,v6UrlByFile,slugForUrl} from '@/lib/v6-page-map';
 
-import {businessOsUrl,footerSignature} from '@/lib/public-footer';
+import {businessOsUrl,footerSignature,headerBrand} from '@/lib/public-footer';
 
 const assetBase='/v6/';
 const htmlEscape=(value:string)=>value.replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]||ch));
@@ -85,6 +85,10 @@ export async function renderV6Page(path:string){
   if(!file)return new Response('Not found',{status:404});
   let html=await readFile(join(process.cwd(),'content','v6',file),'utf8');
   html=rewriteLinks(html,file);
+  html=html.replace(/<header\b[^>]*>[\s\S]*?<\/header>/, header => header
+    .replace(/(<a class=["']brand["'] href="\/">)[\s\S]*?(<\/a>)/, (_match,start,end) => start+headerBrand+end)
+    .replace(/<a\b(?=[^>]*class="[^"]*\bnav-icon\b[^"]*")(?=[^>]*href="(?:tel:|https:\/\/wa\.me\/))[^>]*>[\s\S]*?<\/a>/g, '')
+    .replace('Insights &amp; News</a>', 'Insights</a><a href="/blog">Blog</a>'));
   html=html.replace('<div class="navlinks">','<button class="site-menu" type="button" aria-controls="site-links" aria-expanded="false">Menu</button><div class="navlinks" id="site-links">');
   html=html.replace('<a href="/contact">Contact</a>','<a href="/#clients">Our clients</a><a href="/contact">Contact Us</a><a class="nav-extra" href="/free-audits">Free audit</a><a class="nav-extra" href="/login">Client login</a>');
   html=html.replace('<div class="footer-cta-copy">',footerSignature+'<div class="footer-cta-copy">');

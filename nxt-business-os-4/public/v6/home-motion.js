@@ -1,14 +1,4 @@
 (() => {
-  const strip = document.querySelector('[data-logo-shell]');
-  const pause = strip?.querySelector('.logo-pause');
-  if (pause) {
-    pause.addEventListener('click', () => {
-      const stopped = strip.classList.toggle('paused');
-      pause.setAttribute('aria-pressed', String(stopped));
-      pause.textContent = stopped ? 'Play logos' : 'Pause logos';
-    });
-  }
-
   const chat = document.querySelector('[data-chat-example]');
   if (chat) {
     const play = () => {

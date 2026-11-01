@@ -76,11 +76,14 @@
 
   const prefix='/';
   const items=[
+    ['WhatsApp Business messaging and bots','Conversations, templates and staff handoffs','services/whatsapp-business'],
+    ['Business SMS messaging','Reminders, invoice and payment notifications','services/business-sms'],
+    ['NXT blog','Articles from the NXT team','blog'],
     ['AI integration and automation','WhatsApp bots, CRM handoff and workflow automation','services/ai-integration'],
     ['Custom back-office development','Staff workspaces, portals, invoices and approvals','services/back-office-systems.html'],
     ['NXT Business OS','A CRM built for Africa','index.html#business-os'],
     ['Domain registration','Register or set up your domain','domains'],
-    ['Managed Data Storage & Protection','Monthly storage, record handling and POPIA support','services/data-protection'],
+    ['Managed Data Storage & Protection','Monthly storage, record handling and Zimbabwe data protection requirements under POTRAZ','services/data-protection'],
     ['SME digital packages','Website, local search and lead follow-up','services/sme-digital-packages'],
     ['Services','Digital, sales, outsourcing and technology support','services.html'],
     ['Email Marketing','Campaigns, newsletters and automation','services/digital/email-marketing.html'],
