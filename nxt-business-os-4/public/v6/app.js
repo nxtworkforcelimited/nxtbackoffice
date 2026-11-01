@@ -2,6 +2,7 @@
 (function(){
   const io=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in')}),{threshold:.12});
   document.querySelectorAll('.reveal-left,.reveal-right,.reveal-up,.meet-grid,.image-card').forEach(el=>io.observe(el));
+  document.body.classList.add('has-reveal');
 
   document.querySelectorAll('.engine-row').forEach(row=>row.addEventListener('click',()=>{
     document.querySelectorAll('.engine-row').forEach(x=>{if(x!==row)x.classList.remove('open')});
@@ -76,7 +77,8 @@
   const prefix='/';
   const items=[
     ['Domain registration','Register or set up your domain','domains'],
-    ['Monthly data protection','Monthly record handling and POPIA support','services/data-protection'],
+    ['Managed Data Storage & Protection','Monthly storage, record handling and POPIA support','services/data-protection'],
+    ['SME digital packages','Website, local search and lead follow-up','services/sme-digital-packages'],
     ['Services','Digital, sales, outsourcing and technology support','services.html'],
     ['Email Marketing','Campaigns, newsletters and automation','services/digital/email-marketing.html'],
     ['SEO','Search visibility and on-page optimisation','services/digital/seo.html'],
@@ -129,12 +131,46 @@ const enquiry = document.querySelector('#nxtLeadForm');
 const serviceSelect = enquiry?.querySelector('select[data-field="service"]');
 if (serviceSelect) {
   const params = new URLSearchParams(location.search);
-  const topic = params.get('service');
+  const requested = params.get('service');
+  const topic = requested === 'Monthly data protection' ? 'Managed Data Storage & Protection' : requested;
   if ([...serviceSelect.options].some(option => option.value === topic)) serviceSelect.value = topic;
   const message = enquiry.querySelector('[data-field="challenge"]');
   const domain = params.get('domain')?.trim();
   if (topic === 'Domain registration' && domain && domain.length <= 253 && message)
     message.value = 'Please check availability and quote registration for ' + domain + '.';
-  if (message && topic === 'Monthly data protection')
-    message.placeholder = 'Describe your systems and record types. Please leave individual records and ID numbers out.';
+  const note = enquiry.querySelector('#service-note');
+  function updateNote() {
+    if (!note) return;
+    note.textContent = serviceSelect.value === 'Managed Data Storage & Protection'
+      ? 'Tell us the types of records and approximate volume. Please leave individual records, ID numbers and confidential documents out.'
+      : serviceSelect.value === 'Domain registration'
+        ? 'Include your preferred domain. We confirm availability, registration and renewal fees before you approve an order.'
+        : 'Describe your goal and the support you need. Please leave personal records out of this form.';
+  }
+  const preference = enquiry.querySelector('[data-field="contact_method"]');
+  const phone = enquiry.querySelector('[name="phone"]');
+  if (preference && phone) {
+    const updatePhone = () => { phone.required = preference.value !== 'Email'; };
+    preference.addEventListener('change', updatePhone);
+    enquiry.addEventListener('reset', () => queueMicrotask(updatePhone));
+    updatePhone();
+  }
+  serviceSelect.addEventListener('change', updateNote);
+  updateNote();
+}
+
+const menuToggle = document.querySelector('.site-menu');
+const navLinks = document.querySelector('#site-links');
+if (menuToggle && navLinks) {
+  const closeMenu = () => menuToggle.setAttribute('aria-expanded', 'false');
+  menuToggle.addEventListener('click', () => {
+    menuToggle.setAttribute('aria-expanded', String(menuToggle.getAttribute('aria-expanded') !== 'true'));
+  });
+  navLinks.addEventListener('click', closeMenu);
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && menuToggle.getAttribute('aria-expanded') === 'true') {
+      closeMenu();
+      menuToggle.focus();
+    }
+  });
 }

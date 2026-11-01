@@ -451,3 +451,38 @@ img{max-width:100%;display:block}
 @media(max-width:1120px){.navlinks{gap:12px}.nav-actions .register-domain{padding:9px 11px}}
 @media(max-width:700px){.managed-service .grid{grid-template-columns:1fr}.nav{flex-wrap:wrap;justify-content:space-between}.nav-actions{margin-left:auto}.nav-actions .register-domain{display:inline-flex!important;font-size:12px}.managed-service .section{padding:32px 0}}
 @media(max-width:500px){.domain-start div{flex-direction:column}.nav-actions .nav-icon[title="Call Zimbabwe office"]{display:none}}
+
+/* Public service catalogue and client index */
+:root{--directory-ink:#211c37;--directory-purple:#3c3489;--directory-rule:#e1ddec}
+.site-menu{display:none}.offer-actions,.offer-links,.offer-related,.offer-jump{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.offer-hero,.data-hero-inner,.data-split,.data-close{display:grid;grid-template-columns:1.2fr 1fr;align-items:center;gap:clamp(24px,6vw,95px)}
+.offer-hero{padding-block:clamp(40px,6vw,90px)}.offer-hero h1,.data-hero h1{font-size:clamp(38px,5vw,72px);line-height:1.04;letter-spacing:-.045em;color:var(--directory-ink);margin:14px 0}
+.offer-hero p,.data-hero p,.client-heading p,.data-scope p,.data-close p,.data-split p{line-height:1.65;max-width:64ch}
+.offer-hero-img{overflow:hidden;border-radius:20px}.offer-hero-img img{width:100%;height:clamp(220px,25vw,350px);object-fit:cover;display:block}
+.offer-actions{margin:22px 0 4px}.offer-directory{padding-bottom:50px}.offer-jump{margin:4px 0 30px}.offer-jump a{border:1px solid var(--directory-rule);padding:9px 14px;border-radius:24px;background:white;color:var(--directory-purple);font-size:13px;font-weight:600}
+.offer-group,.offer-directory,.client-section,.data-scope,#nxtLeadForm{scroll-margin-top:105px}
+.offer-group{border-top:1px solid var(--directory-rule);padding:32px 0 14px}.offer-group-title,.client-heading{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap}
+.offer-group-title h2,.client-heading h2,.data-scope h2,.data-band h2,.data-close h2{font-size:clamp(25px,3vw,43px);letter-spacing:-.04em;line-height:1.12;margin:8px 0 18px}
+.group-no,.offer-count,.client-type{font-size:12px;font-weight:600;color:var(--directory-purple)}
+.offer-count{margin-left:auto}.offer-grid,.offer-home-grid,.client-grid{display:grid;gap:16px;grid-template-columns:repeat(3,minmax(0,1fr))}
+.offer-card,.offer-home-grid article{display:flex;flex-direction:column;padding:24px;background:white;border:1px solid var(--directory-rule);border-radius:14px}
+.offer-card h3,.offer-home-grid h3,.client-grid h3,.data-example h2{font-size:clamp(20px,2vw,26px);line-height:1.2;letter-spacing:-.04em;margin:0 0 8px}
+.offer-card p{font-size:15px;line-height:1.6;margin:0 0 28px}.offer-links{align-items:baseline;justify-content:space-between;margin-top:auto}.offer-links a,.svc-action,.offer-related a{color:var(--directory-purple);font-size:13px;font-weight:650;text-underline-offset:3px;text-decoration:underline}
+.offer-related{margin:22px 0 0;padding:22px 0;border-top:1px solid var(--directory-rule)}.offer-related h2{font-size:19px;width:100%}.offer-home-grid ul{padding-left:18px}.offer-home-grid li{padding:4px 0;font-size:14px}.offer-home-grid a:hover,.client-section a:hover{text-decoration:underline}
+.client-section{padding:clamp(40px,6vw,80px) 0;background:#f2eff9}.client-heading{justify-content:space-between;align-items:flex-end;margin-bottom:20px}.client-heading p{max-width:480px}
+.client-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border-block:1px solid #dcd6e8;margin:12px 0 18px}.client-grid article{padding:22px;min-width:0;border-right:1px solid #dcd6e8}.client-grid article:last-child{border:0}.client-grid h3{margin:10px 0}.client-grid p{font-size:14px;line-height:1.55}
+.data-hero,.data-band{background:#f3f0fa}.data-hero-inner,.data-scope,.data-band,.data-close{padding-block:clamp(40px,5vw,78px)}.data-example{padding:30px;background:var(--directory-purple);color:white;border-radius:14px}.data-example h2{color:white;margin:14px 0}.data-example .kicker{color:#e3d9ff}.data-scope .offer-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.data-band p+p{margin-top:14px}.data-close .btn{justify-self:start}
+@media(max-width:1150px){.navlinks{display:none}.site-menu{display:inline-flex;background:white;border:1px solid var(--directory-rule);border-radius:8px;padding:9px 13px;color:var(--directory-purple);font:inherit;font-size:14px;font-weight:650;margin-left:auto}.site-menu[aria-expanded=true]+.navlinks{display:grid;position:absolute;top:100%;left:0;right:0;background:white;padding:12px max(18px,5vw);border-bottom:1px solid var(--directory-rule);box-shadow:0 8px 14px #211c3712;max-height:65dvh;overflow:auto}.nav-actions{margin-left:0}.site-menu[aria-expanded=true]+.navlinks a{padding:10px}.offer-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.offer-hero,.data-hero-inner,.data-split,.data-close{grid-template-columns:1fr}.offer-hero-img{display:none}.client-grid,.offer-home-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.client-grid article{border:0;border-top:1px solid #dcd6e8}.offer-count{margin-left:0}.nav{flex-wrap:nowrap;gap:8px}.nav-actions .nav-icon,.nav-actions .nav-audit,.nav-actions .nav-client{display:none}.nav-actions{margin-left:0}.brand img{max-width:100px}}
+@media(max-width:540px){.offer-grid,.data-scope .offer-grid,.offer-home-grid{grid-template-columns:1fr}.client-grid article{padding:16px 8px}.offer-card{padding:20px}.client-heading{display:block}.offer-group-title{gap:10px}.offer-jump{gap:6px}.offer-jump a{font-size:12px}.client-grid h3{font-size:18px}}
+@media(min-width:1151px){.nav{gap:16px}.navlinks{gap:16px}.navlinks a,.nav-actions .btn{white-space:nowrap}.nav-actions .btn{padding:10px 14px}}
+@media(min-width:1151px) and (max-width:1330px){.nav-actions .nav-icon[title="Call Zimbabwe office"],.nav-actions .nav-icon-whatsapp{display:none}.navlinks{gap:12px}}
+@media(prefers-reduced-motion:reduce){.reveal-left,.reveal-right,.reveal-up{opacity:1;transform:none;transition:none}}
+main{overflow-x:clip}
+.nav-extra{display:none}
+@media(max-width:1150px){.navlinks .nav-extra{display:block}}
+@media(max-width:600px){.header .nav{display:grid;grid-template-columns:minmax(62px,1fr) auto auto;gap:8px}.site-menu{margin-left:0;padding:8px 10px}.nav-actions{margin:0}.nav-actions>:not(.register-domain){display:none!important}.nav .brand img{width:86px;max-width:100%}.nav-actions .register-domain{padding:9px 10px;font-size:12px}}
+
+body:not(.has-reveal) :is(.reveal-left,.reveal-right,.reveal-up),
+.hero :is(.reveal-left,.reveal-right,.reveal-up),
+.service-page-hero :is(.reveal-left,.reveal-right,.reveal-up){opacity:1;transform:none}

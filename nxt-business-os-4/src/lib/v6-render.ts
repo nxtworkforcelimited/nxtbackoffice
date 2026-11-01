@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(btn){btn.disabled=true;btn.textContent='Sending…';}
   const hidden=form.querySelector('input[name="name"]');
   const payload={type:hidden&&hidden.value==='Free Audit Request'?'free_audit':'enquiry',name:form.querySelector('[name="contact_name"]')?.value||'',company:form.querySelector('[name="partner_name"]')?.value||'',email:form.querySelector('[name="email_from"]')?.value||'',phone:form.querySelector('[name="phone"]')?.value||'',service:form.querySelector('[data-field="service"]')?.value||'',audit_type:hidden&&hidden.value==='Free Audit Request'?(form.querySelector('[data-field="service"]')?.value||''):'',industry:form.querySelector('[data-field="industry"]')?.value||'',contact_method:form.querySelector('[data-field="contact_method"]')?.value||'',message:form.querySelector('[data-field="challenge"]')?.value||'',website:''};
-  let status=document.getElementById('nxtBridgeStatus');if(!status){status=document.createElement('p');status.id='nxtBridgeStatus';form.appendChild(status);}
+  let status=document.getElementById('nxtBridgeStatus');if(!status){status=document.createElement('p');status.id='nxtBridgeStatus';status.setAttribute('role','status');form.appendChild(status);}
   try{const r=await fetch('/api/public/enquiry',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const b=await r.json().catch(()=>({}));if(!r.ok)throw new Error(b.error||'Submission failed');form.reset();status.style.color='#2f6b45';status.textContent=payload.type==='free_audit'?'Thank you. Your free audit request has been received. We will respond within 24 hours.':'Thank you. Your enquiry has been received. We will respond within 24 hours.';}catch(err){status.style.color='#9b2c2c';status.textContent='We could not submit this form. Please email hello@nxt-workforce.com or WhatsApp +263 79 005 0483.';}finally{if(btn){btn.disabled=false;btn.textContent=old||'Submit';}}
  });
 });
@@ -83,6 +83,8 @@ export async function renderV6Page(path:string){
   if(!file)return new Response('Not found',{status:404});
   let html=await readFile(join(process.cwd(),'content','v6',file),'utf8');
   html=rewriteLinks(html,file);
+  html=html.replace('<div class="navlinks">','<button class="site-menu" type="button" aria-controls="site-links" aria-expanded="false">Menu</button><div class="navlinks" id="site-links">');
+  html=html.replace('<a href="/contact">Contact</a>','<a href="/#clients">Our clients</a><a href="/contact">Contact Us</a><a class="nav-extra" href="/free-audits">Free audit</a><a class="nav-extra" href="/login">Client login</a>');
   html=attachFormBridge(html);
   const url=process.env.NEXT_PUBLIC_SUPABASE_URL,key=process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   if(url&&key){
