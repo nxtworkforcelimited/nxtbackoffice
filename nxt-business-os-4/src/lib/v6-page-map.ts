@@ -3,4 +3,4 @@ export type V6Url=keyof typeof v6Files;
 export const v6UrlByFile=new Map(Object.entries(v6Files).map(([url,file])=>[file,url]));
 export function slugForUrl(url:string){return url==='/'?'home':url.replace(/^\/+|\/+$/g,'');}
 
-export const siteFiles = {...v6Files, '/domains': 'domains.html', '/services/data-protection': 'data-protection.html', '/services/sme-digital-packages': 'services/sme-digital-packages.html', '/services/ai-integration': 'services/ai-integration.html', '/services/whatsapp-business': 'services/whatsapp-business.html', '/services/business-sms': 'services/business-sms.html', '/blog': 'blog.html'} as const;
+export const siteFiles = {...v6Files, '/domains': 'domains.html', '/domain-checkout': 'domain-checkout.html', '/domain-account': 'domain-account.html', '/services/data-protection': 'data-protection.html', '/services/sme-digital-packages': 'services/sme-digital-packages.html', '/services/ai-integration': 'services/ai-integration.html', '/services/whatsapp-business': 'services/whatsapp-business.html', '/services/business-sms': 'services/business-sms.html', '/blog': 'blog.html'} as const;

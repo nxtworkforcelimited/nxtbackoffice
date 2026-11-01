@@ -38,7 +38,7 @@
       card.append(copy);
       if (item.status === 'available') {
         const register = document.createElement('button');
-        register.type = 'button'; register.className = 'btn primary'; register.textContent = 'Register domain';
+        register.type = 'button'; register.className = 'btn primary'; register.textContent = 'Add to cart';
         register.addEventListener('click', () => document.dispatchEvent(new CustomEvent('nxt-register-domain', {detail: {domain: item.domain}})));
         card.append(register);
       }
