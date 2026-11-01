@@ -94,6 +94,7 @@ export async function renderV6Page(path:string){
   html=html.replace('<div class="footer-cta-copy">',footerSignature+'<div class="footer-cta-copy">');
   html=html.replace('</head>','<link rel="stylesheet" href="/v6/footer-trace.css"><script defer src="/v6/footer-trace.js"></script></head>');
   html=html.replaceAll('href="/login"', 'href="'+businessOsUrl+'"');
+  html=html.replace('</head>','<link rel="stylesheet" href="/v6/service-chat.css"><script defer src="/v6/service-chat.js"></script></head>');
   html=attachFormBridge(html);
   const url=process.env.NEXT_PUBLIC_SUPABASE_URL,key=process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   if(url&&key){

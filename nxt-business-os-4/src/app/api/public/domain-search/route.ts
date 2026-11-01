@@ -16,7 +16,7 @@ function candidates(input: unknown): string[] {
   if (!name.includes('.')) name = name.replace(/\s+/g, '-');
   const labels = name.split('.');
   if (labels.some(label => !/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(label))) return [];
-  if (labels.length === 1) return ['co.zw', 'com', 'co.uk', 'co.za'].map(tld => name + '.' + tld);
+  if (labels.length === 1) return ['co.zw', 'com', 'co.uk', 'co.com', 'co.za'].map(tld => name + '.' + tld);
   if (!/^[a-z]{2,63}$/.test(labels.at(-1)!)) return [];
   return [name];
 }
@@ -71,7 +71,7 @@ async function internationalLookup(domains: string[]): Promise<DomainResult[]> {
   }
   return Promise.all(domains.map(async domain => {
     if (answers.get(domain) === true) return {domain, status: 'available' as const, source: 'Registrar'};
-    const base = rdapBases[domain.split('.').at(-1)!];
+    const base = domain.endsWith('.co.com') ? undefined : rdapBases[domain.split('.').at(-1)!];
     if (base) return registryLookup(domain, base + 'domain/');
     // Registrar search can return false for both unavailable and unconfirmed names.
     return {domain, status: 'unconfirmed' as const, source: 'Registrar'};

@@ -9,9 +9,9 @@
   let activeRequest = null;
 
   const labels = {
-    available: ['Available', 'Request registration'],
+    available: ['Available', 'Register domain'],
     unavailable: ['Unavailable', 'Ask about alternatives'],
-    unconfirmed: ['NXT review needed', 'Ask NXT to check'],
+    unconfirmed: ['', ''],
   };
 
   function enquiryLink(domain, label) {
@@ -25,7 +25,7 @@
 
   function showResults(items) {
     list.replaceChildren();
-    for (const item of items) {
+    for (const item of items.filter(row => row.status !== 'unconfirmed')) {
       const card = document.createElement('article');
       card.className = 'domain-result';
       const copy = document.createElement('div');
@@ -34,18 +34,14 @@
       const badge = document.createElement('span');
       badge.className = 'domain-badge domain-' + item.status;
       badge.textContent = labels[item.status][0];
-      const note = document.createElement('p');
+      copy.append(badge, name);
+      card.append(copy);
       if (item.status === 'available') {
-        note.textContent = item.source === 'ZISPA'
-          ? 'ZISPA’s search reports this name available, subject to its registration policies.'
-          : 'The registrar reports this name available. Ask NXT for registration and renewal pricing.';
-      } else if (item.status === 'unavailable') {
-        note.textContent = 'The registry has a record for this name. We can help you explore an alternative.';
-      } else {
-        note.textContent = 'Availability could not be confirmed online. Our team can check this name for you.';
+        const register = document.createElement('button');
+        register.type = 'button'; register.className = 'btn primary'; register.textContent = 'Register domain';
+        register.addEventListener('click', () => document.dispatchEvent(new CustomEvent('nxt-register-domain', {detail: {domain: item.domain}})));
+        card.append(register);
       }
-      copy.append(badge, name, note);
-      card.append(copy, enquiryLink(item.domain, labels[item.status][1]));
       list.append(card);
     }
     results.hidden = false;
@@ -97,7 +93,8 @@
         throw new Error('Search unavailable');
       }
       showResults(data.results);
-      status.textContent = data.results.length === 1 ? 'Your domain check is ready.' : 'Your domain checks are ready.';
+      status.textContent = data.results.some(item => item.status === 'unconfirmed') ? 'Some checks could not be completed. Please try again.' : '';
+      if (data.results.every(item => item.status === 'unconfirmed')) results.hidden = true;
       results.querySelector('h2').focus();
     } catch {
       if (activeRequest !== controller) return;

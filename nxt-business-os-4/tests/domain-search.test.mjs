@@ -36,7 +36,7 @@ test('reports confirmed registry records as unavailable without returning owner 
   assert.ok(!JSON.stringify(result).includes('owner@'));
 });
 
-test('a bare business name compares four extensions and preserves uncertain international answers', async t => {
+test('a bare business name compares five extensions and preserves uncertain international answers', async t => {
   const calls = [];
   t.mock.method(globalThis, 'fetch', async (url, options) => {
     calls.push([url, options.body]);
@@ -51,10 +51,10 @@ test('a bare business name compares four extensions and preserves uncertain inte
   const result = await (await POST(request(' New Business '))).json();
   assert.deepEqual(result.results.map(r => [r.domain, r.status]), [
     ['new-business.co.zw', 'available'], ['new-business.com', 'available'],
-    ['new-business.co.uk', 'unavailable'], ['new-business.co.za', 'unconfirmed'],
+    ['new-business.co.uk', 'unavailable'], ['new-business.co.com', 'unconfirmed'], ['new-business.co.za', 'unconfirmed'],
   ]);
   assert.deepEqual(JSON.parse(calls.find(c => c[0].includes('/domains/search'))[1]).domains,
-    ['new-business.com', 'new-business.co.uk', 'new-business.co.za']);
+    ['new-business.com', 'new-business.co.uk', 'new-business.co.com', 'new-business.co.za']);
 });
 
 test('an RDAP 404 alone never declares an international domain available', async t => {

@@ -1,0 +1,17 @@
+# Public website service flows
+
+The `/domains` page shows confirmed Available / Unavailable results and a short registration wizard. `.co.zw` applications collect the owner, billing and technical contacts, organisation description, intended use, street address for notices, and two to four unique nameservers with IP addresses. International applications collect the owner, billing and business details. The two-to-three-hour estimate begins after complete details and payment.
+
+`POST /api/public/domain-registration` validates on the server and rechecks `.co.zw` availability. With `RESEND_API_KEY` and `NOTIFICATION_FROM` set, it sends one email to the fixed address `dns@nxt-workforce.com`, with the full domain as subject and one ASCII `.txt` attachment. The supplied ZISPA 3.3 template retains its labels and line layout. The Resend transport encodes attachments for delivery to NXT's inbox; the decoded file is ASCII with CRLF line endings. NXT must verify the required signed owner documents, payment and authoritative DNS, then submit from its registered registrar mailbox. This endpoint does not email ZISPA or purchase domains.
+
+Without the email configuration, the API returns the prepared application for download. The page explicitly asks the customer to attach it to an email; it never reports that an unsent application was received. Set the two server-only email variables on the website Vercel project to enable automatic delivery. Sensitive keys on a different project cannot be read/copied through the connector. Do not place keys in the frontend or this archive.
+
+Normal 123 Reg accounts have no verified API connection here. International applications can be fulfilled manually in the NXT 123 Reg account. Inconclusive online availability checks show a retry message; they are never converted to false Unavailable results. A registrar API with suitable supported extensions is needed for comprehensive automated international checks and purchases.
+
+The floating WhatsApp action opens NXT's existing +263790050483 contact. Ask AI calls `/api/public/service-assistant`, which uses only the public catalogue in `src/lib/public-service-catalogue.ts`; it has no CRM access or action tools. Replies can suggest up to three known service links. Keep that catalogue in sync with the service pages.
+
+AI requires `NXT_PUBLIC_AI_ENABLED=true` and Vercel deployment OIDC (or server-only `AI_GATEWAY_API_KEY` outside Vercel). The selected model is configurable in `NXT_PUBLIC_AI_MODEL`; `google/gemini-2.5-flash-lite` was verified in the live Gateway catalogue. Input/history and output tokens are bounded. Per-instance throttling is best effort, not a distributed spending cap; Gateway credit/budget settings remain the account-level limit. No credit purchase, auto-recharge or budget increase was configured.
+
+Photos in `public/v6/photos/` are the owner's supplied originals. The source filenames are recorded in `credits.json`. Spotly's supplied transparent SVG joins the animated client strip. The homepage's white animated-X hero remains unchanged.
+
+Verification: focused server tests cover validation, cross-site requests, malformed/oversized input, ASCII formatting, fixed recipients, delivery failures, download fallback, safe catalogue links and throttling. Browser checks cover the wizard, retries, mobile layouts and chat. Live delivery requires an actual configured sender; a successful mock test does not prove mailbox delivery.
