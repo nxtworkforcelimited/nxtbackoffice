@@ -1,0 +1,49 @@
+.nxt-home-hero { background: #fff; padding: clamp(22px, 3.8vw, 58px) 0; }
+.home-hero-layout { display: grid; grid-template-columns: 1.1fr 1fr; align-items: center; gap: clamp(24px, 5vw, 86px); }
+.home-hero-copy { padding: 8px 0 12px; }
+.nxt-home-hero h1 { font-size: clamp(52px, 5.2vw, 82px); line-height: 1; max-width: 12ch; }
+.nxt-home-hero .home-hero-copy p { max-width: 52ch; font-size: clamp(15px, 1.2vw, 18px); }
+.home-hero-art { display: grid; place-items: center; background: white; }
+.hero-x-art { display: block; width: min(100%, 490px); height: auto; }
+.hero-x-base { stroke: #574481; stroke-width: 3.2; }
+.hero-x-flare { stroke: #b487fe; stroke-width: 16; filter: blur(6px); stroke-dasharray: 21 79; }
+.hero-x-edge { stroke: #8c50e5; stroke-width: 6; stroke-dasharray: 21 79; }
+.hero-x-spark { stroke: #5a2baf; stroke-width: 3; stroke-dasharray: 6 94; }
+.service-finder { background: #f6f4fa; border-block: 1px solid #e8e3ef; padding: clamp(28px, 4vw, 64px) 0; scroll-margin-top: 90px; }
+.finder-layout { display: grid; grid-template-columns: minmax(225px,.72fr) minmax(0,1.28fr); align-items: center; gap: clamp(25px,6vw,90px); }
+.finder-intro h2 { margin: 10px 0 12px; font-size: clamp(34px, 3.6vw, 56px); font-weight: 500; line-height: 1.05; letter-spacing: -.045em; }
+.finder-intro p { max-width: 34ch; color: #504956; margin: 0 0 13px; }
+.finder-directory,.finder-back,.finder-reset { color: #463786; font-weight: 650; text-decoration: underline; text-underline-offset: .23em; font-size: 14px; }
+.finder-card { border: 1px solid #ded8e8; border-radius: 22px; background: #fff; padding: clamp(18px, 2.4vw, 32px); }
+.finder-card [hidden],.finder-card[hidden] { display: none; }
+.finder-progress { margin: 0; color: #665a7c; font-size: 11px; text-transform: uppercase; letter-spacing: .13em; font-weight: 700; }
+.finder-question { font-weight: 600; font-size: clamp(20px,2vw,28px); line-height: 1.25; margin: 8px 0 18px; }
+.finder-card fieldset { border: 0; min-inline-size: 0; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 7px; }
+.finder-option { position: relative; display: flex; align-items: center; gap: 10px; padding: 8px 12px; min-height: 42px; border-radius: 11px; border: 1px solid #dcd7e5; color: #292333; font: 550 14px/1.35 Montserrat,Arial,sans-serif; cursor: pointer; }
+.finder-option input { margin: 0; width: 14px; height: 14px; accent-color: #51409a; flex-shrink: 0; }
+.finder-option:hover { background: #f9f7fd; }
+.finder-option:has(:checked) { border-color: #6b52ad; background: #f1edfb; color: #352866; }
+.finder-option:focus-within,.finder-back:focus-visible,.finder-reset:focus-visible,.finder-card .btn:focus-visible,.finder-question:focus-visible { outline: 2px solid #6543b4; outline-offset: 3px; }
+.finder-controls,.finder-links { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+.finder-controls { margin-top: 15px; }
+.finder-controls .btn { padding: 8px 20px; min-height: 42px; }
+.finder-controls .btn:disabled { color: #534b65; background: #f0edf5; border-color: #e6e2ec; transform: none; cursor: default; }
+.finder-back,.finder-reset { background: none; border: 0; padding: 8px 2px; cursor: pointer; }
+.finder-reason { color: #514957; margin: 0 0 15px; max-width: 58ch; }
+@media (max-width: 750px) {
+ .nxt-home-hero { padding: 12px 0 24px; }
+ .home-hero-layout { grid-template-columns: 1fr; gap: 4px; }
+ .home-hero-art { grid-row: 1; }
+ .hero-x-art { width: clamp(155px, 37vw, 215px); }
+ .nxt-home-hero h1 { font-size: clamp(39px,8vw,55px); margin: 10px 0; }
+ .home-hero-copy { padding: 0; }
+ .nxt-home-hero .hero-actions { margin-top: 16px; }
+ .finder-layout { grid-template-columns: 1fr; gap: 14px; }
+ .finder-intro h2 { margin: 5px 0; }
+ .finder-intro br { display: none; }
+ .finder-intro p { margin-bottom: 6px; max-width: none; }
+ .service-finder { padding: 24px 0; scroll-margin-top: 76px; }
+ .finder-card { padding: 16px; border-radius: 16px; }
+ .finder-option { padding: 7px 8px; font-size: 13px; gap: 6px; }
+}
+@media (prefers-reduced-motion: reduce) { .hero-x-art .nxt-trace-run { animation: none; } }
