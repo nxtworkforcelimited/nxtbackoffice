@@ -67,6 +67,13 @@ export function withServicesMenu(html: string, brand: string, page: string): str
     .replace(/<script defer src="\/v6\/services-menu\.js(?:\?[^"]*)?"><\/script>/g, '')
     .replace('</head>', '<link rel="stylesheet" href="/v6/services-menu.css?v=3"><script defer src="/v6/services-menu.js?v=2"></script></head>');
   const route = page.replace(/^\//, '').replace(/\.html$/, '');
+  if (route === 'admin') {
+    html = html.replace('<h1>Ideas into words.<br>Words into action.</h1><p>Publish blogs and insights, and review website enquiries.</p>',
+      '<h1>News &amp; Articles</h1><p>Read the latest industry news, or sign in to write and publish a blog article.</p>' +
+      '<nav class="actions" aria-label="News and articles"><a class="btn outline" href="/insights?view=news#industry-news">Read news</a><a class="btn outline" href="/blog">Read blog articles</a></nav>');
+    html = html.replace('id="new-post" class="btn">New article', 'id="new-post" class="btn">New blog article')
+      .replace('<h2>Your articles</h2>', '<h2>Your blog articles</h2>');
+  }
   if (route === 'insights' && !html.includes('id="industry-news"')) {
     html = html.replace('data-news-card="News"', 'id="industry-news" data-news-card="News"');
   }

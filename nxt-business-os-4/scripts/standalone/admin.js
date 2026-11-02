@@ -53,7 +53,37 @@ loginForm.onsubmit = async event => {
 };
 q('#signout').onclick=async()=>{if(session)await fetch(API+'/auth/v1/logout',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+session.access_token}}).catch(()=>{});logout();};
 q('#new-post').onclick=()=>{q('#post-editor').reset();q('#post-editor').elements.id.value='';q('#post-editor').scrollIntoView({behavior:'smooth'});};
-q('#post-editor').onsubmit=async e=>{e.preventDefault();const f=e.target,b=f.querySelector('button');b.disabled=true;try{const p={};for(const n of ['title','slug','category','excerpt','body'])p[n]=f.elements[n].value.trim();p.published=f.elements.published.checked;await authFetch('nxt_website_posts'+(f.elements.id.value?'?id=eq.'+f.elements.id.value:''),{method:f.elements.id.value?'PATCH':'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify(p)});f.querySelector('.status').textContent='Article saved.';await workspace();}catch(err){f.querySelector('.status').textContent=err.message;}finally{b.disabled=false;}};
+q('#post-editor').onsubmit = async event => {
+  event.preventDefault();
+  const form = event.target;
+  const fields = form.elements;
+  const button = form.querySelector('button');
+  const status = form.querySelector('.status');
+  button.disabled = true;
+  try {
+    const post = {};
+    for (const name of ['title', 'slug', 'category', 'excerpt', 'body']) {
+      post[name] = fields[name].value.trim();
+    }
+    post.published = fields.published.checked;
+    const query = new URLSearchParams({select: 'id'});
+    const id = fields.id.value;
+    if (id) query.set('id', 'eq.' + id);
+    const saved = await authFetch('nxt_website_posts?' + query, {
+      method: id ? 'PATCH' : 'POST',
+      headers: {Prefer: 'return=representation'},
+      body: JSON.stringify(post)
+    });
+    if (!saved?.[0]?.id) throw new Error('Could not save this article. Refresh the list and try again.');
+    fields.id.value = saved[0].id;
+    status.textContent = post.published ? 'Article published.' : 'Draft saved.';
+    await workspace();
+  } catch (error) {
+    status.textContent = error.message;
+  } finally {
+    button.disabled = false;
+  }
+};
 let subscriberOffset = 0;
 let subscriberRequest = 0;
 async function readSubscribers(offset) {
