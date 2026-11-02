@@ -13,3 +13,6 @@ for (const name of pages) {
 await mkdir(join(root,'v6'),{recursive:true});
 for (const name of ['services-menu.css','services-menu.js'])
   await copyFile(new URL('../public/v6/'+name,import.meta.url),join(root,'v6',name));
+if (pages.includes('admin.html')) {
+  await copyFile(new URL('./standalone/admin.js', import.meta.url), join(root, 'admin.js'));
+}
