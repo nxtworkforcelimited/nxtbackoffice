@@ -57,11 +57,17 @@
     try { return JSON.parse(localStorage.getItem(key) || '{}') || {}; }
     catch { return {}; }
   };
+  const dismissalKey = 'nxt.workforce.newsletter.dismissed';
+  const dismissedThisVisit = () => {
+    try { return sessionStorage.getItem(dismissalKey) === '1'; }
+    catch { return false; }
+  };
+  const newsletterLink = () => ['#newsletter', '#nxt-newsletter'].includes(location.hash);
   const remember = state => { try { localStorage.setItem(key, JSON.stringify(state)); } catch {} };
   const open = manual => {
     if (dialog.open) return;
     const preference = readPreference();
-    if (!manual && (preference.joined || preference.laterUntil > Date.now())) return;
+    if (!manual && (preference.joined || dismissedThisVisit() || location.hash || document.querySelector('dialog[open]'))) return;
     form.hidden = Boolean(preference.joined);
     status.textContent = preference.joined ? 'You’ve joined the NXT Workforce newsletter on this device.' : '';
     dialog.querySelector('[data-dismiss-news]').textContent = preference.joined ? 'Close' : 'Maybe later';
@@ -79,7 +85,7 @@
     }
   });
   dialog.addEventListener('close', () => {
-    if (!readPreference().joined) remember({laterUntil: Date.now() + 30 * 86400000});
+    try { sessionStorage.setItem(dismissalKey, '1'); } catch {}
   });
   wireSignup(form, 'nxt_company_newsletter_subscribe', status, () => {
     remember({joined:true});
@@ -88,5 +94,7 @@
     dialog.querySelector('[data-dismiss-news]').textContent = 'Close';
     if (dialog.open) dialog.querySelector('[data-dismiss-news]').focus();
   });
-  if (!location.hash) window.setTimeout(() => open(false), 700);
+  window.addEventListener('hashchange', () => { if (newsletterLink()) open(true); });
+  if (newsletterLink()) open(true);
+  else if (!location.hash) window.setTimeout(() => open(false), 700);
 })();
