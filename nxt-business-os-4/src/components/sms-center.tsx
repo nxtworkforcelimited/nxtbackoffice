@@ -1,46 +1,71 @@
 'use client';
 import {useEffect,useState} from 'react';
 import type {Workspace} from '@/lib/types';
+import {Send,MessageSquareText,CheckCircle2,Clock3,XCircle} from 'lucide-react';
 
+type Client={id:string;contact_code:string|null;title:string;phone:string};
 type State={
- provider:string;enabled:boolean;sender_id:string;batch_size:number;updated_at:string|null;
- ready_clients:number;enabled_without_phone:number;total_clients:number;
+ enabled:boolean;sender_id:string;
  counts:{queued:number;submitted:number;delivered:number;failed:number};
+ clients:Client[];
  recent:{status:string;source_type:string;created_at:string;delivered_at:string|null;error:string|null}[];
 };
 
 export default function SmsCenter({workspace}:{workspace:Workspace}){
- const [state,setState]=useState<State|null>(null),[error,setError]=useState(''),[notice,setNotice]=useState(''),[busy,setBusy]=useState(false),[recipient,setRecipient]=useState(''),[message,setMessage]=useState('NXT Business OS SMS test. If you received this message, Gikko SMS is working.');
- useEffect(()=>{let live=true;async function load(){try{const r=await fetch('/api/sms?workspace='+workspace.id,{cache:'no-store'}),b=await r.json();if(!r.ok)throw Error(b.error);if(live){setState(b);setError('');}}catch(e){if(live)setError((e as Error).message);}}load();const timer=setInterval(load,15000);return()=>{live=false;clearInterval(timer);};},[workspace.id]);
- if(error)return <p className="notice error">{error}</p>;
- if(!state)return <section className="panel"><p>Loading SMS integration status…</p></section>;
- const ready=state.enabled;
- return <div>
-  <section className="sms-provider-card">
-   <div><span className="eyebrow">SMS PROVIDER</span><h3>Gikko Mobile Messaging</h3>
-    <p>{ready?'Automated client SMS delivery is enabled. Approved client-facing work can be queued to Gikko using the saved contact number.':'The Gikko workflow is installed but live sending is disabled until the API key is stored securely and the integration is enabled.'}</p>
-   </div><span className={'badge '+(ready?'active':'')}>{ready?'Enabled':'Setup required'}</span>
+ const [state,setState]=useState<State|null>(null),[error,setError]=useState(''),[notice,setNotice]=useState(''),[busy,setBusy]=useState(false);
+ const [clientId,setClientId]=useState(''),[recipient,setRecipient]=useState(''),[message,setMessage]=useState('');
+ async function load(){
+  const r=await fetch('/api/sms?workspace='+workspace.id,{cache:'no-store'}),b=await r.json();
+  if(!r.ok)throw Error(b.error);setState(b);setError('');
+ }
+ useEffect(()=>{let live=true;async function go(){try{const r=await fetch('/api/sms?workspace='+workspace.id,{cache:'no-store'}),b=await r.json();if(!r.ok)throw Error(b.error);if(live){setState(b);setError('');}}catch(e){if(live)setError((e as Error).message);}}go();const timer=setInterval(go,30000);return()=>{live=false;clearInterval(timer);};},[workspace.id]);
+ if(error&&!state)return <p className="notice error">{error}</p>;
+ if(!state)return <section className="panel"><p>Loading SMS workspace…</p></section>;
+
+ function chooseClient(id:string){
+  setClientId(id);
+  const client=state?.clients.find(c=>c.id===id);
+  setRecipient(client?.phone||'');
+ }
+ async function sendSms(e:React.FormEvent){
+  e.preventDefault();setBusy(true);setError('');setNotice('');
+  try{
+   const r=await fetch('/api/sms?workspace='+workspace.id,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({client_id:clientId||null,recipient,message})}),b=await r.json();
+   if(!r.ok)throw Error(b.error);
+   setNotice('SMS queued for delivery.');
+   setMessage('');await load();
+  }catch(e){setError((e as Error).message);}finally{setBusy(false);}
+ }
+
+ return <section className="sms-workspace">
+  <section className="sms-hero">
+   <div><span className="eyebrow">SMS</span><h2>Client Messaging</h2><p>Create and send SMS messages from one clean workspace.</p></div>
+   <span className="sms-sender-id">Sender ID · {state.sender_id}</span>
   </section>
-  <div className="studio-metrics">
-   <div><span>Sender ID</span><strong>{state.sender_id}</strong><small>{ready?'Active provider sender':'Testing/default sender'}</small></div>
-   <div><span>Clients ready</span><strong>{state.ready_clients}</strong><small>SMS alerts enabled + valid number</small></div>
-   <div><span>Queued / submitted</span><strong>{state.counts.queued} / {state.counts.submitted}</strong><small>Awaiting or sent to provider</small></div>
-   <div><span>Delivered / failed</span><strong>{state.counts.delivered} / {state.counts.failed}</strong><small>Provider delivery state</small></div>
-  </div>
-  <section className="panel sms-test-panel">
-   <h3>Send test SMS</h3><p>Use an internal mobile number in international format to verify live Gikko delivery.</p>
-   {notice&&<p className="notice">{notice}</p>}
-   <form onSubmit={async e=>{e.preventDefault();setBusy(true);setError('');setNotice('');try{const r=await fetch('/api/sms?workspace='+workspace.id,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({recipient,message})}),b=await r.json();if(!r.ok)throw Error(b.error);setNotice('Test SMS queued. The worker runs every minute; watch Recent SMS Activity below for submitted/failed status.');}catch(e){setError((e as Error).message);}finally{setBusy(false);}}}><div className="form-grid"><label>Mobile number<input required value={recipient} onChange={e=>setRecipient(e.target.value.replace(/\s+/g,''))} placeholder="+2637XXXXXXXX"/></label><label>Message<textarea required maxLength={480} rows={3} value={message} onChange={e=>setMessage(e.target.value)}/></label></div><button className="primary" disabled={busy}>{busy?'Queuing…':'Send test SMS'}</button></form>
+
+  <section className="sms-metrics">
+   <article><Clock3 size={17}/><span>Queued</span><strong>{state.counts.queued}</strong></article>
+   <article><Send size={17}/><span>Submitted</span><strong>{state.counts.submitted}</strong></article>
+   <article><CheckCircle2 size={17}/><span>Delivered</span><strong>{state.counts.delivered}</strong></article>
+   <article><XCircle size={17}/><span>Failed</span><strong>{state.counts.failed}</strong></article>
   </section>
-  <section className="panel">
-   <h3>Approval notification workflow</h3>
-   <p>When a client-facing project, task or social deliverable reaches its configured approval/review stage, NXT Business OS checks the linked Contact. SMS is queued only when that contact has an international mobile number and <strong>SMS approval alerts</strong> enabled.</p>
-   {state.enabled_without_phone>0&&<p className="notice error">{state.enabled_without_phone} contact(s) have SMS alerts enabled but no valid mobile number.</p>}
-   {!ready&&<p className="notice">Next activation step: store the Gikko API key in Supabase Vault as <code>gikko_api_key</code>, verify the API host/sender ID, then enable the provider and run one controlled internal test.</p>}
+
+  <section className="sms-grid">
+   <article className="panel sms-compose">
+    <div className="panel-head"><div><span className="eyebrow">COMPOSE</span><h3>Create SMS</h3><p>Choose a saved contact or enter a mobile number manually.</p></div><MessageSquareText size={20}/></div>
+    {notice&&<p className="notice">{notice}</p>}{error&&<p className="notice error">{error}</p>}
+    <form onSubmit={sendSms}><fieldset disabled={busy}>
+     <label>Client / contact<select value={clientId} onChange={e=>chooseClient(e.target.value)}><option value="">Manual number</option>{state.clients.map(c=><option key={c.id} value={c.id}>{c.title}{c.contact_code?' · '+c.contact_code:''}{c.phone?' · '+c.phone:' · No mobile'}</option>)}</select></label>
+     <label>Mobile number<input required value={recipient} onChange={e=>setRecipient(e.target.value.replace(/\s+/g,''))} placeholder="+2637XXXXXXXX"/></label>
+     <label>Message<textarea required maxLength={480} rows={6} value={message} onChange={e=>setMessage(e.target.value)} placeholder="Type your SMS…"/></label>
+     <div className="sms-compose-foot"><span>{message.length}/480</span><button className="primary" disabled={busy||!message.trim()||!recipient.trim()}><Send size={14}/>{busy?'Queuing…':'Send SMS'}</button></div>
+    </fieldset></form>
+   </article>
+
+   <article className="panel sms-activity">
+    <div className="panel-head"><div><span className="eyebrow">DELIVERY</span><h3>Recent SMS Activity</h3><p>Latest queued and delivered messages.</p></div></div>
+    <div>{!state.recent.length?<p className="empty compact">No SMS activity yet.</p>:state.recent.map((row,i)=><article key={i} className={'sms-activity-row '+row.status}><span><strong>{row.source_type||'SMS'}</strong><small>{new Date(row.created_at).toLocaleString()}</small></span><em>{row.status}</em>{row.error&&<small className="sms-error">{row.error}</small>}</article>)}</div>
+   </article>
   </section>
-  <section className="panel">
-   <h3>Recent SMS activity</h3>
-   {!state.recent.length?<p>No SMS has been queued yet.</p>:state.recent.map((row,i)=><div className="report-row" key={i}><span>{row.source_type||'SMS'}</span><strong>{row.status}</strong><small>{new Date(row.created_at).toLocaleString()}{row.error?' · '+row.error:''}</small></div>)}
-  </section>
- </div>;
+ </section>;
 }
