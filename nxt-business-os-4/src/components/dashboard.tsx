@@ -81,7 +81,7 @@ export default function Dashboard({initial,workspace,workspaces,email,demo=false
  const activeItems=biz.items.filter(i=>!i.deleted_at);
  const canRemoveTestInvoice=biz.canRemoveInvoices===true;
  const items=preview?activeItems.filter(r=>r.client_id===clientId&&(r.kind==='request'||(['invoice','quote'].includes(r.kind)&&['issued','paid','accepted'].includes(r.status)))):activeItems;
- const nav=(Object.keys(appIcons) as View[]).filter(v=>!['email','website'].includes(v)&&(client?(['overview','projects','tasks','social_posts','documents','messages','requests','assistant','utm','invoices'].includes(v)&&(v!=='assistant'||clientAssistantEnabled)):v==='settings'?(['owner','admin'].includes(workspace.role)||can('hr')):['clients','deals'].includes(v)||!viewCap[v]||can(viewCap[v])||(v==='social_posts'&&can('approve_content'))));
+ const nav=(Object.keys(appIcons) as View[]).filter(v=>!['email','website'].includes(v)&&(client?(['overview','projects','tasks','social_posts','documents','messages','requests','assistant','utm','invoices'].includes(v)&&(v!=='assistant'||clientAssistantEnabled)):v==='settings'?(['owner','admin'].includes(workspace.role)||can('hr')):['clients','deals'].includes(v)||v==='employees'||!viewCap[v]||can(viewCap[v])||(v==='social_posts'&&can('approve_content'))));
  const sidebarOrder:View[]=client
   ? ['overview','projects','tasks','invoices','documents','social_posts','messages','requests','utm',...(clientAssistantEnabled?['assistant' as View]:[])]
   : ['overview','deals','calls','projects','tasks','clients','employees','team','leave','expenses','accounting','invoices','payroll','loans','tickets','builds','social_posts','documents','sms','phone','utm','reports','settings'];
