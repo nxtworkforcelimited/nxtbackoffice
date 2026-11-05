@@ -92,7 +92,7 @@ export default function Dashboard({initial,workspace,workspaces,email,demo=false
  const nav=(Object.keys(appIcons) as View[]).filter(v=>!['email','website','employees','team'].includes(v)&&(client?(['overview','projects','tasks','social_posts','documents','messages','requests','assistant','utm','invoices'].includes(v)&&(v!=='assistant'||clientAssistantEnabled)):v==='settings'?protectedPeopleAccess:['clients','deals'].includes(v)||!viewCap[v]||can(viewCap[v])||(v==='social_posts'&&can('approve_content'))));
  const sidebarOrder:View[]=client
   ? ['overview','projects','tasks','invoices','documents','social_posts','messages','requests','utm',...(clientAssistantEnabled?['assistant' as View]:[])]
-  : ['overview','deals','calls','projects','tasks','clients','leave','accounting','loans','tickets','builds','social_posts','documents','sms','phone','utm','reports','settings'];
+  : ['overview','deals','calls','projects','tasks','clients','leave','accounting','loans','tickets','builds','documents','sms','utm','reports','settings'];
  const sidebarNav=sidebarOrder.filter(v=>nav.includes(v));
  const activeView=nav.includes(view)?view:'overview';
  useEffect(()=>{if(activeView!=='utm'||demo)return;void loadTracking();},[activeView,demo,workspace.id]);
@@ -183,8 +183,8 @@ export default function Dashboard({initial,workspace,workspaces,email,demo=false
  const isBridget=email.toLowerCase()==='bridget@nxt-workforce.com';
  const navTitle=(v:View)=>client?({overview:'Home',projects:'Projects',tasks:'Tasks',invoices:'Invoices & Payments',documents:'Documents',social_posts:'Approvals',messages:'Messages',requests:'Support',assistant:'NXT Assistant',utm:'Campaign Links'} as Partial<Record<View,string>>)[v]??titleFor(v):({overview:'Home',projects:'Master Tracker',deals:'CRM',clients:'Contacts',expenses:'Expenses',social_posts:'Marketing',reports:'Reports',payroll:'Payroll',loans:'Employee Loans',tickets:'Tickets'} as Partial<Record<View,string>>)[v]??titleFor(v);
  const staffHomeApps=[
-  ['deals','CRM','Leads & pipeline'],['projects','Master Tracker','Tasks, approvals & risks'],['tasks','Tasks','Stay on track'],['clients','Contacts','Manage contacts'],['accounting','Accounting','Invoices, quotes, expenses & ledger'],['loans','Employee Loans','Manage staff loans'],['tickets','Tickets','Support & IT'],['builds','Websites & Back Offices','Website and back-office delivery'],['documents','Documents','Store & share'],['social_posts','Marketing','Plan & publish'],
-  ['phone','Zoiper Call','Business calls through Zoiper'],['sms','SMS','Send & monitor client messages'],['calls','Cold Calling','Call lists & daily reports'],['utm','UTM Generator','Create tracked campaign links'],['reports','Reports','Analytics & insights'],['settings','Settings','Configure OS']
+  ['deals','CRM','Leads & pipeline'],['projects','Master Tracker','Tasks, approvals & risks'],['tasks','Tasks','Stay on track'],['clients','Contacts','Manage contacts'],['accounting','Accounting','Invoices, quotes, expenses & ledger'],['loans','Employee Loans','Manage staff loans'],['tickets','Tickets','Support & IT'],['builds','Websites & Back Offices','Website and back-office delivery'],['documents','Documents','Store & share'],
+  ['sms','SMS','Create & send client messages'],['calls','Cold Calling','Call lists & daily reports'],['utm','UTM Generator','Create tracked campaign links'],['reports','Reports','Analytics & insights'],['settings','Settings','Configure OS']
  ] as [View,string,string][];
  const clientHomeApps=[
   ['projects','Projects','Track project delivery'],['tasks','Tasks','See actions & deadlines'],['invoices','Invoices & Payments','View and pay invoices'],['documents','Documents','Shared files & uploads'],['social_posts','Approvals','Review content'],['requests','Support','Send service requests'],
