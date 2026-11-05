@@ -2094,3 +2094,15 @@ html[data-theme=dark] .accounting-card-grid>button{background:#222431;border-col
  .studio-main:has(.contacts-dashboard-table){padding-left:22px;padding-right:22px}
  .studio-main:has(.contacts-dashboard-table) .people-area{width:100%}
 }
+
+
+/* GA4 website analytics */
+.nxt-ga-card{position:relative}.ga-updated{display:block;margin-top:10px;color:#978fa1;font-size:8px}
+.ga4-dashboard{display:grid;gap:16px}
+.ga4-hero{display:flex;justify-content:space-between;align-items:end;gap:20px;padding:22px 24px;border-radius:20px;background:linear-gradient(120deg,#2b1a4b,#6940c9);color:#fff}
+.ga4-hero .eyebrow,.ga4-hero h2,.ga4-hero p,.ga4-hero>span{color:#fff!important}.ga4-hero h2{font-size:28px;margin:5px 0}.ga4-hero p{margin:0;color:#e7ddf7!important;font-size:11px}.ga4-hero>span{font-size:9px;opacity:.82}
+.ga4-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.ga4-kpis article{background:#fff;border:1px solid #e7e2ef;border-radius:16px;padding:17px}.ga4-kpis span{display:block;color:#8a8294;font-size:9px}.ga4-kpis strong{display:block;margin-top:8px;font-size:27px;color:#2e2938}
+.ga4-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:14px}.ga4-grid>.panel{padding-bottom:14px}.ga4-channel-card{grid-row:span 2}.ga4-channel-layout{display:grid;grid-template-columns:170px 1fr;gap:20px;align-items:center;padding:8px 20px 20px}.ga4-large-donut{width:160px;height:160px}.ga4-large-donut:after{inset:29px}
+.ga4-list{display:grid;padding:0 18px 10px}.ga4-list>div{display:flex;justify-content:space-between;gap:14px;padding:11px 0;border-top:1px solid #f0edf4}.ga4-list strong{font-size:10px;max-width:72%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ga4-list span{font-size:9px;color:#918a9b;white-space:nowrap}.ga4-note{padding:14px 18px;font-size:9px;color:#7f7789}
+html[data-theme="dark"] .ga4-kpis article,html[data-theme="dark"] .ga4-grid>.panel,html[data-theme="dark"] .ga4-note{background:#222431;border-color:#363847;color:#f1eef8}html[data-theme="dark"] .ga4-kpis strong{color:#f1eef8}html[data-theme="dark"] .ga4-list>div{border-color:#363847}
+@media(max-width:900px){.ga4-kpis{grid-template-columns:repeat(2,1fr)}.ga4-grid{grid-template-columns:1fr}.ga4-channel-card{grid-row:auto}}@media(max-width:560px){.ga4-kpis{grid-template-columns:1fr 1fr}.ga4-channel-layout{grid-template-columns:1fr;justify-items:center}.ga4-hero{align-items:flex-start;flex-direction:column}}
