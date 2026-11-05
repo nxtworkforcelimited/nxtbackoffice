@@ -41,8 +41,15 @@ export async function GET(req:NextRequest){
 export async function POST(req:NextRequest){
  if(req.headers.get('origin')!==req.nextUrl.origin)return NextResponse.json({error:'Forbidden'},{status:403});
  const c=await context(req.nextUrl.searchParams.get('workspace'));if(!c?.workspace)return NextResponse.json({error:'Sign in required'},{status:401});
+ const peopleAdmins=['michael@nxt-workforce.com','bridget@nxt-workforce.com','kristian@nxt-workforce.com'];
+ const peopleAdmin=peopleAdmins.includes((c.user.email??'').toLowerCase());
  const parsed=schema.safeParse(await req.json().catch(()=>null));if(!parsed.success)return NextResponse.json({error:parsed.error.issues.map(i=>i.message).join('; ')},{status:400});
  const {action,...v}=parsed.data as any;let result;
+ if(['employee','salary','extra_hours'].includes(action)&&!peopleAdmin)return NextResponse.json({error:'Employee management is restricted.'},{status:403});
+ if(action==='file'&&!peopleAdmin){
+  const own=await c.db.from('employees').select('id').eq('tenant_id',c.workspace.id).eq('user_id',c.user.id).maybeSingle();
+  if(!own.data||own.data.id!==v.employee_id)return NextResponse.json({error:'You can only upload documents to your own employee profile.'},{status:403});
+ }
  if(action==='review')result=await c.db.rpc('review_leave',{t:c.workspace.id,r:v.id,decision:v.decision,note:v.note});
  else if(action==='employee'&&v.id){const key=v.id;delete v.id;result=await c.db.from('employees').update(v).eq('tenant_id',c.workspace.id).eq('id',key).select().single();}
  else {
