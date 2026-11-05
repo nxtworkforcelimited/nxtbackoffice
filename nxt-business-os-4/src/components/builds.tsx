@@ -112,13 +112,14 @@ export default function Builds({workspace,demo=false}:{workspace:Workspace;demo?
    <article><CalendarDays size={17}/><span>Due soon</span><strong>{builds.filter(b=>b.target_date&&b.target_date>=new Date().toISOString().slice(0,10)&&b.target_date<=new Date(Date.now()+7*86400000).toISOString().slice(0,10)).length}</strong></article>
   </div>
 
-  <div className="table-wrap builds-table"><table><thead><tr><th>Client / build</th><th>Type</th><th>Content</th><th>Stage</th><th>Assigned to</th><th>Due date</th><th>QA</th><th>Client review</th><th>Ready</th></tr></thead><tbody>{builds.filter(b=>(b.title+' '+clientName(b.client_id)).toLowerCase().includes(search.toLowerCase())).map(b=><tr key={b.id}>
+  <div className="table-wrap builds-table"><table><thead><tr><th>Client / build</th><th>Type</th><th>Content</th><th>Stage</th><th>Assigned to</th><th>Due date</th><th>QA</th><th>Client review</th><th>Ready</th><th>Actions</th></tr></thead><tbody>{builds.filter(b=>(b.title+' '+clientName(b.client_id)).toLowerCase().includes(search.toLowerCase())).map(b=><tr key={b.id}>
    <td><button className="table-title" onClick={()=>{setSelected({...b,checklist:checklistFor(b.build_types?.length?b.build_types:['Back Office'],b.checklist??[])});setNotice('');}}>{clientName(b.client_id)}<small>{b.title}</small></button></td>
    <td>{(b.build_types??[]).join(' + ')}</td>
    <td><span className={'build-pill '+b.content_status.toLowerCase().replaceAll(' ','-')}>{b.content_status}</span></td>
    <td>{b.status}</td><td>{assigneeNames(b)}</td><td>{b.target_date||'No date'}</td><td>{qaProgress(b)}%</td>
    <td><span className={'build-review '+b.client_review_status.toLowerCase().replaceAll(' ','-')}>{b.client_review_status}</span></td>
    <td><strong>{ready(b)?'Ready':'In progress'}</strong></td>
+   <td><button className="build-edit-button" onClick={()=>{setSelected({...b,checklist:checklistFor(b.build_types?.length?b.build_types:['Back Office'],b.checklist??[])});setNotice('');}}>Edit</button></td>
   </tr>)}</tbody></table></div>
   {!builds.length&&<p className="empty">No builds registered yet.</p>}
 
@@ -154,7 +155,7 @@ export default function Builds({workspace,demo=false}:{workspace:Workspace;demo?
       <label>Review / revision notes<textarea maxLength={5000} value={selected.review_notes} onChange={e=>update('review_notes',e.target.value)} placeholder="Client feedback, revisions required, approval notes…"/></label>
      </div>
      <div className="build-options"><label><input type="checkbox" checked={selected.hosting_managed} onChange={e=>update('hosting_managed',e.target.checked)}/> NXT manages hosting</label><label><input type="checkbox" checked={selected.dns_managed} onChange={e=>update('dns_managed',e.target.checked)}/> NXT manages DNS</label></div>
-     <button className="primary">Save build</button>
+     <div className="build-save-actions"><button className="primary">Save build</button>{selected.id&&manage&&<button type="button" className="danger-button" onClick={async()=>{if(!window.confirm('Delete this website / back office build? This cannot be undone.'))return;setBusy(true);setError('');try{const r=await fetch(base,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'delete',id:selected.id})}),b=await r.json();if(!r.ok)throw Error(b.error);setSelected(null);await load();setNotice('Build deleted.');}catch(e){setError((e as Error).message);}finally{setBusy(false);}}}>Delete build</button>}</div>
     </fieldset>
    </form>
 
