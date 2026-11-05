@@ -2084,3 +2084,13 @@ html[data-theme=dark] .employee-profile-card{background:#242632}.employee-dashbo
 .accounting-card-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}.accounting-card-grid>button{display:grid;grid-template-columns:auto 1fr;column-gap:11px;row-gap:4px;text-align:left;background:#fff;border:1px solid #e6e1ef;border-radius:16px;padding:17px;min-height:115px;box-shadow:0 6px 18px rgba(45,31,79,.05)}.accounting-card-grid>button:hover{border-color:#baa6f4;transform:translateY(-1px)}.accounting-card-grid>button>span{grid-row:1/4;width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:#eee8ff;color:#6a42da}.accounting-card-grid strong{font-size:12px}.accounting-card-grid small{font-size:9px;color:#8f8799;line-height:1.45}.accounting-card-grid em{display:flex;align-items:center;gap:4px;font-style:normal;color:#6b43d6;font-size:9px;font-weight:700}
 html[data-theme=dark] .accounting-card-grid>button{background:#222431;border-color:#363847;color:#f1eef8}
 @media(max-width:900px){.accounting-card-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){.accounting-card-grid{grid-template-columns:1fr}}
+
+/* Contacts full-width override */
+.studio-main .client-layout{grid-template-columns:minmax(0,1fr)!important}
+.studio-main .contacts-dashboard-table{width:100%;max-width:none}
+.studio-main .contacts-dashboard-table table{width:100%;min-width:1000px}
+.studio-main .client-detail-pane{grid-column:1/-1;width:100%}
+@media(min-width:1200px){
+ .studio-main:has(.contacts-dashboard-table){padding-left:22px;padding-right:22px}
+ .studio-main:has(.contacts-dashboard-table) .people-area{width:100%}
+}
