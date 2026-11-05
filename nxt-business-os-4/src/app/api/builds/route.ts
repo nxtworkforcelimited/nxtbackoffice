@@ -36,7 +36,14 @@ export async function POST(req:NextRequest){
  if(req.headers.get('origin')!==req.nextUrl.origin)return NextResponse.json({error:'Forbidden'},{status:403});
  const c=await context(req.nextUrl.searchParams.get('workspace'));
  if(!c?.workspace||c.workspace.role==='client'||!allowed(c.workspace.role,c.workspace.permissions??[],'tickets'))return NextResponse.json({error:'IT administrator access required'},{status:403});
- const p=schema.safeParse(await req.json().catch(()=>null));if(!p.success)return NextResponse.json({error:p.error.issues.map(i=>i.message).join('; ')},{status:400});
+ const raw=await req.json().catch(()=>null);
+ if(raw?.action==='delete'){
+  const parsed=z.object({action:z.literal('delete'),id:z.uuid()}).strict().safeParse(raw);
+  if(!parsed.success)return NextResponse.json({error:'Choose a valid build to delete.'},{status:400});
+  const deleted=await c.db.from('backoffice_builds').delete().eq('tenant_id',c.workspace.id).eq('id',parsed.data.id).select().single();
+  return NextResponse.json(deleted.error?{error:deleted.error.message}:deleted.data,{status:deleted.error?400:200});
+ }
+ const p=schema.safeParse(raw);if(!p.success)return NextResponse.json({error:p.error.issues.map(i=>i.message).join('; ')},{status:400});
  const {id,...fields}=p.data;
  const r=id?await c.db.from('backoffice_builds').update(fields).eq('tenant_id',c.workspace.id).eq('id',id).select().single():await c.db.from('backoffice_builds').insert({...fields,tenant_id:c.workspace.id}).select().single();
  return NextResponse.json(r.error?{error:r.error.message}:r.data,{status:r.error?400:200});
