@@ -88,7 +88,7 @@ export default function Dashboard({initial,workspace,workspaces,email,demo=false
  const nav=(Object.keys(appIcons) as View[]).filter(v=>!['email','website','employees','team'].includes(v)&&(client?(['overview','projects','tasks','social_posts','documents','messages','requests','assistant','utm','invoices'].includes(v)&&(v!=='assistant'||clientAssistantEnabled)):v==='settings'?protectedPeopleAccess:['clients','deals'].includes(v)||!viewCap[v]||can(viewCap[v])||(v==='social_posts'&&can('approve_content'))));
  const sidebarOrder:View[]=client
   ? ['overview','projects','tasks','invoices','documents','social_posts','messages','requests','utm',...(clientAssistantEnabled?['assistant' as View]:[])]
-  : ['overview','deals','calls','projects','tasks','clients','leave','expenses','accounting','invoices','payroll','loans','tickets','builds','social_posts','documents','sms','phone','utm','reports','settings'];
+  : ['overview','deals','calls','projects','tasks','clients','leave','accounting','loans','tickets','builds','social_posts','documents','sms','phone','utm','reports','settings'];
  const sidebarNav=sidebarOrder.filter(v=>nav.includes(v));
  const activeView=nav.includes(view)?view:'overview';
  useEffect(()=>{if(activeView!=='utm'||demo)return;void loadTracking();},[activeView,demo,workspace.id]);
@@ -172,10 +172,9 @@ export default function Dashboard({initial,workspace,workspaces,email,demo=false
  const crmDays=Math.max(0,Math.ceil((crmLaunch.getTime()-(localNow?.getTime()??Date.now()))/86400000));
  const comingSoonApps=[{name:'NXT CRM',date:'1 Jan 2027',days:crmDays}];
  const isBridget=email.toLowerCase()==='bridget@nxt-workforce.com';
- const navTitle=(v:View)=>client?({overview:'Home',projects:'Projects',tasks:'Tasks',invoices:'Invoices & Payments',documents:'Documents',social_posts:'Approvals',messages:'Messages',requests:'Support',assistant:'NXT Assistant',utm:'Campaign Links'} as Partial<Record<View,string>>)[v]??titleFor(v):({overview:'Home',deals:'CRM',clients:'Contacts',expenses:'Finance',social_posts:'Marketing',reports:'Reports',payroll:'Payroll',loans:'Employee Loans',tickets:'Tickets'} as Partial<Record<View,string>>)[v]??titleFor(v);
+ const navTitle=(v:View)=>client?({overview:'Home',projects:'Projects',tasks:'Tasks',invoices:'Invoices & Payments',documents:'Documents',social_posts:'Approvals',messages:'Messages',requests:'Support',assistant:'NXT Assistant',utm:'Campaign Links'} as Partial<Record<View,string>>)[v]??titleFor(v):({overview:'Home',deals:'CRM',clients:'Contacts',expenses:'Expenses',social_posts:'Marketing',reports:'Reports',payroll:'Payroll',loans:'Employee Loans',tickets:'Tickets'} as Partial<Record<View,string>>)[v]??titleFor(v);
  const staffHomeApps=[
-  ['deals','CRM','Leads & pipeline'],['projects','Projects','Plan & deliver work'],['tasks','Tasks','Stay on track'],['clients','Contacts','Manage contacts'],['invoices','Invoices','Bill & get paid'],['quotes','Quotes','Create proposals'],
-  ['accounting','Accounting','Journals & financial statements'],['expenses','Finance','Money & expenses'],['payroll','Payroll','Run payroll'],['loans','Employee Loans','Manage staff loans'],['tickets','Tickets','Support & IT'],['builds','Back Office Builds','Systems & internal platforms'],['documents','Documents','Store & share'],['social_posts','Marketing','Plan & publish'],
+  ['deals','CRM','Leads & pipeline'],['projects','Projects','Plan & deliver work'],['tasks','Tasks','Stay on track'],['clients','Contacts','Manage contacts'],['accounting','Accounting','Invoices, quotes, expenses & ledger'],['loans','Employee Loans','Manage staff loans'],['tickets','Tickets','Support & IT'],['builds','Back Office Builds','Systems & internal platforms'],['documents','Documents','Store & share'],['social_posts','Marketing','Plan & publish'],
   ['phone','Zoiper Call','Business calls through Zoiper'],['sms','SMS','Send & monitor client messages'],['calls','Cold Calling','Call lists & daily reports'],['utm','UTM Generator','Create tracked campaign links'],['reports','Reports','Analytics & insights'],['settings','Settings','Configure OS']
  ] as [View,string,string][];
  const clientHomeApps=[
@@ -240,6 +239,14 @@ export default function Dashboard({initial,workspace,workspaces,email,demo=false
  
  {activeView!=='overview'&&<div className="studio-heading reference-page-heading"><div><p className="eyebrow">{client?'CLIENT PORTAL':'NXT WORKFORCE'} / {navTitle(activeView).toUpperCase()}</p><h1>{activeView==='social_posts'?(client?'Approvals':'Content Workspace'):navTitle(activeView)}</h1><p>{activeView==='social_posts'?(client?'Review content shared with your account.':'Plan content. Review together. Keep every approval in one place.'):activeView==='payroll'?'Employee payroll and payslips.':'Your connected workspace, built around the way you work.'}</p></div><div className="action-row">{current&&((!client&&can(viewCap[activeView]))||(client&&current==='documents'))&&<button className="primary" onClick={()=>openForm(current)}><Plus size={16}/>{current==='documents'?'Upload file':current==='social_posts'?'Create content':'New '+(current==='clients'?'contact':current==='deals'?'opportunity':current==='projects'?'project':'task')}</button>}{activeView==='requests'&&<button className="primary" onClick={()=>openForm('request')}><Plus size={16}/>New request</button>}{activeView==='quotes'&&!client&&<button className="primary" onClick={()=>openForm('quote')}>New quotation</button>}{['invoices','quotes'].includes(activeView)&&!client&&<button className="primary" onClick={()=>openForm('invoice')}>New invoice</button>}{activeView==='payroll'&&<button className="primary" onClick={()=>openForm('payroll')}><Plus size={16}/>Prepare payslip</button>}</div></div>}
  {error&&!form&&!detail&&!paper&&<p className="notice error" role="alert">{error}</p>}{message&&<p className="notice" role="status">{message}</p>}
+ {!client&&activeView==='accounting'&&<section className="accounting-hub"><div className="accounting-hub-head"><div><span className="eyebrow">FINANCE CENTRE</span><h2>Accounting</h2><p>Open the financial workspace you need.</p></div></div><div className="accounting-card-grid">{[
+ ['invoices','Invoices','Issued invoices, balances and receipts',Wallet],
+ ['quotes','Quotations','Prepare and convert client quotations',FileText],
+ ['expenses','Expenses','Track and approve company spending',Wallet],
+ ['purchase_orders','Purchase Orders','Supplier orders and commitments',FileText],
+ ['subscriptions','Subscriptions','Recurring services and renewal dates',CalendarDays],
+ ['payroll','Payroll','Payslips and payroll processing',Users]
+ ].map(([v,label,desc,Icon]:any)=><button key={v} onClick={()=>go(v as View)}><span><Icon size={18}/></span><strong>{label}</strong><small>{desc}</small><em>Open <ArrowRight size={12}/></em></button>)}</div></section>}
  {!client&&['expenses','purchase_orders','subscriptions','accounting'].includes(activeView)&&<Finance key={activeView} area={activeView==='expenses'?'expense':activeView==='purchase_orders'?'purchase_order':activeView==='subscriptions'?'subscription':'accounting'} workspace={workspace}/>}
  {!client&&activeView==='builds'&&<Builds workspace={workspace} demo={demo}/>} 
  {!client&&activeView==='loans'&&<Loans workspace={workspace} demo={demo}/>}
