@@ -37,7 +37,14 @@ const channelMap:Record<string,{source:string;medium:string;offline?:boolean;cam
  'receipt':{source:'receipt',medium:'qr',offline:true},
  'event-stand':{source:'event-stand',medium:'qr',offline:true},
  'tv-advert':{source:'tv-advert',medium:'qr',offline:true},
- 'google-business-profile':{source:'google',medium:'organic',campaign:'always-on-gbp'}
+ 'google-business-profile':{source:'google',medium:'organic',campaign:'always-on-gbp'},
+ 'linkedin-ad':{source:'linkedin',medium:'paid-social'},
+ 'tiktok-ad':{source:'tiktok',medium:'paid-social'},
+ 'twitter-ad':{source:'twitter',medium:'paid-social'},
+ 'radio':{source:'radio',medium:'audio'},
+ 'podcast':{source:'podcast',medium:'audio'},
+ 'partner-referral':{source:'partner',medium:'referral'},
+ 'influencer-affiliate':{source:'creator',medium:'affiliate'}
 };
 const clean=(value:string)=>value.trim().toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
 const input=z.object({
@@ -57,7 +64,7 @@ const input=z.object({
 function sameSite(a:URL,b:URL){return a.hostname.replace(/^www\./,'')===b.hostname.replace(/^www\./,'');}
 function campaignValue(name:string,startMonth?:string,fixed?:string){
  if(fixed)return fixed;
- const slug=clean(name);if(slug.startsWith('always-on-'))return slug.slice(0,40);
+ const slug=clean(name);if(/^\d{4}-\d{2}-[a-z0-9-]+$/.test(slug))return slug.slice(0,40);if(slug.startsWith('always-on-'))return slug.slice(0,40);
  if(!startMonth)throw Error('Choose the campaign start month.');
  return clean(startMonth+'-'+slug).slice(0,40);
 }
