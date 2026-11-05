@@ -1978,3 +1978,12 @@ html[data-theme="dark"] .nxt-dashboard-card,html[data-theme="dark"] .nxt-kpi-car
 html[data-theme="dark"] .nxt-employee-home-card{background:#272936;border-color:#3b3d4c;color:#f0eef8}
 @media(max-width:900px){.nxt-employee-home-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:620px){.nxt-employee-home-grid{grid-template-columns:1fr}.nxt-crm-countdown{align-items:flex-start}.nxt-crm-days{min-width:90px}.nxt-employee-home-card{grid-template-columns:auto 1fr}.nxt-employee-home-card em{grid-column:2}}
+
+
+/* Coming soon sidebar section */
+.side-coming{margin-top:6px;border-top:1px solid rgba(255,255,255,.08);padding-top:6px}
+.side-coming-toggle{width:100%;display:flex!important;align-items:center;gap:8px;padding:11px 12px!important;border-radius:10px!important;color:#d7d2e3!important;background:transparent!important;font-size:11px!important;font-weight:700!important}
+.side-coming-toggle small{margin-left:auto;color:#a99fc2}
+.side-coming-list{display:grid;gap:6px;padding:5px 8px 7px}
+.side-coming-list>div{display:grid;grid-template-columns:1fr auto;gap:2px 8px;padding:9px 10px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.05)}
+.side-coming-list strong{font-size:10px;color:#fff}.side-coming-list span{font-size:9px;color:#c8c1d7}.side-coming-list small{grid-column:1/-1;font-size:8px;color:#9f94b7}
