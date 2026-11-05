@@ -16,6 +16,7 @@ import Finance from './finance';
 import Loans from './loans';
 import SocialPublisher from './social-publisher';
 import ColdCalling from './cold-calling';
+import CrmLinkBuilder from './crm-link-builder';
 import StaffAccess from './staff-access';
 import TeamChat from './team-chat';
 import dynamic from 'next/dynamic';
@@ -57,6 +58,7 @@ export default function Dashboard({initial,workspace,workspaces,email,demo=false
  const [ga4,setGa4]=useState<any>(null),[ga4Loading,setGa4Loading]=useState(false);
  const [financeRecords,setFinanceRecords]=useState<any[]>([]);
  const [quickTaskTitle,setQuickTaskTitle]=useState(''),[quickTaskAssignee,setQuickTaskAssignee]=useState('');
+ const [crmSection,setCrmSection]=useState<'pipeline'|'links'>('pipeline');
  const [month,setMonth]=useState(()=>new Date(demo?2026:new Date().getFullYear(),demo?9:new Date().getMonth(),1));
  const [form,setForm]=useState<Module|BusinessKind|null>(null),[detail,setDetail]=useState<{module:Module;row:RecordRow}|null>(null),[paper,setPaper]=useState<BusinessItem|null>(null),[lines,setLines]=useState([{...blankLine}]),[rulesText,setRulesText]=useState(JSON.stringify(Object.keys(business.rules).length?business.rules:ruleExample,null,2));
  const createDialog=useRef<HTMLDialogElement>(null),detailsDialog=useRef<HTMLDialogElement>(null),paperDialog=useRef<HTMLDialogElement>(null);
@@ -92,7 +94,7 @@ export default function Dashboard({initial,workspace,workspaces,email,demo=false
  const nav=(Object.keys(appIcons) as View[]).filter(v=>!['email','website','employees','team'].includes(v)&&(client?(['overview','projects','tasks','social_posts','documents','messages','requests','assistant','utm','invoices'].includes(v)&&(v!=='assistant'||clientAssistantEnabled)):v==='settings'?protectedPeopleAccess:['clients','deals'].includes(v)||!viewCap[v]||can(viewCap[v])||(v==='social_posts'&&can('approve_content'))));
  const sidebarOrder:View[]=client
   ? ['overview','projects','tasks','invoices','documents','social_posts','messages','requests','utm',...(clientAssistantEnabled?['assistant' as View]:[])]
-  : ['overview','deals','calls','projects','tasks','clients','leave','accounting','loans','tickets','builds','documents','sms','utm','reports','settings'];
+  : ['overview','deals','calls','projects','tasks','clients','leave','accounting','loans','tickets','builds','documents','sms','reports','settings'];
  const sidebarNav=sidebarOrder.filter(v=>nav.includes(v));
  const activeView=nav.includes(view)?view:'overview';
  useEffect(()=>{if(activeView!=='utm'||demo)return;void loadTracking();},[activeView,demo,workspace.id]);
@@ -184,7 +186,7 @@ export default function Dashboard({initial,workspace,workspaces,email,demo=false
  const navTitle=(v:View)=>client?({overview:'Home',projects:'Projects',tasks:'Tasks',invoices:'Invoices & Payments',documents:'Documents',social_posts:'Approvals',messages:'Messages',requests:'Support',assistant:'NXT Assistant',utm:'Campaign Links'} as Partial<Record<View,string>>)[v]??titleFor(v):({overview:'Home',projects:'Master Tracker',deals:'CRM',clients:'Contacts',expenses:'Expenses',social_posts:'Marketing',reports:'Reports',payroll:'Payroll',loans:'Employee Loans',tickets:'Tickets'} as Partial<Record<View,string>>)[v]??titleFor(v);
  const staffHomeApps=[
   ['deals','CRM','Leads & pipeline'],['projects','Master Tracker','Tasks, approvals & risks'],['tasks','Tasks','Stay on track'],['clients','Contacts','Manage contacts'],['accounting','Accounting','Invoices, quotes, expenses & ledger'],['loans','Employee Loans','Manage staff loans'],['tickets','Tickets','Support & IT'],['builds','Websites & Back Offices','Website and back-office delivery'],['documents','Documents','Store & share'],
-  ['sms','SMS','Create & send client messages'],['calls','Cold Calling','Call lists & daily reports'],['utm','UTM Generator','Create tracked campaign links'],['reports','Reports','Analytics & insights'],['settings','Settings','Configure OS']
+  ['sms','SMS','Create & send client messages'],['calls','Cold Calling','Call lists & daily reports'],['reports','Reports','Analytics & insights'],['settings','Settings','Configure OS']
  ] as [View,string,string][];
  const clientHomeApps=[
   ['projects','Projects','Track project delivery'],['tasks','Tasks','See actions & deadlines'],['invoices','Invoices & Payments','View and pay invoices'],['documents','Documents','Shared files & uploads'],['social_posts','Approvals','Review content'],['requests','Support','Send service requests'],
@@ -317,6 +319,8 @@ export default function Dashboard({initial,workspace,workspaces,email,demo=false
  </section>}
  {activeView==='social_posts'&&!client&&<SocialPublisher workspace={workspace} clients={visible.clients} posts={visible.social_posts}/>}
   {current&&(current==='deals'?<section className="crm-board-shell">
+  <div className="crm-section-tabs"><button className={crmSection==='pipeline'?'active':''} onClick={()=>setCrmSection('pipeline')}>Pipeline</button><button className={crmSection==='links'?'active':''} onClick={()=>setCrmSection('links')}>Link Builder</button></div>
+  {crmSection==='links'?<CrmLinkBuilder workspace={workspace.id} clients={visible.clients.map(c=>({id:c.id,title:c.title}))}/>:<>
   <div className="crm-board-top">
    <div><span className="eyebrow">CRM PIPELINE</span><h2>Sales Pipeline</h2><p>Track each opportunity from first contact to won, with the next action clear.</p></div>
    <div className="crm-board-actions"><span>{visible.deals.length} opportunities</span><button className="primary" onClick={()=>openForm('deals')}><Plus size={15}/>New opportunity</button></div>
@@ -333,6 +337,7 @@ export default function Dashboard({initial,workspace,workspaces,email,demo=false
     </div>
    </section>)}
   </div>
+  </>}
  </section>:<><div className="studio-toolbar"><select aria-label="Filter status" value={filter} onChange={e=>setFilter(e.target.value)}><option value="all">All statuses</option>{statuses[current].map(s=><option key={s} value={s}>{pretty(s)}</option>)}</select><span>{rows(current).length} records</span><div className="view-switch">{(current==='social_posts'?['calendar','list']:['list','cards']).map(m=><button key={m} className={mode===m?'active':''} onClick={()=>setMode(m)}>{pretty(m)}</button>)}</div></div>
  {current==='social_posts'&&<div className="studio-metrics">{[['Planned posts',posts.filter(p=>p.status!=='published').length],['Manager review',posts.filter(p=>p.status==='manager_review').length],['Client review',posts.filter(p=>p.status==='client_review').length],['Approved',posts.filter(p=>p.status==='approved').length]].map(([l,v])=><div key={l}><span>{l}</span><strong>{v}</strong>{!client&&<small>Publishing connection pending</small>}</div>)}</div>}
  <div className={current==='social_posts'?'content-layout':''}><div className="content-primary">{mode==='calendar'&&current==='social_posts'?<section className="calendar-panel"><div className="calendar-heading"><h2>{month.toLocaleDateString('en-GB',{month:'long',year:'numeric'})}</h2><div><button title="Previous month" onClick={()=>setMonth(new Date(month.getFullYear(),month.getMonth()-1,1))}><ChevronLeft size={18}/></button><button onClick={()=>setMonth(new Date(new Date().getFullYear(),new Date().getMonth(),1))}>Today</button><button title="Next month" onClick={()=>setMonth(new Date(month.getFullYear(),month.getMonth()+1,1))}><ChevronRight size={18}/></button></div></div><div className="calendar-grid">{['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d=><div className="weekday" key={d}>{d}</div>)}{Array.from({length:42},(_,i)=>{const d=new Date(month.getFullYear(),month.getMonth(),1-(month.getDay()+6)%7+i),iso=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;return <div key={iso} className={'calendar-day '+(d.getMonth()!==month.getMonth()?'outside':'')}><span>{d.getDate()}</span>{rows('social_posts').filter(p=>p.due_date===iso).map(p=><button key={p.id} className={'calendar-post '+p.status} onClick={()=>inspect('social_posts',p)}><small>{p.channel}</small>{p.title}<em>{pretty(p.status)}</em></button>)}</div>;})}</div>{rows('social_posts').filter(p=>!p.due_date).map(p=><button className="studio-task" key={p.id} onClick={()=>inspect('social_posts',p)}>Unscheduled: {p.title}</button>)}</section>:mode==='cards'?<div className="directory-grid">{rows(current).map(r=><button className="directory-card" key={r.id} onClick={()=>inspect(current,r)}><h2>{r.title}</h2><p>{clientName(r.client_id)}</p><span className="badge">{pretty(r.status)}</span></button>)}</div>:<div className="table-wrap"><table><thead><tr><th>Name</th><th>{current==='clients'?'Email':'Client'}</th><th>Status</th><th>{(current as View)==='deals'?'Value':'Date'}</th></tr></thead><tbody>{rows(current).map(r=><tr key={r.id}><td><button className="table-title" onClick={()=>inspect(current,r)}>{r.title}</button></td><td>{current==='clients'?r.email:clientName(r.client_id)}</td><td><span className={'badge '+r.status}>{pretty(r.status)}</span></td><td>{(current as View)==='deals'?formatMoney(r.amount??0):dateLabel(r.due_date)}</td></tr>)}</tbody></table>{!rows(current).length&&<div className="empty">No records match this view.</div>}</div>}</div>{current==='social_posts'&&<aside className="panel approval-panel"><div className="panel-head"><h2>Approval queue</h2><span className="badge">{queue.length}</span></div>{queue.map(p=><div className="queue-card" key={p.id}><small>{p.channel} · {dateLabel(p.due_date)}</small><button className="record-title" onClick={()=>inspect('social_posts',p)}>{p.title}</button><p>{p.description||clientName(p.client_id)}</p><span className={'badge '+p.status}>{pretty(p.status)}</span>{socialActions(p)}<button className="text-button" onClick={()=>inspect('social_posts',p)}>Open discussion <MessageSquare size={13}/></button></div>)}{!queue.length&&<div className="empty">No content waiting for approval.</div>}{!client&&<p className="panel-note">Manager approval comes first. Client approval follows for client content. Approved posts are not automatically published until a publishing provider is connected.</p>}</aside>}</div></>)}
