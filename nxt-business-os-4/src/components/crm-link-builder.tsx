@@ -15,12 +15,13 @@ const channels=[
  ['newsletter','Newsletter'],['sales-outreach','Cold / sales outreach'],['email-signature','Email signature'],['sms','SMS'],
  ['flyer','Flyer'],['poster','Poster'],['banner','Banner'],['business-card','Business card'],['brochure','Brochure'],['vehicle','Vehicle'],
  ['billboard','Billboard'],['packaging','Packaging'],['receipt','Receipt'],['event-stand','Event stand'],['tv-advert','TV advert'],
- ['google-business-profile','Google Business Profile']
+ ['google-business-profile','Google Business Profile'],['linkedin-ad','LinkedIn ad'],['tiktok-ad','TikTok ad'],['twitter-ad','X / Twitter ad'],['radio','Radio mention'],['podcast','Podcast mention'],['partner-referral','Partner / directory referral'],['influencer-affiliate','Influencer / affiliate']
 ] as const;
 const offline=new Set(['flyer','poster','banner','business-card','brochure','vehicle','billboard','packaging','receipt','event-stand','tv-advert']);
 const channelLabel=(v:string)=>channels.find(x=>x[0]===v)?.[1]??v;
 function copy(value:string){return navigator.clipboard.writeText(value);}
 function downloadQr(url:string,name:string){const a=document.createElement('a');a.href=url;a.download=name;a.target='_blank';a.rel='noreferrer';a.click();}
+function exportCsv(links:Saved[]){const rows=[['date','business','campaign','channel','placement','destination_url','utm_source','utm_medium','utm_campaign','utm_content','utm_term','final_url','qr_file','post_id','created_by','notes'],...links.map(x=>[x.created_at,x.business_name,x.campaign,x.channel,x.placement,x.destination_url,x.utm_source,x.utm_medium,x.campaign,x.utm_content,x.utm_term,x.final_url,x.qr_requested?'generated-in-crm':'','','',''])];const csv='\uFEFF'+rows.map(r=>r.map(v=>'"'+String(v??'').replaceAll('"','""')+'"').join(',')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='nxt-crm-link-log.csv';a.click();URL.revokeObjectURL(a.href);}
 
 export default function CrmLinkBuilder({workspace,clients}:Props){
  const now=new Date(),month=now.toISOString().slice(0,7);
@@ -73,6 +74,6 @@ export default function CrmLinkBuilder({workspace,clients}:Props){
     <p className="panel-note">GA4 may show <strong>qr</strong> visits as Unassigned until a “QR and print” custom channel group is added.</p>
    </section>
   </div>
-  <section className="panel crm-link-log"><div className="panel-head"><div><h3>Campaign link log</h3><p>Reuse exact campaign values and spot near-duplicates before publishing.</p></div><button onClick={()=>load().catch(e=>setError(e.message))}><RefreshCw size={14}/>Refresh</button></div><div className="table-wrap"><table><thead><tr><th>Date</th><th>Business</th><th>Campaign</th><th>Channel</th><th>Source</th><th>Medium</th><th>Content</th><th>Final link</th></tr></thead><tbody>{links.map(x=><tr key={x.id}><td>{new Date(x.created_at).toLocaleDateString()}</td><td>{clientName(x.client_id)}</td><td><strong>{x.campaign}</strong></td><td>{channelLabel(x.channel)}</td><td>{x.utm_source}</td><td>{x.utm_medium}</td><td>{x.utm_content||'—'}</td><td><button onClick={()=>copy(x.final_url).then(()=>setNotice('Link copied.'))}>Copy</button></td></tr>)}{!links.length&&<tr><td colSpan={8}>No campaign links saved yet.</td></tr>}</tbody></table></div></section>
+  <section className="panel crm-link-log"><div className="panel-head"><div><h3>Campaign link log</h3><p>Reuse exact campaign values and spot near-duplicates before publishing.</p></div><div className="action-row"><button onClick={()=>exportCsv(links)}><Download size={14}/>CSV log</button><button onClick={()=>load().catch(e=>setError(e.message))}><RefreshCw size={14}/>Refresh</button></div></div><div className="table-wrap"><table><thead><tr><th>Date</th><th>Business</th><th>Campaign</th><th>Channel</th><th>Source</th><th>Medium</th><th>Content</th><th>Final link</th></tr></thead><tbody>{links.map(x=><tr key={x.id}><td>{new Date(x.created_at).toLocaleDateString()}</td><td>{clientName(x.client_id)}</td><td><strong>{x.campaign}</strong></td><td>{channelLabel(x.channel)}</td><td>{x.utm_source}</td><td>{x.utm_medium}</td><td>{x.utm_content||'—'}</td><td><button onClick={()=>copy(x.final_url).then(()=>setNotice('Link copied.'))}>Copy</button></td></tr>)}{!links.length&&<tr><td colSpan={8}>No campaign links saved yet.</td></tr>}</tbody></table></div></section>
  </section>;
 }
