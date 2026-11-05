@@ -12,16 +12,30 @@ const schema=z.discriminatedUnion('action',[employee,
  z.object({action:z.literal('file'),employee_id:id,name:text.min(1).max(200),category:z.enum(['Profile Photo','CV','ID','Contract','Other'])})]);
 export async function GET(req:NextRequest){
  const c=await context(req.nextUrl.searchParams.get('workspace'));if(!c?.workspace)return NextResponse.json({error:'Sign in required'},{status:401});
+ const peopleAdmins=['michael@nxt-workforce.com','bridget@nxt-workforce.com','kristian@nxt-workforce.com'];
+ const peopleAdmin=peopleAdmins.includes((c.user.email??'').toLowerCase());
  const area=req.nextUrl.searchParams.get('area');
  const tables=area==='messages'?['portal_messages']:area==='leave'?['leave_requests']:area==='employees'?['employees','employee_salaries','employee_files','employee_extra_hours']:[];
  if(!tables.length)return NextResponse.json({error:'Invalid area'},{status:400});
  const output:Record<string,unknown>={user_id:c.user.id};
- for(const table of tables){
-  const order=table==='employee_extra_hours'?'work_date':'created_at';
-  const {data,error}=await c.db.from(table).select('*').eq('tenant_id',c.workspace.id).order(order,{ascending:false});
-  if(error)return NextResponse.json({error:'People records could not load.'},{status:400});output[table]=data;
+ if(area==='employees'&&!peopleAdmin){
+  const own=await c.db.from('employees').select('*').eq('tenant_id',c.workspace.id).eq('user_id',c.user.id).maybeSingle();
+  if(own.error)return NextResponse.json({error:'People records could not load.'},{status:400});
+  output.employees=own.data?[own.data]:[];
+  if(own.data){
+   const files=await c.db.from('employee_files').select('*').eq('tenant_id',c.workspace.id).eq('employee_id',own.data.id).order('created_at',{ascending:false});
+   if(files.error)return NextResponse.json({error:'People records could not load.'},{status:400});
+   output.employee_files=await Promise.all((files.data??[]).map(async f=>{const r=await c.db.storage.from('employee-files').createSignedUrl(f.object_path,120);return {...f,url:r.data?.signedUrl??null};}));
+  }else output.employee_files=[];
+  output.employee_salaries=[];output.employee_extra_hours=[];
+ }else{
+  for(const table of tables){
+   const order=table==='employee_extra_hours'?'work_date':'created_at';
+   const {data,error}=await c.db.from(table).select('*').eq('tenant_id',c.workspace.id).order(order,{ascending:false});
+   if(error)return NextResponse.json({error:'People records could not load.'},{status:400});output[table]=data;
+  }
+  if(area==='employees')output.employee_files=await Promise.all((output.employee_files as any[]).map(async f=>{const r=await c.db.storage.from('employee-files').createSignedUrl(f.object_path,120);return {...f,url:r.data?.signedUrl??null};}));
  }
- if(area==='employees')output.employee_files=await Promise.all((output.employee_files as any[]).map(async f=>{const r=await c.db.storage.from('employee-files').createSignedUrl(f.object_path,120);return {...f,url:r.data?.signedUrl??null};}));
  return NextResponse.json(output,{headers:{'Cache-Control':'private, no-store'}});
 }
 export async function POST(req:NextRequest){
