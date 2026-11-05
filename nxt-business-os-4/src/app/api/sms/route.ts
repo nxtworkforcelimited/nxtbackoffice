@@ -46,6 +46,7 @@ export async function GET(req:NextRequest){
    ready_clients:ready.length,
    enabled_without_phone:missing.length,
    total_clients:clientRows.length,
+   clients:clientRows.map(x=>({id:x.id,contact_code:x.contact_code,title:x.title,phone:x.phone||''})),
    counts,
    recent:rows.slice(0,10).map(x=>({
     status:x.status,
@@ -67,16 +68,16 @@ export async function POST(req:NextRequest){
   const c=await context(req.nextUrl.searchParams.get('workspace'));
   if(!c?.workspace||c.workspace.role==='client')return reply({error:'Staff access required.'},403);
   if(!allowed(c.workspace.role,c.workspace.permissions??[],'sms'))return reply({error:'SMS access required.'},403);
-  const p=z.object({recipient:z.string().trim().regex(/^\+?[1-9][0-9]{7,14}$/),message:z.string().trim().min(1).max(480)}).safeParse(await req.json().catch(()=>null));
+  const p=z.object({client_id:z.uuid().nullable().optional(),recipient:z.string().trim().regex(/^\+?[1-9][0-9]{7,14}$/),message:z.string().trim().min(1).max(480)}).safeParse(await req.json().catch(()=>null));
   if(!p.success)return reply({error:'Enter a valid international mobile number and a message.'},400);
   const url=process.env.NEXT_PUBLIC_SUPABASE_URL,secret=process.env.SUPABASE_SERVICE_ROLE_KEY;
   if(!url||!secret)return reply({error:'SMS service is unavailable.'},503);
   const admin=createClient(url,secret,{auth:{persistSession:false,autoRefreshToken:false}});
   const source=crypto.randomUUID(),recipient=p.data.recipient.startsWith('+')?p.data.recipient:'+'+p.data.recipient;
   const row=await admin.from('sms_outbox').insert({
-   tenant_id:c.workspace.id,client_id:null,source_type:'manual_test',source_id:source,
-   approval_key:'manual-test:'+source,recipient,body:p.data.message,provider:'gikko',status:'queued'
+   tenant_id:c.workspace.id,client_id:p.data.client_id??null,source_type:'manual',source_id:source,
+   approval_key:'manual:'+source,recipient,body:p.data.message,provider:'gikko',status:'queued'
   }).select('id,status,recipient,created_at').single();
   return reply(row.error?{error:row.error.message}:{...row.data,note:'Queued. The SMS worker runs every minute.'},row.error?400:201);
- }catch{return reply({error:'Test SMS could not be queued.'},503);}
+ }catch{return reply({error:'SMS could not be queued.'},503);}
 }
