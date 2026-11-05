@@ -2184,3 +2184,13 @@ html[data-theme="dark"] .leave-request-row>span:last-child>button{background:#24
 html[data-theme="dark"] .crm-column{background:#262833;border-color:#383a47}
 html[data-theme="dark"] .crm-deal-card{background:#20222d;border-color:#373946}
 html[data-theme="dark"] .crm-column>header>div>b{background:#343645;color:#d5cfe0}
+
+/* Header spacing and assignable Quick Tasks */
+.nxt-hero-copy>p{margin-bottom:22px!important}
+.nxt-hero-actions{margin-top:0!important}
+.nxt-quick-add{display:grid;grid-template-columns:minmax(0,1fr) 130px auto;gap:7px;align-items:center;margin:8px 0 10px}
+.nxt-quick-add input,.nxt-quick-add select{height:34px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.13);color:#fff;border-radius:9px;padding:0 9px;font-size:9px}
+.nxt-quick-add input::placeholder{color:#ddd5ee}
+.nxt-quick-add select option{color:#29243a;background:#fff}
+.nxt-quick-add .primary{height:34px;padding:0 10px;border-radius:9px;background:#fff;color:#5635ad;border-color:#fff;font-size:9px}
+@media(max-width:700px){.nxt-quick-add{grid-template-columns:1fr}.nxt-hero-copy>p{margin-bottom:18px!important}}
