@@ -2,14 +2,14 @@ import {NextRequest,NextResponse} from 'next/server';
 import {context} from '@/lib/context';
 import {z} from 'zod';
 const text=z.string().trim().max(300),date=z.iso.date(),id=z.uuid();
-const employee=z.object({action:z.literal('employee'),id:id.optional(),name:text.min(1),email:z.union([z.email(),z.literal('')]),phone:text,job_title:text,department:text.default(''),reports_to:text.default(''),birth_date:date.nullable(),start_date:date.nullable(),bank_name:text,account_name:text,account_number:text,branch:text,user_id:id.nullable(),status:z.enum(['active','inactive'])});
+const employee=z.object({action:z.literal('employee'),id:id.optional(),name:text.min(1),email:z.union([z.email(),z.literal('')]),phone:text,job_title:text,department:text.default(''),reports_to:text.default(''),birth_date:date.nullable(),start_date:date.nullable(),bank_name:text,account_name:text,account_number:text,branch:text,user_id:id.nullable(),status:z.enum(['active','inactive']),home_address:text.default(''),country:text.default(''),emergency_contact:text.default(''),emergency_phone:text.default(''),allergies:text.default(''),doctor_name:text.default(''),doctor_phone:text.default(''),medical_aid_provider:text.default(''),medical_aid_number:text.default(''),association_society:text.default(''),association_membership_number:text.default('')});
 const schema=z.discriminatedUnion('action',[employee,
  z.object({action:z.literal('salary'),employee_id:id,currency:z.enum(['USD','ZWG','GBP','AUD']),monthly_gross:z.number().min(0).max(100000000),effective_date:date}),
  z.object({action:z.literal('extra_hours'),employee_id:id,work_date:date,hours:z.number().positive().max(24),note:z.string().trim().max(1000).default('')}),
  z.object({action:z.literal('leave'),kind:z.enum(['Annual','Sick','Family','Unpaid','Other']),starts:date,ends:date,reason:z.string().trim().min(1).max(3000)}),
  z.object({action:z.literal('review'),id,decision:z.enum(['approved','rejected','cancelled']),note:z.string().max(3000)}),
  z.object({action:z.literal('message'),client_id:id,body:z.string().trim().min(1).max(5000)}),
- z.object({action:z.literal('file'),employee_id:id,name:text.min(1).max(200),category:z.enum(['Profile Photo','CV','ID','Contract','Other'])})]);
+ z.object({action:z.literal('file'),employee_id:id,name:text.min(1).max(200),category:z.enum(['Profile Photo','CV','National ID','Driver Licence','Contract','Next of Kin','Medical','Association / Society','Other'])})]);
 export async function GET(req:NextRequest){
  const c=await context(req.nextUrl.searchParams.get('workspace'));if(!c?.workspace)return NextResponse.json({error:'Sign in required'},{status:401});
  const peopleAdminIds=['3c5d23a8-6fea-48ca-a630-37124a10d1db','4f661657-3ec7-4246-9d72-04cc3e4f3841','2f0123f5-8e00-4ab6-92d1-cd3ec8ff0f74'];
@@ -45,7 +45,14 @@ export async function POST(req:NextRequest){
  const peopleAdmin=peopleAdminIds.includes(c.user.id);
  const parsed=schema.safeParse(await req.json().catch(()=>null));if(!parsed.success)return NextResponse.json({error:parsed.error.issues.map(i=>i.message).join('; ')},{status:400});
  const {action,...v}=parsed.data as any;let result;
- if(['employee','salary','extra_hours'].includes(action)&&!peopleAdmin)return NextResponse.json({error:'Employee management is restricted.'},{status:403});
+ if(['salary','extra_hours'].includes(action)&&!peopleAdmin)return NextResponse.json({error:'Employee management is restricted.'},{status:403});
+ if(action==='employee'&&!peopleAdmin){
+  if(!v.id)return NextResponse.json({error:'You can only update your own employee profile.'},{status:403});
+  const own=await c.db.from('employees').select('*').eq('tenant_id',c.workspace.id).eq('user_id',c.user.id).eq('id',v.id).maybeSingle();
+  if(!own.data)return NextResponse.json({error:'You can only update your own employee profile.'},{status:403});
+  const controlled=['job_title','department','reports_to','start_date','status','user_id'];
+  for(const key of controlled)v[key]=(own.data as any)[key];
+ }
  if(action==='file'&&!peopleAdmin){
   const own=await c.db.from('employees').select('id').eq('tenant_id',c.workspace.id).eq('user_id',c.user.id).maybeSingle();
   if(!own.data||own.data.id!==v.employee_id)return NextResponse.json({error:'You can only upload documents to your own employee profile.'},{status:403});
