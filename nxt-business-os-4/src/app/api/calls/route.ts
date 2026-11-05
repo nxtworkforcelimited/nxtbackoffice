@@ -13,15 +13,66 @@ function parseCsv(text:string){
  if(cell.length||row.length){row.push(cell.replace(/\r$/,''));rows.push(row);}return rows.filter(r=>r.some(x=>x.trim()));
 }
 function normalizeHeader(s:string){return s.trim().toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');}
+function excelDate(value:string){
+ const raw=value.trim();if(!raw)return null;
+ if(/^\d+(?:\.\d+)?$/.test(raw)){const serial=Number(raw);if(serial>20000&&serial<100000){const d=new Date(Date.UTC(1899,11,30)+serial*86400000);return d.toISOString();}}
+ const parsed=Date.parse(raw);return Number.isFinite(parsed)?new Date(parsed).toISOString():null;
+}
+function mappedStatus(value:string){
+ const v=value.trim().toLowerCase();
+ if(!v||v==='not contacted'||v==='needs research')return 'new';
+ if(v==='attempted contact')return 'attempted';
+ if(v==='contacted')return 'connected';
+ if(v==='interested'||v==='proposal sent')return 'interested';
+ if(v==='follow-up required'||v==='meeting scheduled'||v==='on hold')return 'callback';
+ if(v==='registered')return 'converted';
+ if(v==='not interested')return 'not_interested';
+ return 'new';
+}
 function importRows(text:string,defaults:{target_type:'nxt'|'client';client_id:string|null;campaign:string;owner_id:string}){
  const rows=parseCsv(text);if(rows.length<2)throw Error('The sheet needs a header row and at least one prospect.');
  const headers=rows[0].map(normalizeHeader),find=(...names:string[])=>names.map(n=>headers.indexOf(n)).find(i=>i>=0)??-1;
- const ix={company:find('company','business','organisation','organization'),contact:find('contact_name','contact','name','person'),phone:find('phone','phone_number','mobile','telephone','tel'),email:find('email','email_address'),source:find('source','lead_source'),notes:find('notes','note','comments','comment')};
- if(ix.company<0||ix.phone<0)throw Error('Required columns: Company and Phone. Optional: Contact Name, Email, Source, Notes.');
+ const ix={
+  business_id:find('business_id','id','reference'),
+  company:find('business_name','company','business','organisation','organization'),
+  category:find('category','business_category'),
+  location:find('location_address','location','address'),
+  phone:find('contact_number','phone','phone_number','mobile','telephone','tel'),
+  website:find('website_source','website','source_url'),
+  existing:find('existing_app_online_system','existing_app','online_system','existing_system'),
+  contact:find('contact_person','contact_name','contact','name','person'),
+  date_contacted:find('date_contacted','contacted_date'),
+  contact_method:find('contact_method','method'),
+  person_spoken_to:find('person_spoken_to','spoken_to'),
+  interest:find('interest_level','interest'),
+  outreach:find('outreach_status','status'),
+  follow_up:find('next_follow_up_date','next_follow_up','follow_up_date'),
+  registration:find('registration_status','registration'),
+  notes:find('next_action_notes','next_action','notes','note','comments','comment'),
+  integration:find('integration_needed','integration'),
+  email:find('email','email_address')
+ };
+ if(ix.company<0||ix.phone<0)throw Error('Required columns: Business Name (or Company) and Contact Number (or Phone). Spotly-style outreach columns are supported automatically.');
  const clean=(v?:string)=>String(v??'').trim();
- const out=rows.slice(1).map((r,n)=>({tenant_id:'',target_type:defaults.target_type,client_id:defaults.target_type==='client'?defaults.client_id:null,campaign:defaults.campaign,company:clean(r[ix.company]),contact_name:ix.contact>=0?clean(r[ix.contact]):'',phone:clean(r[ix.phone]),email:ix.email>=0?clean(r[ix.email]):'',source:ix.source>=0?clean(r[ix.source]):'',notes:ix.notes>=0?clean(r[ix.notes]):'',owner_id:defaults.owner_id,status:'new',_row:n+2})).filter(x=>x.company||x.phone);
+ const out=rows.slice(1).map((r,n)=>{
+  const company=clean(r[ix.company]),phone=clean(r[ix.phone]),outreach=ix.outreach>=0?clean(r[ix.outreach]):'';
+  return {
+   tenant_id:'',target_type:defaults.target_type,client_id:defaults.target_type==='client'?defaults.client_id:null,campaign:defaults.campaign,
+   business_id:ix.business_id>=0?clean(r[ix.business_id]):'',company,category:ix.category>=0?clean(r[ix.category]):'',
+   location_address:ix.location>=0?clean(r[ix.location]):'',phone,website_source:ix.website>=0?clean(r[ix.website]):'',
+   existing_system:ix.existing>=0?clean(r[ix.existing]):'',contact_name:ix.contact>=0?clean(r[ix.contact]):'',
+   contact_method:ix.contact_method>=0?clean(r[ix.contact_method]):'',person_spoken_to:ix.person_spoken_to>=0?clean(r[ix.person_spoken_to]):'',
+   interest_level:ix.interest>=0?clean(r[ix.interest]):'',registration_status:ix.registration>=0?clean(r[ix.registration]):'',
+   next_action:ix.notes>=0?clean(r[ix.notes]):'',integration_needed:ix.integration>=0?clean(r[ix.integration]):'',
+   email:ix.email>=0?clean(r[ix.email]):'',source:ix.website>=0?clean(r[ix.website]):'',
+   notes:ix.notes>=0?clean(r[ix.notes]):'',owner_id:defaults.owner_id,status:mappedStatus(outreach),
+   last_called_at:ix.date_contacted>=0?excelDate(clean(r[ix.date_contacted])):null,
+   next_follow_up:ix.follow_up>=0?excelDate(clean(r[ix.follow_up])):null,
+   follow_up_method:'Call',_row:n+2
+  };
+ }).filter(x=>x.company||x.phone);
  if(out.length>1000)throw Error('Import at most 1,000 prospects at a time.');
- const invalid=out.find(x=>!x.company||x.phone.length<6||x.email&&!(z.email().safeParse(x.email).success));if(invalid)throw Error('Check row '+invalid._row+': Company and Phone are required, and Email must be valid.');
+ const invalid=out.find(x=>!x.company||!x.phone||x.email&&!(z.email().safeParse(x.email).success));if(invalid)throw Error('Check row '+invalid._row+': Business Name and Contact Number are required, and Email must be valid when supplied.');
  return out.map(({_row,...x})=>x);
 }
 function googleSheetCsvUrl(value:string){
@@ -65,7 +116,7 @@ export async function POST(req:NextRequest){
    const r=await c.db.from('cold_call_prospects').insert(rows).select('id');if(r.error)throw r.error;return reply({imported:r.data.length},201);
   }
   if(action==='create_prospect'){
-   const p=z.object({target_type:z.enum(['nxt','client']),client_id:id.nullable().optional(),campaign:z.string().max(160).default(''),company:z.string().trim().min(1).max(200),contact_name:z.string().max(160).default(''),phone:z.string().trim().min(6).max(40),email:z.union([z.email(),z.literal('')]).default(''),source:z.string().max(160).default(''),owner_id:id.nullable().optional(),notes:z.string().max(5000).default('')}).parse(b);
+   const p=z.object({target_type:z.enum(['nxt','client']),client_id:id.nullable().optional(),campaign:z.string().max(160).default(''),business_id:z.string().max(80).default(''),company:z.string().trim().min(1).max(200),category:z.string().max(160).default(''),location_address:z.string().max(500).default(''),contact_name:z.string().max(160).default(''),phone:z.string().trim().min(1).max(80),email:z.union([z.email(),z.literal('')]).default(''),website_source:z.string().max(500).default(''),existing_system:z.string().max(300).default(''),contact_method:z.string().max(80).default(''),person_spoken_to:z.string().max(160).default(''),interest_level:z.string().max(80).default(''),registration_status:z.string().max(80).default(''),next_action:z.string().max(5000).default(''),integration_needed:z.string().max(80).default(''),follow_up_method:z.enum(['Call','Email','SMS','WhatsApp']).default('Call'),source:z.string().max(500).default(''),owner_id:id.nullable().optional(),notes:z.string().max(5000).default('')}).parse(b);
    if(p.target_type==='client'&&!p.client_id)return reply({error:'Choose the client this calling campaign belongs to.'},400);
    const r=await c.db.from('cold_call_prospects').insert({...p,tenant_id:t,client_id:p.target_type==='client'?p.client_id:null,owner_id:p.owner_id??c.user.id}).select().single();if(r.error)throw r.error;return reply(r.data,201);
   }
@@ -74,11 +125,11 @@ export async function POST(req:NextRequest){
    const r=await c.db.from('cold_call_prospects').update({status:p.status,notes:p.notes,feedback:p.feedback,next_follow_up:p.next_follow_up??null,owner_id:p.owner_id??null}).eq('tenant_id',t).eq('id',p.id).select().single();if(r.error)throw r.error;return reply(r.data);
   }
   if(action==='log_call'){
-   const p=z.object({prospect_id:id,outcome:z.enum(outcomes),notes:z.string().max(5000).default(''),feedback:z.string().max(5000).default(''),duration_seconds:z.number().int().min(0).max(28800).nullable().optional(),next_follow_up:z.string().datetime({offset:true}).nullable().optional()}).parse(b);
+   const p=z.object({prospect_id:id,caller_id:id.nullable().optional(),outcome:z.enum(outcomes),notes:z.string().max(5000).default(''),feedback:z.string().max(5000).default(''),duration_seconds:z.number().int().min(0).max(28800).nullable().optional(),next_follow_up:z.string().datetime({offset:true}).nullable().optional(),follow_up_method:z.enum(['Call','Email','SMS','WhatsApp']).default('Call')}).parse(b);
    const prospect=await c.db.from('cold_call_prospects').select('id').eq('tenant_id',t).eq('id',p.prospect_id).single();if(prospect.error)return reply({error:'Prospect not found'},404);
-   const act=await c.db.from('cold_call_activities').insert({tenant_id:t,prospect_id:p.prospect_id,caller_id:c.user.id,outcome:p.outcome,notes:p.notes,feedback:p.feedback,duration_seconds:p.duration_seconds??null}).select().single();if(act.error)throw act.error;
+   const act=await c.db.from('cold_call_activities').insert({tenant_id:t,prospect_id:p.prospect_id,caller_id:p.caller_id??c.user.id,outcome:p.outcome,notes:p.notes,feedback:p.feedback,duration_seconds:p.duration_seconds??null}).select().single();if(act.error)throw act.error;
    const mapped=p.outcome==='no_answer'||p.outcome==='voicemail'?'attempted':p.outcome;
-   const upd=await c.db.from('cold_call_prospects').update({status:mapped,last_called_at:new Date().toISOString(),last_outcome:p.outcome,feedback:p.feedback||undefined,next_follow_up:p.next_follow_up??null}).eq('tenant_id',t).eq('id',p.prospect_id).select().single();if(upd.error)throw upd.error;
+   const upd=await c.db.from('cold_call_prospects').update({status:mapped,last_called_at:new Date().toISOString(),last_outcome:p.outcome,feedback:p.feedback||undefined,next_follow_up:p.next_follow_up??null,follow_up_method:p.follow_up_method}).eq('tenant_id',t).eq('id',p.prospect_id).select().single();if(upd.error)throw upd.error;
    return reply({activity:act.data,prospect:upd.data},201);
   }
   return reply({error:'Unknown action'},400);
