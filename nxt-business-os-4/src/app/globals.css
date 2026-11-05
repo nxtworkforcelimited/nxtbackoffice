@@ -2133,3 +2133,20 @@ html[data-theme="dark"] .accounting-tabs{background:#262836;border-color:#363847
 .nxt-hero-quick-tasks .nxt-task-check{width:22px;height:22px;border-radius:7px;background:rgba(255,255,255,.12);display:grid;place-items:center}
 .nxt-hero-quick-tasks>div>button span:nth-child(2){min-width:0}.nxt-hero-quick-tasks>div>button strong{display:block;color:#fff;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.nxt-hero-quick-tasks>div>button small{display:block;color:#d9d1ea;font-size:8px;margin-top:2px}.nxt-hero-quick-tasks>div>button em{font-style:normal;font-size:8px;color:#eee8fb;white-space:nowrap}.nxt-hero-quick-tasks>div>p{margin:18px 0 8px;color:#ddd5ee!important;font-size:9px}
 @media(max-width:900px){.nxt-dashboard-hero{grid-template-columns:1fr}.nxt-hero-quick-tasks{width:100%}}
+
+
+/* Contacts editor + attached contracts */
+.client-contact-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.contact-documents-panel{margin-top:14px;overflow:hidden}
+.contact-document-upload{display:grid;grid-template-columns:1fr 1.3fr auto;gap:12px;align-items:end;padding:0 18px 18px}
+.contact-document-upload fieldset{display:contents}
+.contact-document-upload label{margin:0}
+.contact-document-upload .upload-zone{min-height:75px;padding:10px 12px;text-align:left}
+.contact-document-upload .upload-zone input{margin-top:5px;padding:0}
+.contact-document-upload .primary{height:39px}
+.contact-documents-list{display:grid;border-top:1px solid #eee8f4}
+.contact-documents-list>button{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;text-align:left;padding:13px 18px;border-top:1px solid #f1edf5}
+.contact-documents-list>button:first-child{border-top:0}.contact-documents-list>button:hover{background:#fbf9fe}
+.contact-documents-list>button>svg:first-child{color:#7252c9}.contact-documents-list strong{display:block;font-size:10px}.contact-documents-list small{display:block;margin-top:3px;color:#938a9d;font-size:8px}
+html[data-theme="dark"] .contact-documents-list{border-color:#363847}html[data-theme="dark"] .contact-documents-list>button{border-color:#363847}
+@media(max-width:760px){.client-contact-grid{grid-template-columns:1fr}.contact-document-upload{grid-template-columns:1fr}.contact-document-upload fieldset{display:contents}}
