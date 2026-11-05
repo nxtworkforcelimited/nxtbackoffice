@@ -142,7 +142,7 @@ export default function Builds({workspace,demo=false}:{workspace:Workspace;demo?
       <label>Prototype URL<input type="url" placeholder="https://" value={selected.prototype_url} onChange={e=>update('prototype_url',e.target.value)}/></label>
      </div>
 
-     <label className="build-assigned-select">Assigned team<select multiple value={selected.assignee_ids??[]} onChange={e=>update('assignee_ids',Array.from(e.currentTarget.selectedOptions,o=>o.value))}>{staff.filter(s=>['76e3f054-7bdf-4670-800e-c54329dfa4dd','c6aa278d-db23-4464-93c2-6308934fe99c','3c5d23a8-6fea-48ca-a630-37124a10d1db'].includes(s.user_id)).map(s=><option key={s.user_id} value={s.user_id}>{s.name}</option>)}</select><small>Hold Ctrl / Cmd to select more than one person.</small></label>
+     <details className="build-team-dropdown"><summary>Assigned team <span>{selected.assignee_ids.length?selected.assignee_ids.map(id=>name(id)).join(', '):'Unassigned'}</span></summary><div>{staff.filter(s=>['76e3f054-7bdf-4670-800e-c54329dfa4dd','c6aa278d-db23-4464-93c2-6308934fe99c','3c5d23a8-6fea-48ca-a630-37124a10d1db'].includes(s.user_id)).map(s=>{const checked=selected.assignee_ids.includes(s.user_id);return <label key={s.user_id}><input type="checkbox" checked={checked} onChange={e=>update('assignee_ids',e.target.checked?[...selected.assignee_ids,s.user_id]:selected.assignee_ids.filter(id=>id!==s.user_id))}/><span>{s.name}</span></label>})}</div></details>
 
      <label>Scope / build notes<textarea maxLength={5000} value={selected.description} onChange={e=>update('description',e.target.value)} placeholder="What is included in this build?"/></label>
 
