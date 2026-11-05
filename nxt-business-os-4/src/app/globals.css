@@ -2161,3 +2161,26 @@ html[data-theme="dark"] .contact-documents-list{border-color:#363847}html[data-t
 .leave-edit-request .panel-head{padding:18px 0}
 html[data-theme="dark"] .leave-request-row.clickable:hover{background:#282a38}
 html[data-theme="dark"] .leave-request-row>span:last-child>button{background:#242632;border-color:#3b3d4b;color:#d8cdf5}
+
+
+/* CRM relationship board: no monetary values */
+.crm-board-shell{overflow:hidden}
+.crm-board{gap:12px;align-items:stretch}
+.crm-column{min-width:235px;border-radius:18px;background:#f5f2f8;border:1px solid #e8e2ee}
+.crm-column>header{padding:14px 14px 10px;min-height:48px}
+.crm-column>header>div{width:100%;display:flex;align-items:center;justify-content:space-between}
+.crm-column>header>div>span{font-size:10px;letter-spacing:.08em;font-weight:800}
+.crm-column>header>div>b{display:grid;place-items:center;min-width:22px;height:22px;border-radius:99px;background:#e9e2f3;color:#776783;font-size:9px}
+.crm-column-body{padding:0 10px 12px;gap:10px}
+.crm-deal-card{border-radius:14px;box-shadow:none;border:1px solid #e7e1ec}
+.crm-card-main{padding:14px 14px 12px}
+.crm-card-main .crm-company{font-size:8px;letter-spacing:.08em}
+.crm-card-main>strong{font-size:12px;line-height:1.35;margin:6px 0 7px}
+.crm-card-main>small{font-size:9px;line-height:1.5;color:#948a9d}
+.crm-card-foot{padding:9px 12px;border-top:1px solid #eee9f2;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.crm-next-action{font-size:8px;color:#9b91a4;text-transform:uppercase;letter-spacing:.08em}
+.crm-card-foot select{margin-left:auto;min-width:100px}
+.crm-empty{min-height:72px;border-radius:14px}
+html[data-theme="dark"] .crm-column{background:#262833;border-color:#383a47}
+html[data-theme="dark"] .crm-deal-card{background:#20222d;border-color:#373946}
+html[data-theme="dark"] .crm-column>header>div>b{background:#343645;color:#d5cfe0}
