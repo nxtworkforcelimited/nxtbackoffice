@@ -12,8 +12,8 @@ const schema=z.discriminatedUnion('action',[employee,
  z.object({action:z.literal('file'),employee_id:id,name:text.min(1).max(200),category:z.enum(['Profile Photo','CV','ID','Contract','Other'])})]);
 export async function GET(req:NextRequest){
  const c=await context(req.nextUrl.searchParams.get('workspace'));if(!c?.workspace)return NextResponse.json({error:'Sign in required'},{status:401});
- const peopleAdmins=['nyasha@nxt-workforce.com','bridget@nxt-workforce.com','kristian@nxt-workforce.com'];
- const peopleAdmin=peopleAdmins.includes((c.user.email??'').toLowerCase());
+ const peopleAdminIds=['3c5d23a8-6fea-48ca-a630-37124a10d1db','4f661657-3ec7-4246-9d72-04cc3e4f3841','2f0123f5-8e00-4ab6-92d1-cd3ec8ff0f74'];
+ const peopleAdmin=peopleAdminIds.includes(c.user.id);
  const area=req.nextUrl.searchParams.get('area');
  const tables=area==='messages'?['portal_messages']:area==='leave'?['leave_requests']:area==='employees'?['employees','employee_salaries','employee_files','employee_extra_hours']:[];
  if(!tables.length)return NextResponse.json({error:'Invalid area'},{status:400});
@@ -41,8 +41,8 @@ export async function GET(req:NextRequest){
 export async function POST(req:NextRequest){
  if(req.headers.get('origin')!==req.nextUrl.origin)return NextResponse.json({error:'Forbidden'},{status:403});
  const c=await context(req.nextUrl.searchParams.get('workspace'));if(!c?.workspace)return NextResponse.json({error:'Sign in required'},{status:401});
- const peopleAdmins=['nyasha@nxt-workforce.com','bridget@nxt-workforce.com','kristian@nxt-workforce.com'];
- const peopleAdmin=peopleAdmins.includes((c.user.email??'').toLowerCase());
+ const peopleAdminIds=['3c5d23a8-6fea-48ca-a630-37124a10d1db','4f661657-3ec7-4246-9d72-04cc3e4f3841','2f0123f5-8e00-4ab6-92d1-cd3ec8ff0f74'];
+ const peopleAdmin=peopleAdminIds.includes(c.user.id);
  const parsed=schema.safeParse(await req.json().catch(()=>null));if(!parsed.success)return NextResponse.json({error:parsed.error.issues.map(i=>i.message).join('; ')},{status:400});
  const {action,...v}=parsed.data as any;let result;
  if(['employee','salary','extra_hours'].includes(action)&&!peopleAdmin)return NextResponse.json({error:'Employee management is restricted.'},{status:403});
