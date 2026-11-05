@@ -2068,3 +2068,19 @@ html[data-theme="dark"] .leave-kpi,html[data-theme="dark"] .leave-balance-card,h
 .leave-team-status em.upcoming{background:#eee8ff;color:#7049d4}
 .leave-team-status>div:not(.panel-head)>span:nth-child(2) small{display:block;margin-top:3px;font-size:8px;color:#9a92a2}
 html[data-theme="dark"] .leave-team-status em.upcoming{background:#392f55;color:#cfbdff}
+
+
+/* Employee dashboard inspired by the supplied card directory */
+.employee-dashboard-hero{position:relative;margin:-2px 0 -76px;padding:26px 28px 112px;border-radius:22px;background:linear-gradient(135deg,#17171f,#252331);color:#fff;overflow:hidden}
+.employee-dashboard-hero .eyebrow,.employee-dashboard-hero h2,.employee-dashboard-hero p{color:#fff!important}.employee-dashboard-hero h2{font-size:29px;margin:5px 0 6px}.employee-dashboard-hero p{margin:0;color:#cbc6d6!important;font-size:11px}.employee-dashboard-hero>.primary{position:absolute;right:26px;top:27px;background:#c6adff;color:#241c31;border:0;border-radius:999px;padding:11px 17px}
+.employee-dashboard-filters{display:flex;gap:8px;align-items:center;margin-top:20px}.employee-dashboard-filters span,.employee-dashboard-filters b{padding:7px 10px;border-radius:999px;background:#ffffff0d;border:1px solid #ffffff16;color:#ddd8e7;font-size:9px;font-weight:600}.employee-dashboard-filters b{margin-left:auto}
+.employee-layout{position:relative;z-index:2}.employee-card-grid{padding:0 2px}.employee-profile-card{min-height:255px;padding:18px;border-radius:18px;background:#fff}.employee-card-top{justify-content:center;position:relative}.employee-avatar{width:58px!important;height:58px!important;border-radius:50%!important}.employee-status{position:absolute;right:0;top:0}.employee-profile-card>strong{text-align:center;font-size:13px}.employee-role,.employee-department{text-align:center}.employee-card-foot{justify-content:center}
+.employee-profile-card:after{content:'';display:block;margin-top:8px;padding-top:8px;border-top:1px solid #eeeaf3}.employee-profile-pane{margin-top:78px}
+html[data-theme=dark] .employee-profile-card{background:#242632}.employee-dashboard-hero+ .employee-layout .employee-profile-card.selected{background:#f7f3ff}
+@media(max-width:760px){.employee-dashboard-hero{padding:22px 20px 105px}.employee-dashboard-hero>.primary{position:static;margin-top:16px}.employee-dashboard-filters{flex-wrap:wrap}.employee-dashboard-filters b{margin-left:0}.employee-profile-pane{margin-top:12px}}
+
+/* Accounting finance launcher */
+.accounting-hub{margin-bottom:20px}.accounting-hub-head{display:flex;justify-content:space-between;align-items:end;margin-bottom:14px}.accounting-hub-head h2{font-size:28px;margin:5px 0}.accounting-hub-head p{margin:0;color:#81798c;font-size:11px}
+.accounting-card-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}.accounting-card-grid>button{display:grid;grid-template-columns:auto 1fr;column-gap:11px;row-gap:4px;text-align:left;background:#fff;border:1px solid #e6e1ef;border-radius:16px;padding:17px;min-height:115px;box-shadow:0 6px 18px rgba(45,31,79,.05)}.accounting-card-grid>button:hover{border-color:#baa6f4;transform:translateY(-1px)}.accounting-card-grid>button>span{grid-row:1/4;width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:#eee8ff;color:#6a42da}.accounting-card-grid strong{font-size:12px}.accounting-card-grid small{font-size:9px;color:#8f8799;line-height:1.45}.accounting-card-grid em{display:flex;align-items:center;gap:4px;font-style:normal;color:#6b43d6;font-size:9px;font-weight:700}
+html[data-theme=dark] .accounting-card-grid>button{background:#222431;border-color:#363847;color:#f1eef8}
+@media(max-width:900px){.accounting-card-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){.accounting-card-grid{grid-template-columns:1fr}}
