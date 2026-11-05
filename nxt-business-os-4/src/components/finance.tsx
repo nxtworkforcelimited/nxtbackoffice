@@ -1,6 +1,5 @@
 'use client';
 import {useEffect,useState} from 'react';
-import AccountingWorkspace from './accounting-workspace';
 import type {Workspace} from '@/lib/types';
 import {allowed,formatMoney} from '@/lib/business';
 type Kind='expense'|'purchase_order'|'subscription';
@@ -36,4 +35,4 @@ function FinanceRecords({area,workspace}:{area:Kind|'accounting';workspace:Works
  </section>;
 }
 
-export default function Finance(props:{area:Kind|'accounting';workspace:Workspace}){return props.area==='accounting'?<AccountingWorkspace workspace={props.workspace}/>:<FinanceRecords {...props}/>;}
+export default function Finance(props:{area:Kind|'accounting';workspace:Workspace}){return props.area==='accounting'?null:<FinanceRecords {...props}/>;}
