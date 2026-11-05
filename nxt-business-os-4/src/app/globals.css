@@ -2030,3 +2030,19 @@ html[data-theme="dark"] .crm-column{background:#1f212d;border-color:#343645}html
 .home-profile-photo label{position:absolute;left:38px;bottom:-2px;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#6e43df;color:#fff;cursor:pointer;border:2px solid #fff;font-size:0}.home-profile-photo label svg{width:12px;height:12px}.home-profile-photo label input{display:none}
 html[data-theme="dark"] .home-my-profile{background:#222431;border-color:#363847;color:#f1eef8}
 @media(max-width:620px){.home-my-profile{grid-template-columns:auto 1fr}.home-my-profile>button{grid-column:2}.nxt-dashboard-hero{min-height:185px}}
+
+
+/* Contacts dashboard: logo-first table */
+.contacts-toolbar{display:flex;justify-content:space-between;align-items:end;gap:18px;margin:0 0 18px;padding:18px 20px;background:#fff;border:1px solid #e7e2ef;border-radius:18px}
+.contacts-toolbar h2{font-size:26px;margin:4px 0}.contacts-toolbar p{margin:0;color:#8a8295;font-size:11px}
+.contacts-toolbar-actions{display:flex;align-items:end;gap:10px;flex-wrap:wrap}
+.contacts-search,.contacts-filter{display:flex;flex-direction:column;gap:6px;font-size:9px;color:#8a8295}.contacts-search input,.contacts-filter select{height:38px;border:1px solid #e3deeb;border-radius:10px;background:#fff;padding:0 11px;font-size:11px}.contacts-search input{min-width:220px}
+.contacts-dashboard-table{overflow:auto;background:#fff;border:1px solid #e7e2ef;border-radius:18px;box-shadow:0 7px 22px rgba(48,33,90,.05)}
+.contacts-dashboard-table table{min-width:920px}.contacts-dashboard-table th{background:#faf9fc;color:#91899b;font-size:9px;font-weight:700;padding:14px 16px;text-transform:none;letter-spacing:0}.contacts-dashboard-table td{padding:13px 16px;border-top:1px solid #f0edf4;color:#6f6879;font-size:10px}
+.contacts-dashboard-table tbody tr:hover,.contacts-dashboard-table tr.selected{background:#fbf9fe}
+.contact-name-cell{display:flex;align-items:center;gap:10px;text-align:left}.contact-name-cell strong{display:block;color:#312d39;font-size:11px}.contact-name-cell small{display:block;margin-top:3px;color:#9a92a2;font-size:8px}
+.contact-logo{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#ede7ff;color:#6843d6;font-size:9px;font-weight:800;overflow:hidden;flex:0 0 auto}.contact-logo img{width:100%;height:100%;object-fit:cover}
+.contact-status{display:inline-flex;padding:5px 8px;border-radius:999px;text-transform:capitalize;font-size:8px}.contact-status.active{background:#e8f5ed;color:#4d8a62}.contact-status.inactive{background:#f2edf3;color:#84798b}
+.contact-more{font-size:12px;color:#9d94a5;letter-spacing:1px}
+html[data-theme="dark"] .contacts-toolbar,html[data-theme="dark"] .contacts-dashboard-table{background:#222431;border-color:#363847}html[data-theme="dark"] .contacts-toolbar h2,html[data-theme="dark"] .contact-name-cell strong{color:#f1eef8}html[data-theme="dark"] .contacts-dashboard-table th{background:#292b39;color:#aaa3b7}html[data-theme="dark"] .contacts-dashboard-table td{border-color:#363847;color:#d8d3df}html[data-theme="dark"] .contacts-dashboard-table tbody tr:hover,html[data-theme="dark"] .contacts-dashboard-table tr.selected{background:#292b39}
+@media(max-width:760px){.contacts-toolbar{align-items:flex-start;flex-direction:column}.contacts-toolbar-actions{width:100%}.contacts-search{flex:1}.contacts-search input{min-width:0;width:100%}}
