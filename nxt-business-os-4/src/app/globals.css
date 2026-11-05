@@ -2120,3 +2120,16 @@ html[data-theme="dark"] .ga4-kpis article,html[data-theme="dark"] .ga4-grid>.pan
 .subscription-reminder-panel>div>button:hover{background:#fbf9fe}.subscription-reminder-panel strong{display:block;font-size:11px}.subscription-reminder-panel small{display:block;color:#91879c;font-size:9px;margin-top:3px}.subscription-reminder-panel em{font-style:normal;font-size:9px;padding:6px 8px;border-radius:999px;background:#f2ecff;color:#6746bf}.subscription-reminder-panel em.urgent{background:#fff3df;color:#ad741d}.subscription-reminder-panel em.overdue{background:#fdecef;color:#b34b64}.subscription-reminder-panel b{font-size:10px}
 html[data-theme="dark"] .accounting-tabs{background:#262836;border-color:#363847}html[data-theme="dark"] .accounting-tabs button.active,html[data-theme="dark"] .subscription-reminder-panel{background:#222431;color:#f2eef8;border-color:#363847}html[data-theme="dark"] .subscription-reminder-panel>header{background:#272a38}html[data-theme="dark"] .subscription-reminder-panel>div>button{border-color:#363847}
 @media(max-width:700px){.accounting-tabs{overflow-x:auto;flex-wrap:nowrap}.accounting-tabs button{white-space:nowrap}.subscription-reminder-panel>header{align-items:flex-start;flex-direction:column}.subscription-reminder-panel>div>button{grid-template-columns:1fr auto}.subscription-reminder-panel b{grid-column:2}}
+
+
+/* Quick Tasks inside Home hero */
+.nxt-dashboard-hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,420px);align-items:stretch;gap:24px}
+.nxt-hero-copy{display:flex;flex-direction:column;justify-content:center;min-width:0}
+.nxt-hero-quick-tasks{align-self:stretch;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(16px);border-radius:18px;padding:14px;color:#fff;min-width:0}
+.nxt-hero-quick-tasks header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px}
+.nxt-hero-quick-tasks header>div{display:grid;gap:2px}.nxt-hero-quick-tasks header span{font-size:8px;letter-spacing:.12em;color:#e9e2ff}.nxt-hero-quick-tasks header strong{font-size:12px;color:#fff}
+.nxt-hero-quick-tasks header>button{display:flex;align-items:center;gap:5px;color:#fff;font-size:8px;padding:0}
+.nxt-hero-quick-tasks>div{display:grid}.nxt-hero-quick-tasks>div>button{display:grid;grid-template-columns:auto 1fr auto;gap:9px;align-items:center;text-align:left;padding:10px 2px;border-top:1px solid rgba(255,255,255,.12);color:#fff}
+.nxt-hero-quick-tasks .nxt-task-check{width:22px;height:22px;border-radius:7px;background:rgba(255,255,255,.12);display:grid;place-items:center}
+.nxt-hero-quick-tasks>div>button span:nth-child(2){min-width:0}.nxt-hero-quick-tasks>div>button strong{display:block;color:#fff;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.nxt-hero-quick-tasks>div>button small{display:block;color:#d9d1ea;font-size:8px;margin-top:2px}.nxt-hero-quick-tasks>div>button em{font-style:normal;font-size:8px;color:#eee8fb;white-space:nowrap}.nxt-hero-quick-tasks>div>p{margin:18px 0 8px;color:#ddd5ee!important;font-size:9px}
+@media(max-width:900px){.nxt-dashboard-hero{grid-template-columns:1fr}.nxt-hero-quick-tasks{width:100%}}
