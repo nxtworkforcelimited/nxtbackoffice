@@ -152,7 +152,7 @@ export default function Dashboard({initial,workspace,workspaces,email,demo=false
  });}
  async function act(item:BusinessItem,action:string,extra:Record<string,unknown>={}){await run(async()=>{
  if(demo){if(action==='payment'){const amt=Number(extra.amount);if(!Number.isFinite(amt)||amt<=0||amt>Number(item.total)-Number(item.paid))throw new Error('Enter an amount within the outstanding balance');if(!String(extra.reference??'').trim())throw new Error('Add a payment reference');if(biz.payments.some(p=>p.invoice_id===item.id&&p.reference===extra.reference))throw new Error('This reference has already been recorded');setBiz(b=>({...b,payments:[...b.payments,{id:crypto.randomUUID(),invoice_id:item.id,amount:amt,reference:String(extra.reference),payment_method:extra.payment_method==='cash'?'cash':'bank',created_at:new Date().toISOString()}]}));updateItem({...item,paid:Number(item.paid)+amt,status:Number(item.paid)+amt===Number(item.total)?'paid':'issued'});}else if(action==='convert'){const old=biz.items.find(i=>i.parent_id===item.id&&i.kind==='invoice');if(old){setPaper(old);return;}const converted={...item,id:crypto.randomUUID(),reference:'NXT-DEMO-'+Date.now().toString().slice(-6),kind:'invoice' as const,status:'issued',parent_id:item.id,payload:{...item.payload,payment_terms:item.payload.payment_terms||'full_payment'}};updateItem(converted);setPaper(converted);}else if(action==='recur'){throw new Error('Recurring draft generation is available in the connected workspace.');}else updateItem({...item,status:action==='issue'?'issued':action==='close'?'closed':'finalised'});
- }else{updateItem(await request('business',{id:item.id,action,...extra}));if(action==='payment'){setMessage('Payment recorded. Refresh to load the persisted receipt.');return;}}
+ }else{const updated=await request('business',{id:item.id,action,...extra});updateItem(updated);if(action==='payment'){const amount=Number(extra.amount||0);setBiz(b=>({...b,payments:[{id:'local-'+Date.now(),invoice_id:item.id,amount,reference:String(extra.reference??''),payment_method:extra.payment_method==='cash'?'cash':'bank',created_at:new Date().toISOString()},...b.payments]}));setMessage('Payment recorded. Monthly goal updated.');return;}}
  setMessage('Updated successfully.');
  });}
  async function removeTestInvoice(item:BusinessItem){
@@ -217,9 +217,16 @@ export default function Dashboard({initial,workspace,workspaces,email,demo=false
  const dashboardTickets=((visible as any).tickets??[]) as RecordRow[];
  const openTicketCount=dashboardTickets.filter(t=>!['done','closed','completed','resolved'].includes(String(t.status).toLowerCase())).length;
  const activeProjects=visible.projects.filter(p=>!['completed','complete'].includes(p.status));
- const novemberGoal=10000;
- const novemberPaid=paidInvoices.filter(i=>i.currency==='USD'&&String(i.created_at??'').startsWith('2026-11')).reduce((sum,i)=>sum+Number(i.paid||0),0);
- const novemberPercent=Math.min(100,Math.round((novemberPaid/novemberGoal)*100));
+ const monthlyGoal=10000;
+ const goalDate=localNow??new Date();
+ const goalMonthPrefix=`${goalDate.getFullYear()}-${String(goalDate.getMonth()+1).padStart(2,'0')}`;
+ const goalMonthLabel=goalDate.toLocaleDateString('en-GB',{month:'long'});
+ const invoiceById=new Map(items.filter(i=>i.kind==='invoice').map(i=>[i.id,i]));
+ const monthlyPayments=(biz.payments??[]).filter(p=>String(p.created_at??'').slice(0,7)===goalMonthPrefix&&invoiceById.get(p.invoice_id)?.currency==='USD');
+ const monthlySales=monthlyPayments.reduce((sum,p)=>sum+Number(p.amount||0),0);
+ const monthlyPercent=Math.min(100,Math.round((monthlySales/monthlyGoal)*100));
+ const monthlyRemaining=Math.max(0,monthlyGoal-monthlySales);
+ const recentGoalPayments=[...monthlyPayments].sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at))).slice(0,3);
  const projectStatusCounts={
   active:visible.projects.filter(p=>['active','in_progress','progress'].includes(String(p.status).toLowerCase())).length,
   review:visible.projects.filter(p=>['review','under_review'].includes(String(p.status).toLowerCase())).length,
@@ -285,13 +292,17 @@ export default function Dashboard({initial,workspace,workspaces,email,demo=false
   {!client&&upcomingSubscriptions.length>0&&<section className="subscription-reminder-panel"><header><div><span className="eyebrow">RENEWAL REMINDERS</span><h2>Subscriptions due soon</h2><p>NXT Business OS alerts you 8 days before renewal.</p></div><button onClick={()=>go('subscriptions')}>View subscriptions <ArrowRight size={13}/></button></header><div>{upcomingSubscriptions.slice(0,4).map((r:any)=>{const days=renewalDays(r.due_date);return <button key={r.id} onClick={()=>go('subscriptions')}><span><strong>{r.title}</strong><small>{r.vendor||'Subscription'} · {r.billing_cycle}</small></span><em className={days<0?'overdue':days<=2?'urgent':''}>{days<0?'Overdue':days===0?'Due today':days===1?'Due tomorrow':'Due in '+days+' days'}</em><b>{formatMoney(Number(r.amount||0),r.currency||'USD')}</b></button>})}</div></section>}
 
   <section className="nxt-kpis">
-   <article className="nxt-goal-card"><div><span>November Goal</span><strong>{formatMoney(novemberGoal)}</strong></div><b>{novemberPercent}%</b><div className="nxt-goal-track"><i style={{width:novemberPercent+'%'}}/></div><small>{formatMoney(novemberPaid)} of {formatMoney(novemberGoal)}</small></article>
+   <article className="nxt-goal-card"><div><span>{goalMonthLabel} Goal</span><strong>{formatMoney(monthlyGoal)}</strong></div><b>{monthlyPercent}%</b><div className="nxt-goal-track"><i style={{width:monthlyPercent+'%'}}/></div><small>{formatMoney(monthlySales)} of {formatMoney(monthlyGoal)}</small></article>
    <button className="nxt-kpi-card" onClick={()=>go('tasks')}><Check size={20}/><span>Open Tasks</span><strong>{openTasks.length}</strong></button>
    <button className="nxt-kpi-card" onClick={()=>go('tickets')}><ListChecks size={20}/><span>Open Tickets</span><strong>{openTicketCount}</strong></button>
    <button className="nxt-kpi-card" onClick={()=>go('clients')}><Users size={20}/><span>Clients</span><strong>{visible.clients.length}</strong></button>
   </section>
 
   <section className="nxt-dashboard-grid">
+   {!client&&<article className="nxt-dashboard-card nxt-chart-card"><header><div><h2>Projects by Status</h2><p>Current delivery portfolio</p></div><button onClick={()=>go('projects')}>Master Tracker</button></header><div className="nxt-chart-content"><div className="nxt-donut" style={{background:projectDonut}}><div><strong>{visible.projects.length}</strong><span>Projects</span></div></div><div className="nxt-chart-legend"><span><i className="s1"/>Active <b>{projectStatusCounts.active}</b></span><span><i className="s2"/>Review <b>{projectStatusCounts.review}</b></span><span><i className="s3"/>On hold <b>{projectStatusCounts.hold}</b></span><span><i className="s4"/>Complete <b>{projectStatusCounts.completed}</b></span></div></div></article>}
+
+   {!client&&<article className="nxt-dashboard-card nxt-sales-progress"><header><div><h2>Sales Progress</h2><p>{goalMonthLabel} recorded payments</p></div><button onClick={()=>go('invoices')}>Invoices</button></header><div className="nxt-sales-total"><span>Recorded</span><strong>{formatMoney(monthlySales)}</strong><small>{formatMoney(monthlyRemaining)} remaining to goal</small></div><div className="nxt-sales-meter"><i style={{width:monthlyPercent+'%'}}/></div><div className="nxt-sales-recent">{recentGoalPayments.map(p=>{const inv=invoiceById.get(p.invoice_id);return <div key={p.id}><span><strong>{inv?.title||inv?.reference||'Invoice payment'}</strong><small>{p.reference||p.payment_method||'Recorded sale'}</small></span><b>{formatMoney(p.amount)}</b></div>})}{!recentGoalPayments.length&&<p className="empty compact">No sales recorded this month yet.</p>}</div></article>}
+
    <article className="nxt-dashboard-card nxt-chart-card"><header><div><h2>Workload by App</h2><p>Current open workload</p></div></header><div className="nxt-chart-content"><div className="nxt-donut" style={{background:workloadDonut}}><div><strong>{Object.values(workloadCounts).reduce((a,b)=>a+b,0)}</strong><span>Total Items</span></div></div><div className="nxt-chart-legend"><span><i className="s1"/>Tasks <b>{workloadCounts.tasks}</b></span><span><i className="s2"/>Tickets <b>{workloadCounts.tickets}</b></span><span><i className="s3"/>Approvals <b>{workloadCounts.approvals}</b></span><span><i className="s4"/>Invoices <b>{workloadCounts.invoices}</b></span></div></div></article>
 
    {!client&&<article className="nxt-dashboard-card nxt-chart-card nxt-ga-card"><header><div><h2>Website Traffic</h2><p>GA4 · {ga4?.period_label||'Last 30 days'}</p></div><button onClick={()=>go('reports')}>View analytics</button></header><div className="nxt-chart-content"><div className="nxt-donut" style={{background:gaDonut}}><div><strong>{ga4Loading?'…':gaSessions}</strong><span>Sessions</span></div></div><div className="nxt-chart-legend">{gaChannels.slice(0,4).map((x,i)=><span key={x.name}><i style={{background:gaPalette[i%gaPalette.length]}}/>{x.name} <b>{x.sessions}</b></span>)}{!gaChannels.length&&<span><i className="s4"/>No GA4 data <b>0</b></span>}</div></div><small className="ga-updated">Updated {ga4?.updated_at?new Date(ga4.updated_at).toLocaleString():'when GA4 syncs'}</small></article>}
