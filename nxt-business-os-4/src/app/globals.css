@@ -2062,3 +2062,9 @@ html[data-theme="dark"] .leave-kpi,html[data-theme="dark"] .leave-balance-card,h
 @media(max-width:1050px){.leave-main-grid{grid-template-columns:1fr 1fr}.leave-balance-card{grid-column:1/-1}.leave-kpis{grid-template-columns:repeat(2,1fr)}}@media(max-width:650px){.leave-welcome{align-items:flex-start;flex-direction:column}.leave-main-grid{grid-template-columns:1fr}.leave-kpis{grid-template-columns:1fr 1fr}.leave-balance-head{display:none}.leave-balance-row{grid-template-columns:1fr 1fr}.leave-request-head{display:none}.leave-request-row{grid-template-columns:1fr 1fr}.leave-request-row>span:nth-child(3){grid-column:1/-1}}
 
 .nxt-dashboard{margin-top:-24px}.nxt-dashboard-hero{width:calc(100% + 56px);margin:0 -28px;min-height:300px;padding:42px 44px;border-radius:26px 26px 0 0;background-position:center 52%}.home-my-profile{margin-top:18px}@media(max-width:760px){.nxt-dashboard{margin-top:-18px}.nxt-dashboard-hero{width:calc(100% + 36px);margin:0 -18px;padding:28px 22px;min-height:240px;border-radius:20px 20px 0 0}}
+
+.leave-welcome,.leave-welcome *{color:#fff!important}
+.leave-reviewer-note{display:block;margin-top:9px;font-size:9px;color:#e8dcff!important}
+.leave-team-status em.upcoming{background:#eee8ff;color:#7049d4}
+.leave-team-status>div:not(.panel-head)>span:nth-child(2) small{display:block;margin-top:3px;font-size:8px;color:#9a92a2}
+html[data-theme="dark"] .leave-team-status em.upcoming{background:#392f55;color:#cfbdff}
