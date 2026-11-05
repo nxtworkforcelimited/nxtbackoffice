@@ -5,6 +5,18 @@ export async function POST(req:NextRequest){if(!trustedRequest(req))return reply
  if(b.action==='configure'){const p=z.object({employee_id:id,employee_start_date:date.optional(),opening_date:date,opening_balance:z.number().min(0).max(365),accrual_start:date,monthly_rate:z.number().min(0).max(10),balance_cap:z.number().min(1).max(365),day_basis:z.enum(['calendar','weekdays']),policy_note:z.string().trim().min(10).max(2000)}).parse(b);r=await c.db.rpc('configure_leave_account',{t,e:p.employee_id,v:p});}
  else if(b.action==='adjust'){const p=z.object({employee_id:id,date,days:z.number().min(-365).max(365),reason:z.string().trim().min(10).max(1000)}).parse(b);r=await c.db.rpc('adjust_leave',{t,e:p.employee_id,day:p.date,amount:p.days,reason:p.reason});}
  else if(b.action==='request'){const p=z.object({kind:z.enum(['Annual','Sick','Family','Unpaid','Other']),starts:date,ends:date,reason:z.string().trim().min(1).max(3000)}).parse(b);r=await c.db.from('leave_requests').insert({...p,tenant_id:t,requester_email:c.user.email??''}).select().single();}
+ else if(b.action==='edit_request'){
+  const p=z.object({id,kind:z.enum(['Annual','Sick','Family','Unpaid','Other']),starts:date,ends:date,reason:z.string().trim().min(1).max(3000)}).parse(b);
+  if(p.ends<p.starts)return reply({error:'Leave end date cannot be before the start date.'},400);
+  const existing=await c.db.from('leave_requests').select('id,user_id,status').eq('tenant_id',t).eq('id',p.id).single();
+  if(existing.error||!existing.data)return reply({error:'Leave request not found.'},404);
+  const reviewer=c.workspace.role==='owner'||(c.workspace.permissions??[]).includes('approve_leave');
+  const own=existing.data.user_id===c.user.id;
+  if(!(own&&existing.data.status==='pending')&&!(reviewer&&['pending','approved'].includes(existing.data.status)))return reply({error:'This leave request can no longer be edited.'},403);
+  const fields:any={kind:p.kind,starts:p.starts,ends:p.ends,reason:p.reason};
+  if(existing.data.status==='approved'){fields.status='pending';fields.review_note='Edited after approval. Review required again.';fields.reviewed_by=null;}
+  r=await c.db.from('leave_requests').update(fields).eq('tenant_id',t).eq('id',p.id).select().single();
+ }
  else if(b.action==='review'){const p=z.object({id,decision:z.enum(['approved','rejected','cancelled']),note:z.string().max(3000).default('')}).parse(b);r=await c.db.rpc('review_leave',{t,r:p.id,decision:p.decision,note:p.note});}
  else if(b.action==='holiday'){if(c.workspace.role!=='owner'&&!(c.workspace.permissions??[]).some(p=>['hr','payroll_admin'].includes(p)))return reply({error:'HR or payroll administrator required'},403);const p=z.object({holiday:date,label:z.string().trim().min(1).max(160)}).parse(b);r=await c.db.from('leave_holidays').upsert({...p,tenant_id:t},{onConflict:'tenant_id,holiday'});}
  else return reply({error:'Unknown action'},400);return reply(r.error?{error:r.error.message}:r.data??{ok:true},r.error?400:200);
