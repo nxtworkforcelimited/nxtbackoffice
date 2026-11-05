@@ -12,7 +12,7 @@ const schema=z.discriminatedUnion('action',[employee,
  z.object({action:z.literal('file'),employee_id:id,name:text.min(1).max(200),category:z.enum(['Profile Photo','CV','ID','Contract','Other'])})]);
 export async function GET(req:NextRequest){
  const c=await context(req.nextUrl.searchParams.get('workspace'));if(!c?.workspace)return NextResponse.json({error:'Sign in required'},{status:401});
- const peopleAdmins=['michael@nxt-workforce.com','bridget@nxt-workforce.com','kristian@nxt-workforce.com'];
+ const peopleAdmins=['nyasha@nxt-workforce.com','bridget@nxt-workforce.com','kristian@nxt-workforce.com'];
  const peopleAdmin=peopleAdmins.includes((c.user.email??'').toLowerCase());
  const area=req.nextUrl.searchParams.get('area');
  const tables=area==='messages'?['portal_messages']:area==='leave'?['leave_requests']:area==='employees'?['employees','employee_salaries','employee_files','employee_extra_hours']:[];
@@ -41,7 +41,7 @@ export async function GET(req:NextRequest){
 export async function POST(req:NextRequest){
  if(req.headers.get('origin')!==req.nextUrl.origin)return NextResponse.json({error:'Forbidden'},{status:403});
  const c=await context(req.nextUrl.searchParams.get('workspace'));if(!c?.workspace)return NextResponse.json({error:'Sign in required'},{status:401});
- const peopleAdmins=['michael@nxt-workforce.com','bridget@nxt-workforce.com','kristian@nxt-workforce.com'];
+ const peopleAdmins=['nyasha@nxt-workforce.com','bridget@nxt-workforce.com','kristian@nxt-workforce.com'];
  const peopleAdmin=peopleAdmins.includes((c.user.email??'').toLowerCase());
  const parsed=schema.safeParse(await req.json().catch(()=>null));if(!parsed.success)return NextResponse.json({error:parsed.error.issues.map(i=>i.message).join('; ')},{status:400});
  const {action,...v}=parsed.data as any;let result;
