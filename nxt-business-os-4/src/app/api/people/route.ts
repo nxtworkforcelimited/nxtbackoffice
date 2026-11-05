@@ -9,7 +9,7 @@ const schema=z.discriminatedUnion('action',[employee,
  z.object({action:z.literal('leave'),kind:z.enum(['Annual','Sick','Family','Unpaid','Other']),starts:date,ends:date,reason:z.string().trim().min(1).max(3000)}),
  z.object({action:z.literal('review'),id,decision:z.enum(['approved','rejected','cancelled']),note:z.string().max(3000)}),
  z.object({action:z.literal('message'),client_id:id,body:z.string().trim().min(1).max(5000)}),
- z.object({action:z.literal('file'),employee_id:id,name:text.min(1).max(200),category:z.enum(['CV','ID','Contract','Other'])})]);
+ z.object({action:z.literal('file'),employee_id:id,name:text.min(1).max(200),category:z.enum(['Profile Photo','CV','ID','Contract','Other'])})]);
 export async function GET(req:NextRequest){
  const c=await context(req.nextUrl.searchParams.get('workspace'));if(!c?.workspace)return NextResponse.json({error:'Sign in required'},{status:401});
  const area=req.nextUrl.searchParams.get('area');
