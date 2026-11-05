@@ -18,6 +18,7 @@ import SocialPublisher from './social-publisher';
 import ColdCalling from './cold-calling';
 import StaffAccess from './staff-access';
 import TeamChat from './team-chat';
+import WebsiteAnalytics from './website-analytics';
 import dynamic from 'next/dynamic';
 const MasterTracker = dynamic(() => import('./master-tracker'), {loading: () => <p role="status">Loading Master Tracker…</p>});
 import {LayoutDashboard,Users,ChartNoAxesCombined,FolderKanban,CalendarDays,FileText,ListChecks,BarChart3,Search,Plus,ArrowUpRight,ArrowRight,Check,LogOut,X,Download,Grid2X2,ChevronLeft,ChevronRight,Mail,Phone,MessageSquare,Wallet,Globe,ShieldCheck,Settings,Printer,Upload,Clock,Send,Sun,Moon,Link2,Copy} from 'lucide-react';
@@ -263,6 +264,8 @@ export default function Dashboard({initial,workspace,workspaces,email,demo=false
    <button className="nxt-kpi-card" onClick={()=>go('tickets')}><ListChecks size={20}/><span>Open Tickets</span><strong>{openTicketCount}</strong></button>
    <button className="nxt-kpi-card" onClick={()=>go('clients')}><Users size={20}/><span>Clients</span><strong>{visible.clients.length}</strong></button>
   </section>
+
+  {!client&&!supportClientId&&can('reports')&&<WebsiteAnalytics/>}
 
   <section className="nxt-dashboard-grid">
    <article className="nxt-dashboard-card nxt-chart-card"><header><div><h2>Projects by Status</h2><p>Live project mix</p></div><button onClick={()=>go('projects')}>View all</button></header><div className="nxt-chart-content"><div className="nxt-donut" style={{background:projectDonut}}><div><strong>{visible.projects.length}</strong><span>Projects</span></div></div><div className="nxt-chart-legend"><span><i className="s1"/>In Progress <b>{projectStatusCounts.active}</b></span><span><i className="s2"/>Under Review <b>{projectStatusCounts.review}</b></span><span><i className="s3"/>On Hold / Planned <b>{projectStatusCounts.hold}</b></span><span><i className="s4"/>Completed <b>{projectStatusCounts.completed}</b></span></div></div></article>
