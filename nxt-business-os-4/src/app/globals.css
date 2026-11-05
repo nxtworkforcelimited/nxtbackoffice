@@ -2248,3 +2248,19 @@ html[data-theme="dark"] .crm-column>header>div>b{background:#343645;color:#d5cfe
 html[data-theme="dark"] .builds-summary article,html[data-theme="dark"] .build-editor,html[data-theme="dark"] .build-type-picker label,html[data-theme="dark"] .build-assignees label{background:#222431;border-color:#373946;color:#f1eef8}
 html[data-theme="dark"] .build-qa,html[data-theme="dark"] .build-type-picker,html[data-theme="dark"] .build-assignees{border-color:#373946}html[data-theme="dark"] .build-section-head{background:#282a38}
 @media(max-width:900px){.builds-summary{grid-template-columns:repeat(2,1fr)}.build-form-grid,.build-checklist,.build-review-grid{grid-template-columns:1fr}}@media(max-width:560px){.builds-hero{align-items:flex-start;flex-direction:column}.builds-summary{grid-template-columns:1fr}.builds-toolbar input{min-width:0;width:100%}}
+
+
+/* Home sales progress card */
+.nxt-sales-progress{display:grid;align-content:start}
+.nxt-sales-progress header button{font-size:10px;color:#6c42df}
+.nxt-sales-total{display:grid;gap:4px;padding:4px 0 12px}
+.nxt-sales-total>span{font-size:9px;color:#8e8698;text-transform:uppercase;letter-spacing:.08em}
+.nxt-sales-total>strong{font-size:28px;letter-spacing:-.6px}
+.nxt-sales-total>small{font-size:9px;color:#8f8798}
+.nxt-sales-meter{height:7px;border-radius:99px;background:#ece7f3;overflow:hidden;margin-bottom:12px}
+.nxt-sales-meter i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#5f35c8,#9f7cf2)}
+.nxt-sales-recent{display:grid;gap:0}
+.nxt-sales-recent>div{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid #f0edf3}
+.nxt-sales-recent span{display:grid;gap:2px}.nxt-sales-recent strong{font-size:9px}.nxt-sales-recent small{font-size:8px;color:#958d9e}.nxt-sales-recent b{font-size:9px;white-space:nowrap}
+html[data-theme="dark"] .nxt-sales-meter{background:#353746}
+html[data-theme="dark"] .nxt-sales-recent>div{border-color:#343744}
