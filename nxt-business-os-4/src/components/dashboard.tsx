@@ -83,7 +83,7 @@ export default function Dashboard({initial,workspace,workspaces,email,demo=false
  const activeItems=biz.items.filter(i=>!i.deleted_at);
  const canRemoveTestInvoice=biz.canRemoveInvoices===true;
  const items=preview?activeItems.filter(r=>r.client_id===clientId&&(r.kind==='request'||(['invoice','quote'].includes(r.kind)&&['issued','paid','accepted'].includes(r.status)))):activeItems;
- const protectedPeopleEmails=['michael@nxt-workforce.com','bridget@nxt-workforce.com','kristian@nxt-workforce.com'];
+ const protectedPeopleEmails=['nyasha@nxt-workforce.com','bridget@nxt-workforce.com','kristian@nxt-workforce.com'];
  const protectedPeopleAccess=!client&&protectedPeopleEmails.includes(email.toLowerCase());
  const nav=(Object.keys(appIcons) as View[]).filter(v=>!['email','website','employees','team'].includes(v)&&(client?(['overview','projects','tasks','social_posts','documents','messages','requests','assistant','utm','invoices'].includes(v)&&(v!=='assistant'||clientAssistantEnabled)):v==='settings'?protectedPeopleAccess:['clients','deals'].includes(v)||!viewCap[v]||can(viewCap[v])||(v==='social_posts'&&can('approve_content'))));
  const sidebarOrder:View[]=client
