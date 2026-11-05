@@ -270,8 +270,6 @@ export default function Dashboard({initial,workspace,workspaces,email,demo=false
  {!client&&activeView==='loans'&&<Loans workspace={workspace} demo={demo}/>}
  {activeView==='assistant'&&<Assistant key={workspace.id} workspace={workspace.id} demo={demo||preview} client={client}/>}
  {!client&&activeView==='devices'&&<Devices workspace={workspace} demo={demo}/>}
- {activeView==='projects'&&!client&&<nav className="project-subnav" aria-label="Projects sections"><button className={!showMaster?'active':''} aria-current={!showMaster?'page':undefined} onClick={()=>setProjectSection('workspace')}><FolderKanban size={16}/>Projects workspace</button><button className={showMaster?'active':''} aria-current={showMaster?'page':undefined} onClick={()=>setProjectSection('master')}><ShieldCheck size={16}/>Master Tracker <span>Internal</span></button></nav>}
- {activeView==='projects'&&<section className="nxt-crm-countdown"><div><span className="eyebrow">COMING 1 JANUARY 2027</span><h2>NXT CRM</h2><p>A connected CRM workspace for leads, clients, follow-ups and project handover.</p></div><div className="nxt-crm-days"><strong>{crmDays}</strong><span>days to launch</span></div></section>}
  {showMaster&&<MasterTracker key={workspace.id} workspace={workspace.id} demo={demo}/>}
  {ops&&<Operations key={activeView} area={activeView as 'clients'|'projects'|'tasks'|'team'|'tickets'} workspace={workspace} demo={demo} onPreviewClient={id=>{setSupportClientId(id);setView('overview');}}/>}
  {['leave','messages'].includes(activeView)&&<People key={activeView} area={activeView as 'employees'|'leave'|'messages'} workspace={workspace} clients={visible.clients} manager={can('approve_leave')} demo={demo}/>}
