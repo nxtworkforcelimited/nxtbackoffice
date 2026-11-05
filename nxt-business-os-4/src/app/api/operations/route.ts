@@ -14,7 +14,7 @@ function normalizePhone(value?:string){
  return cleaned;
 }
 const update=z.discriminatedUnion('action',[
- z.object({action:z.literal('record'),module:z.enum(['clients','projects','tasks']),id:id.optional(),title:text.min(1).max(160),status:text.max(30),email:z.union([z.email(),z.literal('')]).optional(),phone:phoneInput.optional(),approval_email_enabled:z.boolean().optional(),approval_sms_enabled:z.boolean().optional(),description:text.max(5000).optional(),client_id:nullableId.optional(),client_visible:z.boolean().optional(),due_date:z.iso.date().nullable().optional(),assignee_id:nullableId.optional(),project_id:nullableId.optional()}),
+ z.object({action:z.literal('record'),module:z.enum(['clients','projects','tasks']),id:id.optional(),title:text.min(1).max(160),status:text.max(30),email:z.union([z.email(),z.literal('')]).optional(),phone:phoneInput.optional(),approval_email_enabled:z.boolean().optional(),approval_sms_enabled:z.boolean().optional(),address:text.max(500).optional(),primary_contact:text.max(160).optional(),alternate_contact:text.max(160).optional(),alternate_phone:phoneInput.optional(),alternate_email:z.union([z.email(),z.literal('')]).optional(),social_links:text.max(1000).optional(),description:text.max(5000).optional(),client_id:nullableId.optional(),client_visible:z.boolean().optional(),due_date:z.iso.date().nullable().optional(),assignee_id:nullableId.optional(),project_id:nullableId.optional()}),
  z.object({action:z.literal('client_logo'),id,logo_path:z.string().max(500).nullable()}),
  z.object({action:z.literal('delete'),module:z.enum(['clients','projects','tasks']),id}),
  z.object({action:z.literal('archive'),module:z.enum(['clients','projects','tasks']),id,archived:z.boolean()}),
@@ -26,7 +26,7 @@ export async function GET(req:NextRequest){
  const c=await context(req.nextUrl.searchParams.get('workspace'));
  if(!c?.workspace||c.workspace.role==='client')return NextResponse.json({error:'Staff access required'},{status:403});
  const out:Record<string,unknown>={user_id:c.user.id};
- const tables=['staff_directory','clients','projects','tasks','it_tickets','it_ticket_comments','cold_call_prospects','cold_call_activities'];
+ const tables=['staff_directory','clients','projects','tasks','it_tickets','it_ticket_comments','cold_call_prospects','cold_call_activities','documents'];
  const results=await Promise.all(tables.map(table=>c.db.from(table).select('*').eq('tenant_id',c.workspace!.id)));
  for(let i=0;i<tables.length;i++){if(results[i].error)return NextResponse.json({error:'Install upgrade-team-operations.sql before opening Operations.'},{status:400});out[tables[i]]=results[i].data??[];}
  return NextResponse.json(out,{headers:{'Cache-Control':'private, no-store'}});
@@ -42,7 +42,7 @@ export async function POST(req:NextRequest){
  if(!states[v.module].includes(v.status))return NextResponse.json({error:'Invalid status'},{status:400});
  if(v.client_visible&&!v.client_id)return NextResponse.json({error:'Select a client before sharing'},{status:400});
  let fields:Record<string,unknown>={title:v.title,status:v.status};
- if(v.module==='clients'){if(v.approval_email_enabled&&!v.email)return NextResponse.json({error:'Add the client notification email first'},{status:400});if(v.approval_sms_enabled&&!v.phone)return NextResponse.json({error:'Add the client mobile number first'},{status:400});fields={...fields,email:v.email??'',phone:normalizePhone(v.phone),approval_email_enabled:v.approval_email_enabled??false,approval_sms_enabled:v.approval_sms_enabled??false};}
+ if(v.module==='clients'){if(v.approval_email_enabled&&!v.email)return NextResponse.json({error:'Add the client notification email first'},{status:400});if(v.approval_sms_enabled&&!v.phone)return NextResponse.json({error:'Add the client mobile number first'},{status:400});fields={...fields,email:v.email??'',phone:normalizePhone(v.phone),approval_email_enabled:v.approval_email_enabled??false,approval_sms_enabled:v.approval_sms_enabled??false,address:v.address??'',primary_contact:v.primary_contact??'',alternate_contact:v.alternate_contact??'',alternate_phone:normalizePhone(v.alternate_phone),alternate_email:v.alternate_email??'',social_links:v.social_links??''};}
  else fields={...fields,description:v.description??'',client_id:v.client_id??null,client_visible:v.client_visible??false,due_date:v.due_date??null,...(v.module==='tasks'?{assignee_id:v.assignee_id??null,project_id:v.project_id??null}:{})};
  if(v.module==='tasks'&&v.project_id){const project=await c.db.from('projects').select('client_id').eq('id',v.project_id).eq('tenant_id',tenant_id).is('archived_at',null).single();if(!project.data||project.data.client_id!==(v.client_id??null))return NextResponse.json({error:'Task and project must use the same client'},{status:400});}
  r=v.id?await c.db.from(v.module).update(fields).eq('tenant_id',tenant_id).eq('id',v.id).select().single():await c.db.from(v.module).insert({...fields,tenant_id}).select().single();
