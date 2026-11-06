@@ -3,7 +3,7 @@ type NavLink = readonly [string, string];
 const aboutLinks: NavLink[] = [
   ['Company overview', '/about'], ['Why NXT', '/#why'],
   ['Our Vision and Mission', '/about#vision-and-mission'],
-  ['Our Clients', '/#clients'], ['Free audit', '/free-audits#audit-form'],
+  ['Our Clients', '/#clients'],
 ];
 const serviceLinks: NavLink[] = [
   ['Marketing &amp; branding', '/services#marketing'],
@@ -31,11 +31,10 @@ function dropdown(label: string, links: NavLink[], extra = '') {
 export function publicNavigation(brand: string, showSearch = false) {
   const search = showSearch ? '<button id="searchToggle" type="button" aria-label="Search the NXT Workforce website"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="m15 15 6 6"/></svg></button>' : '';
   return `<nav class="nxt-global-nav" aria-label="Main navigation">
-    <div class="nxt-utility"><a href="/contact">Contact us</a><a href="https://nxt-business-os.vercel.app/app">Client login</a><a class="nxt-utility-audit" href="/free-audits#audit-form">Free audit</a><a class="nxt-domain-link" href="/domains">Register a domain</a>${search}</div>
+    <a class="nxt-nav-brand" href="/" aria-label="NXT Workforce home">${brand}</a><div class="nxt-utility"><a href="https://nxt-workforce.com/os">Login</a><a class="nxt-domain-link" href="/domains">Register a domain</a>${search}</div>
     <div class="nxt-nav-row">
-      <div class="nxt-nav-side nxt-nav-left"><a class="nxt-nav-direct" href="/">Home</a>${dropdown('About Us', aboutLinks)}${dropdown('Services', serviceLinks, '<a class="nxt-adviser-link" data-open-adviser href="/#services">Help me choose · Ask AI</a>')}</div>
-      <a class="nxt-nav-brand" href="/" aria-label="NXT Workforce home">${brand}</a>
-      <div class="nxt-nav-side nxt-nav-right">${dropdown('Articles', articleLinks)}<a class="nxt-nav-direct" href="/industries">Who We Serve</a></div>
+      <a class="nxt-nav-direct" href="/">Home</a>${dropdown('About Us', aboutLinks)}${dropdown('Services', serviceLinks, '<a class="nxt-adviser-link" data-open-adviser href="/#services">Help me choose · Ask AI</a>')}
+      ${dropdown('Articles', articleLinks)}<a class="nxt-nav-direct" href="/industries">Who We Serve</a><a class="nxt-nav-direct" href="/contact">Contact Us</a>
     </div>
   </nav>`;
 }
@@ -65,7 +64,7 @@ export function withServicesMenu(html: string, brand: string, page: string): str
   html = html.replace(/<header\b[^>]*>[\s\S]*?<\/header>/, () => header);
   html = html.replace(/<link rel="stylesheet" href="\/v6\/services-menu\.css(?:\?[^"]*)?">/g, '')
     .replace(/<script defer src="\/v6\/services-menu\.js(?:\?[^"]*)?"><\/script>/g, '')
-    .replace('</head>', '<link rel="stylesheet" href="/v6/services-menu.css?v=3"><script defer src="/v6/services-menu.js?v=2"></script></head>');
+    .replace('</head>', '<link rel="stylesheet" href="/v6/services-menu.css?v=4"><script defer src="/v6/services-menu.js?v=3"></script></head>');
   const route = page.replace(/^\//, '').replace(/\.html$/, '');
   if (route === 'admin') {
     html = html.replace('<h1>Ideas into words.<br>Words into action.</h1><p>Publish blogs and insights, and review website enquiries.</p>',

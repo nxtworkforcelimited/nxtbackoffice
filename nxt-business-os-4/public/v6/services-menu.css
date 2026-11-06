@@ -110,3 +110,32 @@
 #industry-news {scroll-margin-top:130px}
 
 #crm-waiting-list {scroll-margin-top:135px}
+/* Shared navigation: brand at left, utility links above the six main links. */
+.nxt-global-header .nxt-global-nav {
+  display:grid;grid-template-columns:auto minmax(0,1fr);
+  grid-template-areas:"brand utility" "brand menu";column-gap:32px;padding:8px 0;
+}
+.nxt-nav-brand {grid-area:brand;justify-self:start;align-self:center}
+.nxt-nav-brand .header-brand-stack {width:112px}
+.nxt-utility {grid-area:utility;justify-content:flex-end;min-height:28px;gap:18px}
+.nxt-nav-row {grid-area:menu;display:flex;justify-content:flex-end;align-items:center;gap:clamp(8px,1.8vw,28px);padding:2px 0 0}
+.nxt-nav-row>.nxt-nav-disclosure,.nxt-nav-row>.nxt-nav-direct {grid-row:auto;min-width:0}
+.nxt-nav-disclosure>summary,.nxt-nav-direct {font-size:15px;padding:10px 5px;min-height:44px;white-space:nowrap}
+.nxt-nav-row>.nxt-nav-disclosure:last-of-type .nxt-nav-panel {left:auto;right:0}
+@media(max-width:860px) {
+  .nxt-global-header .nxt-global-nav {grid-template-columns:auto minmax(0,1fr);grid-template-areas:"brand utility" "menu menu";column-gap:16px;padding:7px 0 3px}
+  .nxt-nav-brand .header-brand-stack {width:85px}
+  .nxt-nav-row {display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0;padding-top:6px}
+  .nxt-nav-disclosure {position:static}
+  .nxt-nav-disclosure>summary,.nxt-nav-direct {justify-content:center;width:100%;box-sizing:border-box;font-size:13px;padding:8px 3px;white-space:normal;text-align:center}
+  .nxt-nav-panel,.nxt-nav-row>.nxt-nav-disclosure:last-of-type .nxt-nav-panel {top:100%;left:0;right:0;width:auto;max-width:none;text-align:left;max-height:calc(100dvh - 170px)}
+  .nxt-nav-disclosure>summary svg {width:10px;flex:none}
+  .nxt-utility {justify-content:flex-end;font-size:12px;gap:14px;white-space:nowrap}
+}
+@media(max-width:540px) {
+  .nxt-nav-row {grid-template-columns:repeat(3,minmax(0,1fr));row-gap:0}
+  .nxt-nav-disclosure>summary,.nxt-nav-direct {font-size:13px;gap:4px}
+  .nxt-nav-brand .header-brand-stack {width:76px}
+  .nxt-utility {gap:11px;font-size:11px}
+  .nxt-nav-panel {max-height:calc(100dvh - 210px)}
+}
