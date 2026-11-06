@@ -1,2 +1,15 @@
-import { redirect } from 'next/navigation';
-export default function Page(){redirect('/app');}
+import SiteShell from '@/components/site-shell';
+import styles from '@/components/public-site.module.css';
+import {services,sectors} from '@/lib/site-content';
+import {websiteCopy} from '@/lib/website';
+export const dynamic='force-dynamic';
+export default async function Page(){
+ const copy=await websiteCopy('home',{title:'NXT Workforce | Digital, Sales & Outsourcing Support',description:'Your business is online. Is it working?',eyebrow:'NXT WORKFORCE',heading:'Your business is online. Is it working?',body:'We connect your website, marketing, leads, sales follow-up and business systems so the whole engine works together.',cta_label:'Request a Free Audit',cta_href:'/free-audit'});
+ return <SiteShell><main>
+  <section className={styles.hero}><div className={styles.heroCopy}><span className={styles.eyebrow}>{copy.eyebrow}</span><h1>{copy.heading}</h1><p>{copy.body}</p><div className={styles.actions}><a className={styles.primary} href={copy.cta_href}>{copy.cta_label}</a><a className={styles.secondary} href="/contact">Talk to NXT</a></div></div><div className={styles.heroVisual}><div><span className={styles.eyebrow} style={{color:'#e8e1ff'}}>AFRICAN DIGITAL NETWORK</span><strong>Strategy, systems and people connected.</strong></div></div></section>
+  <section className={styles.section}><div className={styles.sectionHead}><div><span className={styles.eyebrow}>WHERE WE START</span><h2>Tell us what feels difficult.</h2></div><p>Maybe the website looks good but enquiries are not converting. Maybe leads arrive and disappear into inboxes. Maybe marketing, sales and delivery are all working separately. We start there.</p></div></section>
+  <section className={styles.section+' '+styles.sectionAlt}><div className={styles.sectionHead}><div><span className={styles.eyebrow}>SERVICES</span><h2>One partner for the whole engine.</h2></div><a className={styles.secondary} href="/services">Explore all services</a></div><div className={styles.grid}>{services.slice(0,8).map(x=><article className={styles.card} key={x}><strong>{x}</strong><p>Practical support designed to connect with the rest of your customer and operating journey.</p></article>)}</div></section>
+  <section className={styles.section}><div className={styles.sectionHead}><div><span className={styles.eyebrow}>THE JOURNEY</span><h2>From visibility to measurable follow-up.</h2></div></div><div className={styles.process}>{['Be Found','Earn Attention','Capture Interest','Follow Up','Measure'].map((x,i)=><div className={styles.step} key={x}><small>0{i+1}</small><strong>{x}</strong></div>)}</div></section>
+  <section className={styles.section+' '+styles.sectionAlt}><div className={styles.sectionHead}><div><span className={styles.eyebrow}>SECTORS</span><h2>Built around the way your sector works.</h2></div><a className={styles.secondary} href="/industries">View industries</a></div><div className={styles.grid}>{sectors.map(x=><article className={styles.card} key={x}><strong>{x}</strong><p>Digital, sales and operational support shaped around the realities of your sector.</p></article>)}</div></section>
+ </main></SiteShell>
+}

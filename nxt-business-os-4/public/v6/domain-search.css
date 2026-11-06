@@ -1,0 +1,30 @@
+.domain-start { max-width: 820px; }
+.domain-start label { font-weight: 650; color: #352746; }
+.domain-start input { background: #fff; color: #251c33; }
+.domain-start input:focus { outline: 2px solid #6a4dac; outline-offset: 2px; }
+.domain-start input[aria-invalid="true"] { border-color: #a33249; }
+.domain-start .btn { white-space: nowrap; }
+.domain-start .btn:disabled { cursor: wait; opacity: .7; transform: none; }
+.domain-start small { color: #625773; font-size: 13px; line-height: 1.5; }
+.domain-status { max-width: 820px; color: #4d3d68; font-size: 14px; }
+.domain-status:empty { display: none; }
+.domain-status .btn { margin: 8px 0; }
+.domain-results[hidden] { display: none; }
+.domain-results { max-width: 940px; margin-top: 26px; }
+.domain-results h2 { font-size: clamp(23px,3vw,31px); margin: 0 0 14px; scroll-margin-top: 108px; }
+.domain-results h2:focus-visible { outline: 2px solid #7554b6; outline-offset: 5px; }
+.domain-result-list { display: grid; gap: 10px; }
+.domain-result { display: flex; align-items: center; justify-content: space-between; gap: 22px; border: 1px solid #e2dbe9; border-radius: 14px; background: #fff; padding: 20px 23px; }
+.domain-result > div { min-width: 0; }
+.domain-result h3 { font-size: clamp(18px,2.2vw,23px); line-height: 1.3; overflow-wrap: anywhere; margin: 8px 0 6px; }
+.domain-result p,.managed-service .domain-result p { font-size: 14px; color: #5e5368; max-width: 57ch; margin: 0; }
+.domain-result .btn { flex-shrink: 0; font-size: 12px; }
+.domain-badge { display: inline-block; border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 700; letter-spacing: .015em; }
+.domain-available { background: #e5f3e9; color: #205b35; }
+.domain-unavailable { background: #f5e8ee; color: #853b51; }
+.domain-unconfirmed { background: #f1ecfa; color: #5b417c; }
+.managed-service .domain-terms { font-size: 12px; max-width: 76ch; margin-top: 12px; }
+@media(max-width: 600px) {
+ .domain-result { align-items: flex-start; flex-direction: column; gap: 12px; padding: 18px; }
+ .domain-start { padding: 18px; }
+}
