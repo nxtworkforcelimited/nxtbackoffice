@@ -3,6 +3,8 @@ import {context} from '@/lib/context';
 import {z} from 'zod';
 import {extractImportFile} from '@/lib/server/import-file';
 import {normalisePhone} from '@/lib/phone';
+import {isMicrosoftLink} from '@/lib/microsoft-links';
+import {fetchMicrosoftFile} from '@/lib/server/microsoft-file';
 export const dynamic='force-dynamic';
 const id=z.uuid();
 const outcomes=['no_answer','voicemail','connected','callback','interested','not_interested','wrong_number','converted'] as const;
@@ -133,7 +135,9 @@ export async function POST(req:NextRequest){
   const b=await req.json(),action=String(b.action||'');
   if(action==='import_sheet'){
    const p=z.object({url:z.string().url(),target_type:z.enum(['nxt','client']),client_id:id.nullable().optional(),campaign:z.string().max(160).default(''),owner_id:id.nullable().optional()}).parse(b);if(p.target_type==='client'&&!p.client_id)return reply({error:'Choose the client for this calling list.'},400);
-   const url=googleSheetCsvUrl(p.url),res=await fetch(url,{redirect:'follow',signal:AbortSignal.timeout(10000)});if(!res.ok)throw Error('Google Sheet could not be read. Make sure link sharing allows access.');const text=await res.text();if(text.length>300000)throw Error('Google Sheet is too large. Import at most 1,000 rows.');
+   let text:string;
+   if(isMicrosoftLink(p.url)){text=await extractImportFile(await fetchMicrosoftFile(p.url));}
+   else{const url=googleSheetCsvUrl(p.url),res=await fetch(url,{redirect:'follow',signal:AbortSignal.timeout(10000)});if(!res.ok)throw Error('The sheet could not be read. Make sure link sharing allows access.');text=await res.text();if(text.length>300000)throw Error('The sheet is too large. Import at most 1,000 rows.');}
    const rows=importRows(text,{target_type:p.target_type,client_id:p.client_id??null,campaign:p.campaign,owner_id:p.owner_id??c.user.id}).map(x=>({...x,tenant_id:t}));
    return reply(await insertWithoutDuplicates(c,t,rows),201);
   }
