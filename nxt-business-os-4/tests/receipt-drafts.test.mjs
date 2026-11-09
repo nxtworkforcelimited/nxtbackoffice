@@ -1,0 +1,26 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {PGlite} from '@electric-sql/pglite';
+test('unpaid drafts get unique references, remain outside payments, and enforce tenant permissions',async()=>{
+ const db=new PGlite();
+ await db.exec(`create role anon;create role authenticated;create table tenants(id uuid primary key);
+ create function has_capability(t uuid,c text) returns boolean language sql stable as $$ select t::text=current_setting('test.tenant',true) and (current_setting('test.cap',true)='admin' or (c='finance' and current_setting('test.cap',true)='reader')) $$;
+ create table invoice_payments(amount numeric);create table accounting_journals(amount numeric);`);
+ await db.exec(await readFile('supabase/upgrade-receipt-drafts.sql','utf8'));
+ const tenant='00000000-0000-4000-8000-000000000001',other='00000000-0000-4000-8000-000000000002';
+ await db.query('insert into tenants values($1),($2)',[tenant,other]);
+ await db.exec(`set role authenticated;select set_config('test.tenant','${tenant}',false);select set_config('test.cap','admin',false);`);
+ const create=(t,amount,id)=>db.query("insert into receipt_drafts(id,tenant_id,recipient,description,amount) values($1,$2,'Client','Website deposit',$3) returning *",[id,t,amount]);
+ const first=(await create(tenant,50,'10000000-0000-4000-8000-000000000001')).rows[0];
+ const second=(await create(tenant,75,'10000000-0000-4000-8000-000000000002')).rows[0];
+ assert.match(first.reference,/^DRF-\d{4}-\d{8}$/);assert.notEqual(first.reference,second.reference);assert.equal(first.status,'awaiting_payment');
+ await assert.rejects(create(other,50,'10000000-0000-4000-8000-000000000003'),/row-level security/);
+ await assert.rejects(create(tenant,0,'10000000-0000-4000-8000-000000000004'),/check constraint/);
+ await assert.rejects(db.query("update receipt_drafts set status='received' where id=$1",[first.id]),/permission denied/);
+ await assert.rejects(db.query("insert into receipt_drafts(id,tenant_id,recipient,description,amount,reference) values(gen_random_uuid(),$1,'Client','Deposit',10,'FORGED')",[tenant]),/permission denied/);
+ await db.exec("select set_config('test.cap','reader',false)");assert.equal((await db.query('select * from receipt_drafts')).rows.length,2);
+ await assert.rejects(create(tenant,5,'10000000-0000-4000-8000-000000000005'),/row-level security/);
+ await db.exec("select set_config('test.cap','client',false)");assert.equal((await db.query('select * from receipt_drafts')).rows.length,0);
+ await db.exec('reset role');assert.equal((await db.query('select * from invoice_payments')).rows.length,0);assert.equal((await db.query('select * from accounting_journals')).rows.length,0);await db.close();
+});

@@ -1,6 +1,7 @@
 'use client';
 import {useEffect,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
+import ReceiptDrafts from './receipt-drafts';
 import {Printer,X} from 'lucide-react';
 import {type BusinessData,type BusinessItem,formatMoney} from '@/lib/business';
 
@@ -10,7 +11,7 @@ const day=(value:string)=>new Intl.DateTimeFormat('en-CA',{timeZone:'Africa/Hara
 const method=(payment:Payment)=>payment.payment_method==='cash'?'Cash':payment.payment_method==='bank'?'Bank transfer':'Not specified';
 const receiptNumber=(payment:Payment)=>'RCT-'+payment.id.toUpperCase();
 
-export default function Receipts({payments,invoices,company,clientName,canRecord,onOpenInvoice,demo=false}:{payments:Payment[];invoices:BusinessItem[];company:string;clientName:(id:string|null)=>string;canRecord:boolean;onOpenInvoice:(invoice:BusinessItem)=>void;demo?:boolean}){
+export default function Receipts({workspaceId,payments,invoices,company,clientName,canRecord,onOpenInvoice,demo=false}:{workspaceId:string;payments:Payment[];invoices:BusinessItem[];company:string;clientName:(id:string|null)=>string;canRecord:boolean;onOpenInvoice:(invoice:BusinessItem)=>void;demo?:boolean}){
  const [query,setQuery]=useState(''),[from,setFrom]=useState(''),[to,setTo]=useState(''),[selectedId,setSelectedId]=useState<string|null>(null),[invoiceId,setInvoiceId]=useState('');
  const dialog=useRef<HTMLDialogElement>(null);
  const invoiceMap=new Map(invoices.filter(i=>i.kind==='invoice'&&!i.deleted_at&&i.currency==='USD').map(i=>[i.id,i]));
@@ -21,6 +22,7 @@ export default function Receipts({payments,invoices,company,clientName,canRecord
  const visible=invalidDates?[]:rows.filter(({payment,invoice})=>(!from||day(payment.created_at)>=from)&&(!to||day(payment.created_at)<=to)&&[receiptNumber(payment),payment.reference,invoice.reference,clientName(invoice.client_id)].join(' ').toLowerCase().includes(query.toLowerCase()));
  const unpaid=invoices.filter(i=>i.kind==='invoice'&&!i.deleted_at&&i.currency==='USD'&&i.status==='issued'&&Number(i.total)>Number(i.paid));
  return <section className="finance-area">
+  {canRecord&&<ReceiptDrafts workspaceId={workspaceId} company={company} canCreate={canRecord} demo={demo}/>}
   <p>Find payment receipts, view the linked invoice, and print or save a receipt as PDF. Each receipt represents one recorded payment, including deposits and part-payments.</p>
   {canRecord&&<form className="panel people-form" onSubmit={e=>{e.preventDefault();const invoice=unpaid.find(i=>i.id===invoiceId);if(invoice)onOpenInvoice(invoice);}}><h2>Record a payment</h2><div className="action-row"><label>Invoice<select required value={invoiceId} onChange={e=>setInvoiceId(e.target.value)}><option value="">Choose an unpaid invoice</option>{unpaid.map(i=><option key={i.id} value={i.id}>{i.reference} · {clientName(i.client_id)} · {formatMoney(Number(i.total)-Number(i.paid))} due</option>)}</select></label><button className="primary" disabled={!unpaid.some(i=>i.id===invoiceId)}>Open payment form</button></div><small>Record the payment on the invoice. Its receipt appears here once saved.</small></form>}
   <div className="action-row"><label>Search receipts<input type="search" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Client, invoice or reference"/></label><label>From<input type="date" value={from} onChange={e=>setFrom(e.target.value)}/></label><label>To<input type="date" value={to} onChange={e=>setTo(e.target.value)}/></label><button onClick={()=>{setQuery('');setFrom('');setTo('');}}>Clear filters</button></div>
