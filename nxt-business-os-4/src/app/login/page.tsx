@@ -28,7 +28,7 @@ export default async function Login({searchParams}:{searchParams:Promise<{error?
     <section className={styles.panel}>
       <span className={styles.pageNumber} aria-hidden="true">01</span>
       <div className={styles.formWrap}>
-        <img className={styles.logo} src="/brand/nxt-business-os.png" alt="NXT Business OS"/>
+        <img className={styles.logo} src="/brand/nxt-business-os-wordmark.png" alt="NXT Business OS"/>
         <div className={styles.intro}>
           <p className={styles.welcome}>WELCOME TO NXT</p>
           <h2>Let’s get to work.</h2>

@@ -1,0 +1,89 @@
+/* NXT Business OS interface polish.
+   Loaded after globals.css so it only refines the look: modern, clean, glassy,
+   readable on phones. It changes no behaviour, data or permissions. */
+
+:root{
+ --nxt-display:'Montserrat Variable','Montserrat',Inter,ui-sans-serif,-apple-system,'Segoe UI',sans-serif;
+ --nxt-glass:rgba(255,255,255,.72);
+ --nxt-glass-line:rgba(255,255,255,.8);
+ --nxt-glass-shadow:0 10px 30px -16px rgba(60,52,137,.32);
+}
+[data-theme="dark"]{
+ --nxt-glass:rgba(34,31,56,.62);
+ --nxt-glass-line:rgba(175,169,236,.18);
+ --nxt-glass-shadow:0 10px 30px -16px rgba(0,0,0,.6);
+}
+
+/* Typography: Montserrat for headings and labels, Inter stays for dense data. */
+h1,h2,h3,.eyebrow,.nxt-hero-quick-tasks header strong{font-family:var(--nxt-display)}
+h1{letter-spacing:-.8px}
+
+/* Welcome banner: self-hosted brand gradient (no third-party photo), aligned with
+   the cards below instead of bleeding past them. */
+.nxt-dashboard-hero.nxt-dashboard-hero{
+ width:auto;
+ margin:0 0 20px;
+ padding:36px 40px;
+ min-height:220px;
+ border-radius:24px;
+ background:
+  radial-gradient(760px 320px at 88% -20%,rgba(175,169,236,.55),transparent 62%),
+  radial-gradient(520px 280px at -5% 115%,rgba(124,92,255,.38),transparent 60%),
+  linear-gradient(120deg,#2a2370 0%,#3c3489 48%,#5b4fc7 100%);
+ box-shadow:0 22px 44px -22px rgba(60,52,137,.6);
+}
+.nxt-dashboard-hero h1{font-size:36px;font-weight:600;line-height:1.1;letter-spacing:-1px}
+.nxt-dashboard-hero h1 strong{font-weight:700}
+.nxt-dashboard-hero p{color:rgba(255,255,255,.9);font-size:14px}
+.nxt-dashboard-hero .eyebrow{color:#e4d9ff}
+
+/* Quick tasks: readable glass panel inside the banner. */
+.nxt-hero-quick-tasks{
+ background:rgba(255,255,255,.14);
+ -webkit-backdrop-filter:blur(16px) saturate(150%);
+ backdrop-filter:blur(16px) saturate(150%);
+ border:1px solid rgba(255,255,255,.3);
+ color:#fff;
+}
+.nxt-hero-quick-tasks span,.nxt-hero-quick-tasks small,.nxt-hero-quick-tasks time{color:rgba(255,255,255,.92)}
+.nxt-hero-quick-tasks header button{color:#fff;font-size:12px;font-weight:600;text-decoration:underline;text-underline-offset:3px}
+
+/* The banner used to be pulled up under the sample-workspace strip. */
+.studio-demo ~ .nxt-dashboard{margin-top:0}
+.studio-demo{margin-bottom:20px}
+
+/* Cards: soft glass surfaces. */
+.nxt-kpi-card,.nxt-dashboard-card{
+ background:var(--nxt-glass);
+ -webkit-backdrop-filter:blur(14px) saturate(140%);
+ backdrop-filter:blur(14px) saturate(140%);
+ border:1px solid var(--nxt-glass-line);
+ box-shadow:var(--nxt-glass-shadow);
+}
+
+/* Logo: generous breathing room. */
+.reference-logo{height:auto;min-height:96px;justify-content:center;padding:30px 22px 24px;margin-bottom:12px}
+.reference-logo img{width:158px!important;height:auto;max-width:100%;max-height:none}
+
+/* Footer: small contact details. */
+.nxt-footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 18px;margin-top:32px;padding-top:14px;border-top:1px solid rgba(60,52,137,.12);font-size:11px;line-height:1.5;color:#777384}
+[data-theme="dark"] .nxt-footer{border-top-color:rgba(175,169,236,.18);color:#a9a4c4}
+
+
+/* Night mode: card headings had no light colour and disappeared on dark cards.
+   Printable paper sheets stay dark-on-white. */
+[data-theme="dark"] .studio-main :is(h2,h3):not(.print-sheet *):not(dialog *){color:#f1effa!important}
+
+/* Stat row: when there are four cards, fill the whole row instead of leaving a gap. */
+@media(min-width:761px){.nxt-kpis:has(> :nth-child(4):last-child){grid-template-columns:2fr repeat(3,1fr)}}
+
+/* Phones. */
+@media(max-width:760px){
+ .nxt-dashboard-hero.nxt-dashboard-hero{padding:24px 20px;min-height:0;border-radius:20px}
+ .nxt-dashboard-hero h1{font-size:28px}
+ /* Avoid a single orphaned stat card on the last row. */
+ .nxt-kpis>.nxt-kpi-card:last-child:nth-child(even){grid-column:1/-1}
+ .nxt-footer{flex-direction:column;align-items:flex-start}
+}
+
+/* Login: the logo file is now trimmed, so give it a calm, centred size. */
