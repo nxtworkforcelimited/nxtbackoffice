@@ -5,6 +5,7 @@ import {allowed} from '@/lib/business';
 import {ticketComplete,ticketLabel} from '@/lib/tickets';
 import {CheckCircle2,Globe,LayoutDashboard,CalendarDays,ClipboardCheck,Archive,RotateCcw,Plus,X,ScanSearch} from 'lucide-react';
 import {type Check,summarise} from '@/lib/site-check';
+import {type Integration,integrationStatuses} from '@/lib/client-sites';
 
 type CheckItem={key:string;label:string;done:boolean};
 type Build={
@@ -27,6 +28,9 @@ type Build={
  dns_managed:boolean;
  maintenance_plan:string|null;
  tasks:{id:string;label:string;done:boolean}[];
+ client_visible?:boolean;
+ backoffice_url?:string;
+ integrations?:Integration[];
  archived_at?:string|null;
  site_check?:{checked_at:string;url:string;checks:Check[]}|null;
 };
@@ -74,7 +78,8 @@ function checklistFor(types:Build['build_types'],existing:CheckItem[]=[]){
 const blank:Build={
  title:'',description:'',url:'',prototype_url:'',status:'Not started',assignee_id:null,assignee_ids:[],
  client_id:null,target_date:null,review_notes:'',build_types:['Website'],content_status:'Not started',
- client_review_status:'Not sent',checklist:checklistFor(['Website']),hosting_managed:false,dns_managed:false,maintenance_plan:null,tasks:[]
+ client_review_status:'Not sent',checklist:checklistFor(['Website']),hosting_managed:false,dns_managed:false,maintenance_plan:null,tasks:[],
+ client_visible:false,backoffice_url:'',integrations:[]
 };
 
 export default function Builds({workspace,demo=false}:{workspace:Workspace;demo?:boolean}){
@@ -148,9 +153,11 @@ export default function Builds({workspace,demo=false}:{workspace:Workspace;demo?
 
   {selected&&<section className="panel build-editor">
    <form onSubmit={async e=>{e.preventDefault();setBusy(true);setError('');setNotice('');try{
-    const keys=['id','title','description','url','prototype_url','status','assignee_ids','client_id','target_date','review_notes','build_types','content_status','client_review_status','hosting_managed','dns_managed','maintenance_plan'] as const;
+    const keys=['id','title','description','url','prototype_url','status','assignee_ids','client_id','target_date','review_notes','build_types','content_status','client_review_status','hosting_managed','dns_managed','maintenance_plan','client_visible','backoffice_url','integrations'] as const;
     const payload:Record<string,unknown>={assignee_id:selected.assignee_ids[0]??null,checklist:checklistFor(selected.build_types,selected.checklist),tasks:selected.tasks??[]};
     for(const k of keys)if(!(k==='id'&&!selected.id))payload[k]=selected[k];
+    payload.integrations=(selected.integrations??[]).filter(i=>i.name.trim()).map(i=>({name:i.name.trim(),status:i.status,note:i.note.trim()}));
+    payload.client_visible=Boolean(selected.client_visible);payload.backoffice_url=selected.backoffice_url??'';
     const r=await fetch(base,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}),b=await r.json();
     if(!r.ok)throw Error(b.error);setSelected({...b});await load();setNotice('Build saved.');
    }catch(e){setError((e as Error).message);}finally{setBusy(false);}}}>
@@ -182,6 +189,15 @@ export default function Builds({workspace,demo=false}:{workspace:Workspace;demo?
 
      <section className="build-sitecheck"><div className="build-section-head"><div><span className="eyebrow">AUTOMATIC CHECK</span><h3>Check this site</h3></div>{selected.id&&<button type="button" className="secondary" disabled={checking||!selected.url} onClick={runCheck}><ScanSearch size={14}/>{checking?'Checking…':'Check this site'}</button>}</div>
       {!selected.id?<p className="empty compact">Save the build with its live or staging URL, then run the check.</p>:!selected.url?<p className="empty compact">Add and save the live or staging URL first.</p>:selected.site_check?<><p><small>Checked {new Date(selected.site_check.checked_at).toLocaleString()} · {(()=>{const x=summarise(selected.site_check.checks);return x.pass+' passed, '+x.warn+' to review, '+x.fail+' failed';})()}</small></p><div className="build-checks">{selected.site_check.checks.map(c=><article key={c.key} className={'site-check '+c.state}><strong>{c.state==='pass'?'Pass':c.state==='warn'?'Review':'Fail'} · {c.label}</strong><small>{c.detail}</small></article>)}</div><p><small>This checks the home page only. Content, layout and forms still need a person to tick them above.</small></p></>:<p className="empty compact">Not checked yet.</p>}
+     </section>
+
+     <section className="build-client-portal"><div className="build-section-head"><div><span className="eyebrow">CLIENT PORTAL</span><h3>What the client sees</h3></div></div>
+      <label className="build-portal-toggle"><input type="checkbox" checked={Boolean(selected.client_visible)} onChange={e=>update('client_visible',e.target.checked)}/><span>Show this build on the client's portal<small> - they see the name, a plain stage, launch progress, the links below and the integrations. They never see notes, tasks, team names or test results.</small></span></label>
+      {selected.build_types.includes('Back Office')&&<label>Back office address (where the client logs in)<input type="url" placeholder="https://" value={selected.backoffice_url??''} onChange={e=>update('backoffice_url',e.target.value)}/></label>}
+      <div className="build-integrations"><strong>Integrations and connected systems</strong><small>For example payments, SMS, email, accounting. Shown to the client.</small>
+       {(selected.integrations??[]).map((it,i)=><div key={i} className="build-integration-row"><input aria-label="Integration name" maxLength={80} value={it.name} placeholder="e.g. Paynow, SMS gateway" onChange={e=>setSelected(s=>s?{...s,integrations:(s.integrations??[]).map((x,j)=>j===i?{...x,name:e.target.value}:x)}:s)}/><select aria-label="Integration status" value={it.status} onChange={e=>setSelected(s=>s?{...s,integrations:(s.integrations??[]).map((x,j)=>j===i?{...x,status:e.target.value as Integration['status']}:x)}:s)}>{integrationStatuses.map(o=><option key={o.value} value={o.value}>{o.label}</option>)}</select><input aria-label="Integration note" maxLength={200} value={it.note} placeholder="Short note for the client" onChange={e=>setSelected(s=>s?{...s,integrations:(s.integrations??[]).map((x,j)=>j===i?{...x,note:e.target.value}:x)}:s)}/><button type="button" className="build-task-remove" title="Remove" aria-label={'Remove '+(it.name||'integration')} onClick={()=>setSelected(s=>s?{...s,integrations:(s.integrations??[]).filter((_,j)=>j!==i)}:s)}>×</button></div>)}
+       <button type="button" className="secondary" disabled={(selected.integrations??[]).length>=20} onClick={()=>setSelected(s=>s?{...s,integrations:[...(s.integrations??[]),{name:'',status:'planned',note:''}]}:s)}><Plus size={14}/>Add integration</button>
+      </div>
      </section>
 
      <div className="build-review-grid">

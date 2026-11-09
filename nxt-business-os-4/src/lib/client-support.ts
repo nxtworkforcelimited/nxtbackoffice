@@ -29,3 +29,19 @@ export function categoriesFor(services:unknown){
  return [...new Set([...list.flatMap(k=>byService[k]),'Billing Query'])];
 }
 export const clientPriorities=[{value:'Normal',label:'Normal'},{value:'High',label:'Urgent - my site or system is down or blocked'},{value:'Low',label:'Low - whenever you can'}] as const;
+
+// Extra portal features NXT can switch on per client. 'sms' shows Tasks and Messages.
+export const featureOptions=[
+ {key:'sms',label:'SMS and messages',hint:'Shows Tasks and Messages in their portal'}
+] as const;
+export type FeatureKey=typeof featureOptions[number]['key'];
+export const featureKeys=featureOptions.map(f=>f.key) as FeatureKey[];
+export function cleanFeatures(value:unknown):FeatureKey[]{
+ return Array.isArray(value)?featureKeys.filter(k=>value.includes(k)):[];
+}
+/** What a client sees in their portal. Nothing is on until NXT ticks it. */
+export function portalAccess(services:unknown,features:unknown){
+ const s=cleanServices(services),f=cleanFeatures(features);
+ return {support:supportEnabled(s),website:s.includes('website'),back_office:s.includes('back_office'),sms:f.includes('sms')};
+}
+export type PortalAccess=ReturnType<typeof portalAccess>;

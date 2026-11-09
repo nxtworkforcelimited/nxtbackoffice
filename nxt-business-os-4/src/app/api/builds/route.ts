@@ -4,6 +4,7 @@ import {allowed} from '@/lib/business';
 import {z} from 'zod';
 const text=z.string().trim();
 const checklistItem=z.object({key:z.string().trim().min(1).max(80),label:z.string().trim().min(1).max(200),done:z.boolean()}).strict();
+const integration=z.object({name:z.string().trim().min(1).max(80),status:z.enum(['connected','planned','attention']),note:z.string().trim().max(200)}).strict();
 const taskItem=z.object({id:z.string().trim().min(1).max(60),label:z.string().trim().min(1).max(200),done:z.boolean()}).strict();
 const schema=z.object({
  id:z.uuid().optional(),
@@ -24,7 +25,10 @@ const schema=z.object({
  tasks:z.array(taskItem).max(100).default([]),
  hosting_managed:z.boolean().default(false),
  dns_managed:z.boolean().default(false),
- maintenance_plan:z.string().max(1000).nullable().default(null)
+ maintenance_plan:z.string().max(1000).nullable().default(null),
+ client_visible:z.boolean().default(false),
+ backoffice_url:z.union([z.url().refine(s=>/^https?:\/\//.test(s)),z.literal('')]).default(''),
+ integrations:z.array(integration).max(20).default([])
 }).strict();
 export async function GET(req:NextRequest){
  const c=await context(req.nextUrl.searchParams.get('workspace'));
@@ -59,6 +63,9 @@ export async function POST(req:NextRequest){
  const {id,...fields}=p.data;
  const save=(f:Record<string,unknown>)=>id?c.db.from('backoffice_builds').update(f).eq('tenant_id',c.workspace!.id).eq('id',id).select().single():c.db.from('backoffice_builds').insert({...f,tenant_id:c.workspace!.id}).select().single();
  let r=await save(fields);
- if(r.error&&/tasks/.test(r.error.message)){const {tasks:_tasks,...rest}=fields;r=await save(rest);} // upgrade not applied yet: save everything else
+ // An upgrade is not applied yet: drop only the column it adds and save everything else.
+ let rest:Record<string,unknown>={...fields};const dropped:string[]=[];
+ for(let i=0;i<5&&r.error;i++){const missing=['tasks','client_visible','backoffice_url','integrations'].find(k=>k in rest&&new RegExp('\\b'+k+'\\b').test(r.error!.message));if(!missing)break;dropped.push(missing);delete rest[missing];r=await save(rest);}
+ if(!r.error&&dropped.some(k=>k!=='tasks'&&(fields as Record<string,unknown>)[k]&&((fields as Record<string,unknown>)[k] as unknown[]).length!==0))return NextResponse.json({error:'Saved, but the client portal settings need the database upgrade (202611090009) before they work.'},{status:400});
  return NextResponse.json(r.error?{error:r.error.message}:r.data,{status:r.error?400:200});
 }

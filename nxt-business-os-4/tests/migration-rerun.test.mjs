@@ -35,3 +35,19 @@ test('migration 0004 keeps old sms_outbox rows with other source types and still
  await assert.rejects(db.exec(`insert into public.sms_outbox(source_type) values('bogus')`),/sms_outbox_source_type_check/);
  assert.equal((await db.query(`select count(*)::int n from public.sms_outbox where source_type='legacy_value'`)).rows[0].n,1);
 });
+
+test('migration 0009 adds the client portal columns, defaults off, runs twice, rejects bad values',async()=>{
+ const db=new PGlite();
+ await db.exec(`create table public.clients(id uuid primary key default gen_random_uuid(),title text);
+  create table public.backoffice_builds(id uuid primary key default gen_random_uuid(),title text);
+  insert into public.clients(title) values('Old client');insert into public.backoffice_builds(title) values('Old build');`);
+ const m=await readFile(new URL('../supabase/migrations/202611090009_client_website_backoffice_portal.sql',import.meta.url),'utf8');
+ await db.exec(m);await db.exec(m);
+ const b=(await db.query('select client_visible,backoffice_url,integrations from public.backoffice_builds')).rows[0];
+ assert.equal(b.client_visible,false);assert.equal(b.backoffice_url,'');assert.deepEqual(b.integrations,[]);
+ assert.deepEqual((await db.query('select portal_features from public.clients')).rows[0].portal_features,[]);
+ await db.exec(`update public.clients set portal_features='{sms}'`);
+ await assert.rejects(db.exec(`update public.clients set portal_features='{rocket}'`),/clients_portal_features_check/);
+ await assert.rejects(db.exec(`update public.backoffice_builds set backoffice_url='javascript:alert(1)'`),/backoffice_url_check/);
+ await assert.rejects(db.exec(`update public.backoffice_builds set integrations='{"a":1}'::jsonb`),/integrations_is_array/);
+});

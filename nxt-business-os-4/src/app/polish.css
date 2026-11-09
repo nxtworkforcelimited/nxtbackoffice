@@ -342,3 +342,38 @@ select.cell-input{min-width:110px;cursor:pointer;appearance:none;-webkit-appeara
 
 /* Client home: no company goal; two cards only */
 .nxt-kpis.nxt-kpis-client{grid-template-columns:repeat(2,1fr)}
+
+/* NXT OS banner on the client home */
+.nxt-os-banner{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;padding:26px 30px;border-radius:22px;background:radial-gradient(circle at 85% 20%,rgba(199,169,255,.45),transparent 45%),linear-gradient(120deg,#1b1240,#4f2b92 60%,#7b49df);color:#fff;margin:18px 0;box-shadow:0 12px 30px #30215a22}
+.nxt-os-banner h2{margin:6px 0 4px;font-size:34px;letter-spacing:-1px;color:#fff}.nxt-os-banner p{margin:0;color:#e6e1f0}.nxt-os-banner .eyebrow{color:#d9c8ff;letter-spacing:.14em}
+.nxt-os-banner-days{display:grid;place-items:center;min-width:110px;padding:12px 18px;border:1px solid #ffffff40;border-radius:18px;background:#ffffff14}
+.nxt-os-banner-days strong{font-size:34px;line-height:1}.nxt-os-banner-days span{font-size:12px;color:#e6e1f0}
+
+/* Client My Website / My Back Office */
+.client-site-card{display:grid;gap:14px;padding:24px}
+.client-site-card header{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.client-site-card h2{margin:4px 0 0}
+.client-stage{display:inline-block;padding:6px 14px;border-radius:999px;background:#eee8fb;color:#4f2b92;font-weight:700;font-size:13px}
+.client-stage.live,.client-stage.ready{background:#e3f6ea;color:#1b6b3a}.client-stage.final-checks{background:#fff1da;color:#8a5a00}
+.client-site-progress{height:10px;border-radius:99px;background:#eee8fb;overflow:hidden}.client-site-progress i{display:block;height:100%;background:linear-gradient(90deg,#7b49df,#c7a9ff);border-radius:99px}
+.client-site-meta{margin:0;font-size:14px}
+.client-site-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.client-site-actions a,.client-site-actions button{display:inline-flex;gap:8px;align-items:center;text-decoration:none}
+.client-site-note{opacity:.75;font-size:14px}
+.client-site-facts{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:14px}.client-site-facts li{display:flex;gap:10px;justify-content:space-between;border-bottom:1px solid #eee8fb;padding-bottom:6px}.client-site-facts span{opacity:.7}
+.client-integrations h3{display:flex;gap:8px;align-items:center;margin:6px 0 8px}
+.client-integrations ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.client-integrations li{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 14px;border:1px solid #eee8fb;border-radius:14px;background:#fff}
+.client-integrations li small{display:block;opacity:.7}
+.integration-pill{padding:4px 12px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;background:#eee8fb;color:#4f2b92}
+.integration-pill.connected{background:#e3f6ea;color:#1b6b3a}.integration-pill.attention{background:#fde8e6;color:#b42318}
+.client-sites-empty{padding:26px}
+
+/* Staff: client portal section of a build */
+.build-client-portal{display:grid;gap:12px;padding:18px;border:1px solid rgba(120,130,160,.3);border-radius:16px;margin:14px 0}
+.build-portal-toggle{display:flex;gap:10px;align-items:flex-start}.build-portal-toggle small{display:block;opacity:.7;font-weight:400}
+.build-integrations{display:grid;gap:8px}
+.build-integration-row{display:grid;grid-template-columns:1.2fr 150px 1.6fr auto;gap:8px;align-items:center}
+@media(max-width:760px){.build-integration-row{grid-template-columns:1fr}}
+.nxt-os-banner{grid-column:1/-1;width:100%}
+.nxt-os-banner h2,.nxt-os-banner p,.nxt-os-banner strong,.nxt-os-banner-days span{color:#fff!important}.nxt-os-banner .eyebrow{color:#d9c8ff!important}
