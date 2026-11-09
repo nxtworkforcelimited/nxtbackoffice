@@ -7,7 +7,8 @@ export const mergeFields=[
  {key:'balance',label:'Balance still due',sample:'USD 225.00'},
  {key:'paid',label:'Amount paid',sample:'USD 225.00'},
  {key:'due_date',label:'Due date',sample:'15 Nov 2026'},
- {key:'receipt_number',label:'Receipt number',sample:'RCT-3F9A12BC'}
+ {key:'receipt_number',label:'Receipt number',sample:'RCT-3F9A12BC'},
+ {key:'receipt_link',label:'Link to the receipt',sample:'https://nxt-business-os.vercel.app/r/AbCdEfGhIjKlMnOpQrStUvWxYz0123456789AbCdEfGhIjKlMn'}
 ] as const;
 export type MergeKey=typeof mergeFields[number]['key'];
 export type MergeValues=Partial<Record<MergeKey,string>>;
@@ -17,7 +18,7 @@ export const starterTemplates:StarterTemplate[]=[
  {key:'invoice-issued',name:'Invoice issued',category:'invoice',body:'Hi {client_name}, your invoice {invoice_number} for {amount} has been processed by {company}. Due {due_date}. Thank you.'},
  {key:'payment-due-soon',name:'Payment due soon',category:'reminder',body:'Hi {client_name}, a friendly reminder that invoice {invoice_number} ({balance} outstanding) is due on {due_date}. - {company}'},
  {key:'payment-overdue',name:'Payment overdue',category:'reminder',body:'Hi {client_name}, invoice {invoice_number} ({balance} outstanding) was due on {due_date}. Please arrange payment or reply to this message. - {company}'},
- {key:'receipt',name:'Payment received (receipt)',category:'receipt',body:'Thank you {client_name}. We received {paid} for invoice {invoice_number}. Your receipt is {receipt_number}. Balance: {balance}. - {company}'},
+ {key:'receipt',name:'Payment received (receipt)',category:'receipt',body:'Thank you {client_name}. We received {paid} for invoice {invoice_number}. Your receipt {receipt_number}: {receipt_link} Balance: {balance}. - {company}'},
  {key:'welcome',name:'Welcome',category:'general',body:'Welcome to {company}, {client_name}. We are glad to be working with you. Reply here if you need anything.'}
 ];
 

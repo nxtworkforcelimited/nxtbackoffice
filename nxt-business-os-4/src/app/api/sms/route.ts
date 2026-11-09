@@ -5,6 +5,7 @@ import {allowed} from '@/lib/business';
 import {trustedRequest} from '@/lib/request-origin';
 import {z} from 'zod';
 import {createHash} from 'node:crypto';
+import {signReceipt} from '@/lib/server/receipt-link';
 import {normalisePhone} from '@/lib/phone';
 import {renderTemplate,unknownFields,money,dueDateText,shortReceipt,isQuietHour,type MergeValues} from '@/lib/sms-templates';
 
@@ -126,6 +127,9 @@ export async function POST(req:NextRequest){
    const pay=await admin.from('invoice_payments').select('id,amount').eq('tenant_id',tenant).eq('invoice_id',inv.data.id).order('created_at',{ascending:false}).limit(1).maybeSingle();
    const bal=Math.max(0,Math.round((Number(inv.data.total)-Number(inv.data.paid))*100)/100);
    values={...values,invoice_number:inv.data.reference,amount:money(inv.data.currency,inv.data.total),balance:money(inv.data.currency,bal),paid:money(inv.data.currency,pay.data?.amount??inv.data.paid),due_date:dueDateText(inv.data.due_date),receipt_number:pay.data?shortReceipt(pay.data.id):''};
+   // The link is built here, on the server, and only for a payment that exists on this invoice.
+   const token=pay.data?signReceipt(pay.data.id):null;
+   if(token)values.receipt_link=req.nextUrl.origin+'/r/'+token;
   }
   if(clientId){
    const cl=await admin.from('clients').select('title').eq('tenant_id',tenant).eq('id',clientId).maybeSingle();
