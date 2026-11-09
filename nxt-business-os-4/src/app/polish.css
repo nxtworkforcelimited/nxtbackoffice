@@ -339,3 +339,6 @@ select.cell-input{min-width:110px;cursor:pointer;appearance:none;-webkit-appeara
 .blog-feed-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0}
 .blog-feed-row code{flex:1;min-width:200px;overflow-wrap:anywhere;font-size:13px}
 @media (max-width:1000px){.blog-editor .blog-layout{grid-template-columns:1fr}.blog-editor .blog-side{position:static}}
+
+/* Client home: no company goal; two cards only */
+.nxt-kpis.nxt-kpis-client{grid-template-columns:repeat(2,1fr)}

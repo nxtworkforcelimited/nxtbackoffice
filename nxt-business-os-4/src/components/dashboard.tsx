@@ -307,11 +307,11 @@ const navTitle=(v:View)=>client?({overview:'Home',projects:'Projects',tasks:'Tas
 
   {!client&&upcomingSubscriptions.length>0&&<section className="subscription-reminder-panel"><header><div><span className="eyebrow">RENEWAL REMINDERS</span><h2>Subscriptions due soon</h2><p>NXT Business OS alerts you 8 days before renewal.</p></div><button onClick={()=>go('subscriptions')}>View subscriptions</button></header><div>{upcomingSubscriptions.slice(0,4).map((r:any)=>{const days=renewalDays(r.due_date);return <button key={r.id} onClick={()=>go('subscriptions')}><span><strong>{r.title}</strong><small>{r.vendor||'Subscription'} · {r.billing_cycle}</small></span><em className={days<0?'overdue':days<=2?'urgent':''}>{days<0?'Overdue':days===0?'Due today':days===1?'Due tomorrow':'Due in '+days+' days'}</em><b>{formatMoney(Number(r.amount||0),r.currency||'USD')}</b></button>})}</div></section>}
 
-  <section className="nxt-kpis">
-   <article className="nxt-goal-card"><div><span>{goalMonthLabel} Goal</span><strong>{formatMoney(monthlyGoal)}</strong></div><b>{monthlyPercent}%</b><div className="nxt-goal-track"><i style={{width:monthlyPercent+'%'}}/></div><small>{formatMoney(monthlySales)} of {formatMoney(monthlyGoal)}</small></article>
+  <section className={'nxt-kpis'+(client?' nxt-kpis-client':'')}>
+   {!client&&<article className="nxt-goal-card"><div><span>{goalMonthLabel} Goal</span><strong>{formatMoney(monthlyGoal)}</strong></div><b>{monthlyPercent}%</b><div className="nxt-goal-track"><i style={{width:monthlyPercent+'%'}}/></div><small>{formatMoney(monthlySales)} of {formatMoney(monthlyGoal)}</small></article>}
    <button className="nxt-kpi-card" onClick={()=>go('tasks')}><Check size={20}/><span>Open Tasks</span><strong>{openTasks.length}</strong></button>
    <button className="nxt-kpi-card" onClick={()=>go('tickets')}><ListChecks size={20}/><span>Open Tickets</span><strong>{openTicketCount}</strong></button>
-   <button className="nxt-kpi-card" onClick={()=>go('clients')}><Users size={20}/><span>Clients</span><strong>{visible.clients.length}</strong></button>
+   {!client&&<button className="nxt-kpi-card" onClick={()=>go('clients')}><Users size={20}/><span>Clients</span><strong>{visible.clients.length}</strong></button>}
   </section>
 
   <section className="nxt-dashboard-grid">
