@@ -252,3 +252,15 @@ select.cell-input{min-width:110px;cursor:pointer;appearance:none;-webkit-appeara
 
 .call-import-method .text-button{display:inline-flex;align-items:center;gap:6px;margin-right:14px}
 .nxt-grid .nxt-rownum{vertical-align:middle}
+
+/* SMS templates */
+.sms-fields{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 10px}
+.sms-chip{padding:4px 10px!important;font-size:12px!important;min-height:0!important;border-radius:999px!important;font-family:ui-monospace,Menlo,monospace}
+.sms-preview{margin:6px 0 12px;padding:12px 14px;border-radius:14px;background:rgba(15,23,42,.04);border:1px solid rgba(15,23,42,.08)}
+.sms-preview p{margin:4px 0 6px;white-space:pre-wrap;overflow-wrap:anywhere}
+.sms-night{display:flex;align-items:center;gap:8px;font-size:13px;opacity:.8;margin:4px 0}
+.sms-night input{width:auto}
+.sms-save{margin-top:14px;padding-top:14px;border-top:1px solid rgba(15,23,42,.1)}
+.sms-activity-row small{display:block;overflow-wrap:anywhere}
+[data-theme="dark"] .sms-preview{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.1)}
+[data-theme="dark"] .sms-save{border-color:rgba(255,255,255,.12)}
