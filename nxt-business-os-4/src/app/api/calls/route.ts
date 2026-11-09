@@ -2,6 +2,7 @@ import {NextRequest,NextResponse} from 'next/server';
 import {context} from '@/lib/context';
 import {z} from 'zod';
 import {extractImportFile} from '@/lib/server/import-file';
+import {normalisePhone} from '@/lib/phone';
 export const dynamic='force-dynamic';
 const id=z.uuid();
 const outcomes=['no_answer','voicemail','connected','callback','interested','not_interested','wrong_number','converted'] as const;
@@ -80,6 +81,27 @@ function googleSheetCsvUrl(value:string){
  const m=u.pathname.match(/^\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);if(!m)throw Error('That is not a valid Google Sheets link.');
  const gid=u.searchParams.get('gid')||'0';return 'https://docs.google.com/spreadsheets/d/'+m[1]+'/export?format=csv&gid='+encodeURIComponent(gid);
 }
+
+// Duplicate check: the same number for the same caller target (NXT or one client) is skipped, never overwritten or deleted.
+const targetKey=(x:{target_type:string;client_id:string|null})=>x.target_type==='client'?'client:'+(x.client_id||''):'nxt';
+async function insertWithoutDuplicates(c:any,t:string,rows:any[]){
+ const cleaned=rows.map(x=>{const n=normalisePhone(x.phone);return {...x,phone:n.e164??x.phone,_key:n.key?targetKey(x)+'|'+n.key:''};});
+ const existing=new Set<string>();
+ for(let from=0;from<20000;from+=1000){
+  const r=await c.db.from('cold_call_prospects').select('phone,target_type,client_id').eq('tenant_id',t).range(from,from+999);if(r.error)throw r.error;
+  for(const e of r.data){const k=normalisePhone(e.phone).key;if(k)existing.add(targetKey(e)+'|'+k);}
+  if(r.data.length<1000)break;
+ }
+ const seen=new Set<string>(),fresh:any[]=[];let duplicates=0,duplicatesInFile=0;
+ for(const {_key,...row} of cleaned){
+  if(_key&&existing.has(_key)){duplicates++;continue;}
+  if(_key&&seen.has(_key)){duplicatesInFile++;continue;}
+  if(_key)seen.add(_key);fresh.push(row);
+ }
+ if(!fresh.length)return {imported:0,duplicates,duplicates_in_file:duplicatesInFile};
+ const r=await c.db.from('cold_call_prospects').insert(fresh).select('id');if(r.error)throw r.error;
+ return {imported:r.data.length,duplicates,duplicates_in_file:duplicatesInFile};
+}
 export async function GET(req:NextRequest){
  try{
   const c=await context(req.nextUrl.searchParams.get('workspace'));if(!c?.workspace||c.workspace.role==='client')return reply({error:'Staff access required'},403);
@@ -106,19 +128,25 @@ export async function POST(req:NextRequest){
    const f=await req.formData(),file=f.get('file'),target_type=String(f.get('target_type')||'nxt') as 'nxt'|'client',client_id=String(f.get('client_id')||'')||null,campaign=String(f.get('campaign')||'').trim(),owner_id=String(f.get('owner_id')||'')||c.user.id;
    if(!(file instanceof File))return reply({error:'Choose a CSV or XLSX file.'},400);if(!['nxt','client'].includes(target_type))return reply({error:'Invalid calling target.'},400);if(target_type==='client'&&!client_id)return reply({error:'Choose the client for this calling list.'},400);
    const text=await extractImportFile(file),rows=importRows(text,{target_type,client_id,campaign,owner_id}).map(x=>({...x,tenant_id:t}));
-   const r=await c.db.from('cold_call_prospects').insert(rows).select('id');if(r.error)throw r.error;return reply({imported:r.data.length},201);
+   return reply(await insertWithoutDuplicates(c,t,rows),201);
   }
   const b=await req.json(),action=String(b.action||'');
   if(action==='import_sheet'){
    const p=z.object({url:z.string().url(),target_type:z.enum(['nxt','client']),client_id:id.nullable().optional(),campaign:z.string().max(160).default(''),owner_id:id.nullable().optional()}).parse(b);if(p.target_type==='client'&&!p.client_id)return reply({error:'Choose the client for this calling list.'},400);
    const url=googleSheetCsvUrl(p.url),res=await fetch(url,{redirect:'follow',signal:AbortSignal.timeout(10000)});if(!res.ok)throw Error('Google Sheet could not be read. Make sure link sharing allows access.');const text=await res.text();if(text.length>300000)throw Error('Google Sheet is too large. Import at most 1,000 rows.');
    const rows=importRows(text,{target_type:p.target_type,client_id:p.client_id??null,campaign:p.campaign,owner_id:p.owner_id??c.user.id}).map(x=>({...x,tenant_id:t}));
-   const r=await c.db.from('cold_call_prospects').insert(rows).select('id');if(r.error)throw r.error;return reply({imported:r.data.length},201);
+   return reply(await insertWithoutDuplicates(c,t,rows),201);
   }
   if(action==='create_prospect'){
    const p=z.object({target_type:z.enum(['nxt','client']),client_id:id.nullable().optional(),campaign:z.string().max(160).default(''),business_id:z.string().max(80).default(''),company:z.string().trim().min(1).max(200),category:z.string().max(160).default(''),location_address:z.string().max(500).default(''),contact_name:z.string().max(160).default(''),phone:z.string().trim().min(1).max(80),email:z.union([z.email(),z.literal('')]).default(''),website_source:z.string().max(500).default(''),existing_system:z.string().max(300).default(''),contact_method:z.string().max(80).default(''),person_spoken_to:z.string().max(160).default(''),interest_level:z.string().max(80).default(''),registration_status:z.string().max(80).default(''),next_action:z.string().max(5000).default(''),integration_needed:z.string().max(80).default(''),follow_up_method:z.enum(['Call','Email','SMS','WhatsApp']).default('Call'),source:z.string().max(500).default(''),owner_id:id.nullable().optional(),notes:z.string().max(5000).default('')}).parse(b);
    if(p.target_type==='client'&&!p.client_id)return reply({error:'Choose the client this calling campaign belongs to.'},400);
-   const r=await c.db.from('cold_call_prospects').insert({...p,tenant_id:t,client_id:p.target_type==='client'?p.client_id:null,owner_id:p.owner_id??c.user.id}).select().single();if(r.error)throw r.error;return reply(r.data,201);
+   const n=normalisePhone(p.phone),cid=p.target_type==='client'?p.client_id??null:null;
+   if(n.key){
+    const scoped=await c.db.from('cold_call_prospects').select('id,company,phone,client_id').eq('tenant_id',t).eq('target_type',p.target_type).limit(20000);if(scoped.error)throw scoped.error;
+    const dup=scoped.data.find((e:any)=>normalisePhone(e.phone).key===n.key&&(e.client_id??null)===cid);
+    if(dup&&!b.allow_duplicate)return reply({error:'Already on a calling list: '+dup.company+' ('+dup.phone+'). Open that record instead of adding it again.',duplicate_id:dup.id},409);
+   }
+   const r=await c.db.from('cold_call_prospects').insert({...p,phone:n.e164??p.phone,tenant_id:t,client_id:cid,owner_id:p.owner_id??c.user.id}).select().single();if(r.error)throw r.error;return reply(r.data,201);
   }
   if(action==='update_prospect'){
    const p=z.object({id,status:z.enum(statuses),notes:z.string().max(5000).default(''),feedback:z.string().max(5000).default(''),next_follow_up:z.string().datetime({offset:true}).nullable().optional(),owner_id:id.nullable().optional()}).parse(b);
@@ -126,11 +154,20 @@ export async function POST(req:NextRequest){
   }
   if(action==='log_call'){
    const p=z.object({prospect_id:id,caller_id:id.nullable().optional(),outcome:z.enum(outcomes),notes:z.string().max(5000).default(''),feedback:z.string().max(5000).default(''),duration_seconds:z.number().int().min(0).max(28800).nullable().optional(),next_follow_up:z.string().datetime({offset:true}).nullable().optional(),follow_up_method:z.enum(['Call','Email','SMS','WhatsApp']).default('Call')}).parse(b);
-   const prospect=await c.db.from('cold_call_prospects').select('id').eq('tenant_id',t).eq('id',p.prospect_id).single();if(prospect.error)return reply({error:'Prospect not found'},404);
+   const prospect=await c.db.from('cold_call_prospects').select('id,company,campaign,contact_name,phone,email,notes,feedback,target_type,client_id,converted_deal_id').eq('tenant_id',t).eq('id',p.prospect_id).single();if(prospect.error)return reply({error:'Prospect not found'},404);
    const act=await c.db.from('cold_call_activities').insert({tenant_id:t,prospect_id:p.prospect_id,caller_id:p.caller_id??c.user.id,outcome:p.outcome,notes:p.notes,feedback:p.feedback,duration_seconds:p.duration_seconds??null}).select().single();if(act.error)throw act.error;
    const mapped=p.outcome==='no_answer'||p.outcome==='voicemail'?'attempted':p.outcome;
    const upd=await c.db.from('cold_call_prospects').update({status:mapped,last_called_at:new Date().toISOString(),last_outcome:p.outcome,feedback:p.feedback||undefined,next_follow_up:p.next_follow_up??null,follow_up_method:p.follow_up_method}).eq('tenant_id',t).eq('id',p.prospect_id).select().single();if(upd.error)throw upd.error;
-   return reply({activity:act.data,prospect:upd.data},201);
+   // A converted prospect becomes one CRM deal, once. Existing deals and records are never changed.
+   let deal:any=null,warning='';
+   if(p.outcome==='converted'&&!prospect.data.converted_deal_id){
+    const pr=prospect.data,title=(pr.company+(pr.campaign?' - '+pr.campaign:'')).slice(0,160);
+    const description=['Converted from Cold Calling.',pr.contact_name&&'Contact: '+pr.contact_name,pr.phone&&'Phone: '+pr.phone,pr.email&&'Email: '+pr.email,(p.notes||pr.notes)&&'Notes: '+(p.notes||pr.notes)].filter(Boolean).join('\n').slice(0,5000);
+    const d=await c.db.from('deals').insert({tenant_id:t,title,description,status:'new',client_id:pr.target_type==='client'?pr.client_id:null,client_visible:false,amount:0}).select('id,title').single();
+    if(d.error)warning='The call was saved, but the CRM deal could not be created: '+d.error.message;
+    else{deal=d.data;const link=await c.db.from('cold_call_prospects').update({converted_deal_id:d.data.id,converted_at:new Date().toISOString()}).eq('tenant_id',t).eq('id',p.prospect_id).select().single();if(!link.error)upd.data=link.data;}
+   }
+   return reply({activity:act.data,prospect:upd.data,deal,warning},201);
   }
   return reply({error:'Unknown action'},400);
  }catch(e){return reply({error:e instanceof z.ZodError?e.issues.map(i=>i.message).join('; '):(e as Error).message||'Cold calling action failed'},400);}

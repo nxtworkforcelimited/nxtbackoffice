@@ -2,16 +2,11 @@ import {NextRequest,NextResponse} from 'next/server';
 import {createClient} from '@supabase/supabase-js';
 import {supabase} from '@/lib/supabase/server';
 import {createHash} from 'node:crypto';
+import {deviceFromUserAgent as device} from '@/lib/tracking-classify';
 
 export const dynamic='force-dynamic';
 export const runtime='nodejs';
 
-function device(ua:string){
-  if(/bot|crawler|spider|slurp|bingpreview/i.test(ua))return 'Bot';
-  if(/ipad|tablet|kindle|silk/i.test(ua))return 'Tablet';
-  if(/mobi|android|iphone|ipod/i.test(ua))return 'Mobile';
-  return ua?'Desktop':'Unknown';
-}
 function safeRedirect(value:string){
   try{const u=new URL(value);return ['http:','https:'].includes(u.protocol)?u:null;}catch{return null;}
 }
