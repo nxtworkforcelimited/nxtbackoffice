@@ -6,7 +6,7 @@ const channels=['LinkedIn','Facebook','Instagram','WhatsApp','Email','SMS','Cold
 const fmtDate=(d:string|null)=>d?new Date(d+'T00:00:00').toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'}):'';
 const dates=(c:any)=>c.start_date&&c.end_date?fmtDate(c.start_date)+' to '+fmtDate(c.end_date):c.start_date?'From '+fmtDate(c.start_date):c.end_date?'Until '+fmtDate(c.end_date):'No dates set';
 const sampleCampaigns=[
- {id:'s1',client_id:'c1',name:'Festive offer',channel:'LinkedIn',status:'active',start_date:'2026-11-01',end_date:'2026-12-24',objective:'Fill December bookings with new business enquiries.',client_summary:'Posts and tracked links went live on 1 November.',target_leads:40,budget:600,currency:'USD',client_visible:true,results:{linked:true,links:3,clicks:182,unique:131},calling:{prospects:60,calls:44,interested:7,converted:2}},
+ {id:'s1',client_id:'c1',name:'Festive offer',channel:'LinkedIn',status:'active',start_date:'2026-11-01',end_date:'2026-12-24',objective:'Fill December bookings with new business enquiries.',client_summary:'Posts and tracked links went live on 1 November.',target_leads:40,budget:600,currency:'USD',client_visible:true,results:{linked:true,links:3,clicks:182,unique:131,leads:9,won:2},calling:{prospects:60,calls:44,interested:7,converted:2}},
  {id:'s2',client_id:'c1',name:'Cold call: new suppliers',channel:'Cold calling',status:'planned',start_date:'2026-11-16',end_date:'',objective:'Call 100 suppliers and book intro meetings.',client_summary:'',target_leads:null,budget:0,currency:'USD',client_visible:false,results:{linked:false,links:0,clicks:0,unique:0},calling:null},
  {id:'s3',client_id:'c2',name:'Spring newsletter',channel:'Email',status:'completed',start_date:'2026-09-01',end_date:'2026-09-30',objective:'Re-engage past customers.',client_summary:'Completed with a strong open rate.',target_leads:20,budget:150,currency:'USD',client_visible:true,results:{linked:true,links:1,clicks:96,unique:80},calling:null}];
 const sampleClients=[{id:'c1',title:'Sample Client One'},{id:'c2',title:'Sample Client Two'}];
@@ -36,6 +36,7 @@ export default function Campaigns({workspace,client,demo=false}:{workspace:strin
    <dl className="nxt-camp-results">
     <div><dt>Clicks</dt><dd>{c.results?.linked?c.results.clicks:'None'}</dd></div>
     <div><dt>Unique visitors</dt><dd>{c.results?.linked?c.results.unique:'None'}</dd></div>
+    {!client&&c.results?.leads!==undefined&&<div><dt>Leads from links</dt><dd>{c.results.linked?c.results.leads:'None'}</dd></div>}
     {!client&&<div><dt>Calls made</dt><dd>{c.calling?c.calling.calls:'None'}</dd></div>}
     {!client&&<div><dt>Interested</dt><dd>{c.calling?c.calling.interested:'None'}</dd></div>}
     {!client&&<div><dt>Converted</dt><dd>{c.calling?c.calling.converted:'None'}</dd></div>}

@@ -148,6 +148,19 @@ export async function POST(req:NextRequest){
    }
    const r=await c.db.from('cold_call_prospects').insert({...p,phone:n.e164??p.phone,tenant_id:t,client_id:cid,owner_id:p.owner_id??c.user.id}).select().single();if(r.error)throw r.error;return reply(r.data,201);
   }
+  if(action==='edit_cell'){
+   // One cell edited in the sheet view. Only these columns can be changed this way; status cannot be set to converted here
+   // (converting is done by logging a call, which also creates the CRM deal).
+   const textFields=['business_id','category','location_address','website_source','existing_system','contact_name','contact_method','person_spoken_to','interest_level','registration_status','integration_needed','follow_up_method','next_action','email'] as const;
+   const p=z.object({id,field:z.enum(['company','phone','status',...textFields]),value:z.string().max(5000)}).parse(b);
+   let value:any=p.value.trim();
+   if(p.field==='company'){if(!value)return reply({error:'Business name cannot be empty.'},400);if(value.length>200)return reply({error:'Business name is too long.'},400);}
+   else if(p.field==='phone'){const n=normalisePhone(value);if(!(n.e164??value))return reply({error:'Contact number cannot be empty.'},400);value=n.e164??value;}
+   else if(p.field==='status'){if(!statuses.includes(value as any)||value==='converted')return reply({error:'Choose a status. To convert a prospect, log the call as Converted.'},400);}
+   else if(value.length>500&&p.field!=='next_action')return reply({error:'That entry is too long.'},400);
+   const upd:any={[p.field]:value};if(p.field==='next_action')upd.notes=value;
+   const r=await c.db.from('cold_call_prospects').update(upd).eq('tenant_id',t).eq('id',p.id).select().single();if(r.error)throw r.error;return reply(r.data);
+  }
   if(action==='update_prospect'){
    const p=z.object({id,status:z.enum(statuses),notes:z.string().max(5000).default(''),feedback:z.string().max(5000).default(''),next_follow_up:z.string().datetime({offset:true}).nullable().optional(),owner_id:id.nullable().optional()}).parse(b);
    const r=await c.db.from('cold_call_prospects').update({status:p.status,notes:p.notes,feedback:p.feedback,next_follow_up:p.next_follow_up??null,owner_id:p.owner_id??null}).eq('tenant_id',t).eq('id',p.id).select().single();if(r.error)throw r.error;return reply(r.data);
@@ -163,7 +176,9 @@ export async function POST(req:NextRequest){
    if(p.outcome==='converted'&&!prospect.data.converted_deal_id){
     const pr=prospect.data,title=(pr.company+(pr.campaign?' - '+pr.campaign:'')).slice(0,160);
     const description=['Converted from Cold Calling.',pr.contact_name&&'Contact: '+pr.contact_name,pr.phone&&'Phone: '+pr.phone,pr.email&&'Email: '+pr.email,(p.notes||pr.notes)&&'Notes: '+(p.notes||pr.notes)].filter(Boolean).join('\n').slice(0,5000);
-    const d=await c.db.from('deals').insert({tenant_id:t,title,description,status:'new',client_id:pr.target_type==='client'?pr.client_id:null,client_visible:false,amount:0}).select('id,title').single();
+    const base={tenant_id:t,title,description,status:'new',client_id:pr.target_type==='client'?pr.client_id:null,client_visible:false,amount:0};
+    let d=await c.db.from('deals').insert({...base,lead_source:'cold-calling'}).select('id,title').single();
+    if(d.error&&/lead_source/.test(d.error.message))d=await c.db.from('deals').insert(base).select('id,title').single();
     if(d.error)warning='The call was saved, but the CRM deal could not be created: '+d.error.message;
     else{deal=d.data;const link=await c.db.from('cold_call_prospects').update({converted_deal_id:d.data.id,converted_at:new Date().toISOString()}).eq('tenant_id',t).eq('id',p.prospect_id).select().single();if(!link.error)upd.data=link.data;}
    }

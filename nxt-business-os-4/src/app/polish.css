@@ -152,7 +152,7 @@ h1{letter-spacing:-.8px}
 .nxt-range{display:flex;gap:6px}
 .nxt-range button{padding:7px 14px;border-radius:99px;border:1px solid #d9d6e8;background:#fff;font-size:12px;font-weight:600;color:#5d5a6b}
 .nxt-range button.on{background:#3c3489;border-color:#3c3489;color:#fff}
-.nxt-result-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0}
+.nxt-result-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:16px 0}
 .nxt-result-tiles div,.nxt-camp-stats div{display:grid;gap:4px;padding:14px 16px;border:1px solid #ece8f1;border-radius:14px;background:var(--nxt-glass)}
 .nxt-result-tiles span,.nxt-camp-stats span{font-size:12px;color:#777384}
 .nxt-result-tiles strong,.nxt-camp-stats strong{font-family:var(--nxt-display);font-size:26px;color:#211f28}
@@ -203,3 +203,52 @@ h1{letter-spacing:-.8px}
 
 .nxt-results>*:not(.panel-head){margin-left:20px;margin-right:20px}
 .nxt-results{padding-bottom:20px}
+
+/* Logo: the wordmark PNG sits on plain white. The old rounded border and drop shadow drew a grey halo around it. */
+aside.studio-side.reference-side .reference-logo.reference-logo{background:#fff!important;border:0!important;border-radius:0!important;box-shadow:none!important;margin-bottom:8px!important}
+aside.studio-side.reference-side .reference-logo img{filter:none!important;background:#fff}
+[data-theme="dark"] aside.studio-side.reference-side .reference-logo.reference-logo{border-radius:16px!important;margin:12px 12px 8px!important;width:auto}
+
+/* Call list as a spreadsheet: lettered columns, numbered rows, editable cells, tabs along the bottom. */
+.nxt-sheet{padding:0;overflow:hidden}
+.nxt-sheet-bar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px;padding:18px 20px 14px}
+.nxt-sheet-bar h3{margin:2px 0}
+.nxt-sheet-bar p{margin:0;font-size:13px;color:#777384}
+.nxt-sheet-tools{display:flex;gap:8px;align-items:center}
+.nxt-grid-wrap{max-height:62vh;overflow:auto;border-top:1px solid #e3e0ea;border-bottom:1px solid #e3e0ea;border-radius:0!important}
+.nxt-grid{border-collapse:separate;border-spacing:0;font-size:13px;min-width:2300px}
+.nxt-grid th,.nxt-grid td{border-right:1px solid #e3e0ea;border-bottom:1px solid #e3e0ea;padding:0;white-space:nowrap}
+.nxt-grid thead th{position:sticky;background:#f6f5fa;color:#5d5a6b;font-weight:600;font-size:12px;text-align:left;padding:7px 10px;z-index:2}
+.nxt-grid thead tr.nxt-letters th{top:0;text-align:center;font-size:11px;color:#8a8696;padding:3px 10px;background:#efedf6}
+.nxt-grid thead tr:nth-child(2) th{top:24px}
+.nxt-grid .nxt-rownum{position:sticky;left:0;z-index:1;background:#f6f5fa;color:#8a8696;text-align:center;font-weight:500;font-size:11px;min-width:38px;padding:0 6px}
+.nxt-grid thead th:first-child{left:0;z-index:3;min-width:38px}
+.nxt-grid td.ro{padding:0 10px;color:#5d5a6b;background:#fbfafd}
+.nxt-grid tbody tr:hover td{background:#faf9ff}
+.nxt-grid tbody tr.selected td{background:#f0ecff}
+.nxt-grid .cell-input{width:100%;min-width:120px;height:34px;min-height:34px;margin:0;padding:0 10px;border:0!important;border-radius:0!important;background:transparent!important;font:inherit;font-size:13px;color:#211f28;box-shadow:none!important;display:block}
+.nxt-grid .cell-input:focus{outline:2px solid #5b4fc7;outline-offset:-2px;background:#fff!important}
+select.cell-input{min-width:110px;cursor:pointer;appearance:none;-webkit-appearance:none}
+.nxt-grid td:nth-child(3) .cell-input{min-width:200px;font-weight:600}
+.nxt-grid td:nth-child(5) .cell-input{min-width:200px}
+.nxt-grid td:nth-child(6) .cell-input{min-width:170px}
+.nxt-grid td:nth-child(18) .cell-input{min-width:280px}
+.nxt-grid-empty{padding:28px!important;text-align:center;color:#777384}
+.nxt-add-row td{border-bottom:0}
+.nxt-add-row button{margin:6px 8px;padding:5px 10px;border:1px dashed #c9c4de;border-radius:8px;background:transparent;color:#5b4fc7;font-size:12px;font-weight:600}
+.nxt-sheet-tabs{display:flex;align-items:center;gap:2px;overflow-x:auto;padding:6px 10px;background:#f6f5fa}
+.nxt-tab{display:inline-flex;align-items:center;gap:8px;white-space:nowrap;padding:8px 16px;border:0;border-radius:0 0 10px 10px;background:transparent;color:#5d5a6b;font-size:13px;font-weight:600}
+.nxt-tab em{font-style:normal;font-size:11px;padding:1px 7px;border-radius:99px;background:#e8e5f3;color:#5d5a6b}
+.nxt-tab.on{background:#fff;color:#3c3489;box-shadow:0 2px 0 #5b4fc7 inset,0 6px 14px -8px rgba(60,52,137,.5)}
+.nxt-tab.on em{background:#eeeafc;color:#3c3489}
+.nxt-tab-add{display:grid;place-items:center;width:34px;height:34px;margin-right:6px;border:0;border-radius:50%;background:#fff;color:#3c3489;box-shadow:0 1px 4px rgba(60,52,137,.25)}
+[data-theme="dark"] .nxt-grid thead th,[data-theme="dark"] .nxt-grid .nxt-rownum,[data-theme="dark"] .nxt-sheet-tabs{background:#262338;color:#cbc7e0}
+[data-theme="dark"] .nxt-grid thead tr.nxt-letters th{background:#211f33}
+[data-theme="dark"] .nxt-grid th,[data-theme="dark"] .nxt-grid td,[data-theme="dark"] .nxt-grid-wrap{border-color:rgba(175,169,236,.18)}
+[data-theme="dark"] .nxt-grid td.ro{background:#1f1d30;color:#cbc7e0}
+[data-theme="dark"] .nxt-grid .cell-input{color:#f1effa}
+[data-theme="dark"] .nxt-grid .cell-input:focus,[data-theme="dark"] .nxt-tab.on,[data-theme="dark"] .nxt-tab-add{background:#34304d;color:#f1effa}
+@media(max-width:760px){.nxt-grid-wrap{max-height:70vh}.nxt-sheet-tools{width:100%}.nxt-sheet-tools input{flex:1}}
+
+.call-import-method .text-button{display:inline-flex;align-items:center;gap:6px;margin-right:14px}
+.nxt-grid .nxt-rownum{vertical-align:middle}

@@ -37,6 +37,9 @@ export async function GET(req:NextRequest){
   const [camps,clients]=await Promise.all([q,c.db.from('clients').select('id,title').eq('tenant_id',t).is('archived_at',null).order('title')]);
   if(camps.error)throw camps.error;if(clients.error)throw clients.error;
   const {links,clicks}=await loadTracking(c,t,{days});
+  const dl=await c.db.from('deals').select('lead_source,status').eq('tenant_id',t).like('lead_source','link:%').limit(5000);
+  const leadMap=new Map<string,{leads:number;won:number}>();
+  if(!dl.error)for(const x of dl.data){const k=String(x.lead_source).slice(5),r=leadMap.get(k)||{leads:0,won:0};r.leads++;if(x.status==='won')r.won++;leadMap.set(k,r);}
   const callNames=[...new Set((camps.data??[]).map((x:any)=>x.call_campaign).filter(Boolean))];
   const calling:Record<string,{prospects:number;calls:number;interested:number;converted:number}>={};
   if(callNames.length){
@@ -48,15 +51,16 @@ export async function GET(req:NextRequest){
     calling[camp.id]={prospects:mine.length,calls:a.length,interested:mine.filter((p:any)=>p.status==='interested').length,converted:mine.filter((p:any)=>p.status==='converted').length};
    }
   }
-  const campaigns=(camps.data??[]).map((x:any)=>({...x,results:resultsFor(x.utm_campaign,x.client_id,links,clicks,days),calling:calling[x.id]||null}));
+  const campaigns=(camps.data??[]).map((x:any)=>({...x,results:resultsFor(x.utm_campaign,x.client_id,links,clicks,days,leadMap),calling:calling[x.id]||null}));
   return reply({role:'staff',campaigns,clients:clients.data});
  }catch(e){return reply({error:(e as Error).message||'Campaigns could not load'},500);}
 }
-function resultsFor(utm:string,clientId:string,links:any[],clicks:any[],days:number){
+function resultsFor(utm:string,clientId:string,links:any[],clicks:any[],days:number,leadMap?:Map<string,{leads:number;won:number}>){
  const key=slug(utm||'');if(!key)return {linked:false,links:0,clicks:0,unique:0};
  const mine=links.filter(l=>l.client_id===clientId&&slug(l.campaign)===key);
  const s=summariseTracking(mine,clicks,days);
- return {linked:true,links:mine.length,clicks:s.clicks,unique:s.unique};
+ const lead=leadMap?mine.reduce((a,l)=>({leads:a.leads+(leadMap.get(l.code)?.leads||0),won:a.won+(leadMap.get(l.code)?.won||0)}),{leads:0,won:0}):null;
+ return {linked:true,links:mine.length,clicks:s.clicks,unique:s.unique,...(lead?{leads:lead.leads,won:lead.won}:{})};
 }
 
 export async function POST(req:NextRequest){

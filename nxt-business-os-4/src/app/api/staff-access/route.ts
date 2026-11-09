@@ -30,6 +30,8 @@ export async function POST(req:NextRequest){
   if(!canManage(c))return reply({error:'Staff access administration permission required.'},403);
   const raw=await req.json().catch(()=>null);
   if(raw?.action==='invite'){
+   // Invitations stay owner-only until the invite queue functions in the database accept admin and HR requesters.
+   if(c.workspace!.role!=='owner')return reply({error:'Only the workspace owner can send staff invitations for now. Password resets are available to admin and HR.'},403);
    const p=z.object({
     action:z.literal('invite'),
     name:z.string().trim().min(1).max(160),
