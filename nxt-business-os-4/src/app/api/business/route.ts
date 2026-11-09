@@ -13,6 +13,7 @@ export async function POST(req:NextRequest){
  if(!trustedRequest(req))return NextResponse.json({error:'Forbidden'},{status:403});
  const ctx=await context(req.nextUrl.searchParams.get('workspace'));if(!ctx?.workspace)return NextResponse.json({error:'Sign in required'},{status:401});
  const raw=await req.json().catch(()=>null);
+ if(raw?.action==='payment'&&!String(raw.reference??'').trim())raw.reference='RCT-'+new Date().toISOString().slice(0,10).replaceAll('-','')+'-'+crypto.randomUUID().replaceAll('-','').slice(0,12).toUpperCase();
  if(raw?.action==='remove_test_invoice'){
   const parsed=z.object({action:z.literal('remove_test_invoice'),id:z.uuid(),reason:z.string().trim().min(5).max(500)}).strict().safeParse(raw);
   if(!parsed.success)return NextResponse.json({error:'Choose an invoice and give a removal reason.'},{status:400});
