@@ -293,3 +293,14 @@ select.cell-input{min-width:110px;cursor:pointer;appearance:none;-webkit-appeara
 [data-theme="dark"] .sla-pill.met{color:#86efac}
 [data-theme="dark"] .sla-pill.soon{color:#fcd34d}
 [data-theme="dark"] .sla-pill.overdue{color:#fca5a5}
+
+/* Client services and client support tickets */
+.client-services{margin-top:14px;padding:14px;border:1px solid rgba(15,23,42,.12);border-radius:14px}
+.client-services legend{font-weight:700;padding:0 6px}
+.client-services p{margin:4px 0 10px;opacity:.75;font-size:13px}
+.client-services-grid{display:flex;flex-wrap:wrap;gap:8px 18px}
+.client-services-grid label{display:flex;align-items:center;gap:8px}
+.client-services-grid input{width:auto}
+[data-theme="dark"] .client-services{border-color:rgba(255,255,255,.14)}
+.client-tickets-intro{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+.client-tickets-intro p{margin:0}

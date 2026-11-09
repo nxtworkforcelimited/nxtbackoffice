@@ -38,5 +38,5 @@ export function slaHeadline(t:SlaTicket,now=new Date()){
  return open[0]??{state:'met' as SlaState,label:'Replied'};
 }
 export function isOverdue(t:SlaTicket,now=new Date()){return !done(t.status)&&slaHeadline(t,now).state==='overdue';}
-export const clientCategories=['Website Change','Website Bug','Content Update','Hosting / DNS','Billing Query'] as const;
+export const clientCategories=['Website Change','Website Bug','Content Update','Hosting / DNS','Billing Query','Back Office Issue','Email Issue','Other Support Request'] as const;
 export const internalCategories=['General IT','Back Office / System','CRM / Pipeline','Projects / Tasks','Finance / Expenses','Accounting','Payroll','Leave / Loans','Tickets / IT Support','SMS / Messaging','Phone / Calling','Marketing / Social','Documents / Files','Account / Login Access','Hardware / Device','Network / Connectivity','Website / Domain','Other'] as const;
