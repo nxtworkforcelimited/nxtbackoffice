@@ -87,3 +87,38 @@ h1{letter-spacing:-.8px}
 }
 
 /* Login: the logo file is now trimmed, so give it a calm, centred size. */
+
+/* Page headers: compact, no empty tagline gap. */
+.reference-page-heading{padding-top:20px;padding-bottom:20px;min-height:0}
+.reference-page-heading h1{font-size:30px;margin-bottom:4px}
+.reference-page-heading p:empty{display:none}
+
+/* Invoice and quote status badges: colour shows what needs attention. */
+.badge.status-paid{background:#e3f6ea;color:#17683c}
+.badge.status-overdue{background:#fdeaea;color:#a02828}
+.badge.status-issued{background:#eeeafc;color:#3c3489}
+.badge.status-draft,.badge.status-void,.badge.status-cancelled{background:#efeff3;color:#5d5a6b}
+[data-theme="dark"] .badge.status-paid{background:rgba(63,185,110,.18);color:#8fe0ae}
+[data-theme="dark"] .badge.status-overdue{background:rgba(240,90,90,.18);color:#ffb0b0}
+[data-theme="dark"] .badge.status-issued{background:rgba(175,169,236,.18);color:#d9d4ff}
+
+/* Table row action buttons (client invoices). */
+.table-wrap .row-action{padding:9px 18px;border-radius:10px;font-weight:600;font-size:13px;white-space:nowrap}
+
+/* Phones: client invoice rows become cards so Amount, Balance, Status and
+   the Pay button are visible without sideways scrolling. */
+@media(max-width:760px){
+ .reference-page-heading h1{font-size:24px}
+ .stack-table,.stack-table tbody,.stack-table tr,.stack-table td{display:block;width:100%}
+ .stack-table thead{display:none}
+ .stack-table tr{padding:14px 16px;border-bottom:1px solid rgba(60,52,137,.1)}
+ .stack-table td{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:6px 0;border:0;text-align:right}
+ .stack-table td[data-label]::before{content:attr(data-label);color:#777384;font-size:12px;text-align:left}
+ .stack-table td:first-child{display:block;text-align:left}
+ .stack-table td.action-cell{padding-top:10px}
+ .stack-table td.action-cell .row-action{width:100%}
+}
+@media(max-width:760px){
+ .studio-heading.reference-page-heading h1{font-size:24px;letter-spacing:-.4px}
+ .studio-metrics{grid-template-columns:1fr}
+}
