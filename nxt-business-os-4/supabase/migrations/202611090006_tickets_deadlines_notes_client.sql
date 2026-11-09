@@ -21,7 +21,7 @@ end $$;
 alter table public.it_tickets add constraint it_tickets_category_check check(category in (
  'Hardware','Software','Network','Account access',
  'General IT','Back Office / System','CRM / Pipeline','Projects / Tasks','Finance / Expenses','Accounting','Payroll','Leave / Loans','Tickets / IT Support','SMS / Messaging','Phone / Calling','Marketing / Social','Documents / Files','Account / Login Access','Hardware / Device','Network / Connectivity','Website / Domain','Other',
- 'Website Change','Website Bug','Content Update','Hosting / DNS','Billing Query'));
+ 'Website Change','Website Bug','Content Update','Hosting / DNS','Billing Query')) not valid;
 
 -- 3. Internal notes and time spent on comments
 alter table public.it_ticket_comments

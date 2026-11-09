@@ -17,7 +17,7 @@ alter table public.it_tickets add constraint it_tickets_category_check check(cat
  'Hardware','Software','Network','Account access',
  'General IT','Back Office / System','CRM / Pipeline','Projects / Tasks','Finance / Expenses','Accounting','Payroll','Leave / Loans','Tickets / IT Support','SMS / Messaging','Phone / Calling','Marketing / Social','Documents / Files','Account / Login Access','Hardware / Device','Network / Connectivity','Website / Domain','Other',
  'Website Change','Website Bug','Content Update','Hosting / DNS','Billing Query',
- 'Back Office Issue','Email Issue','Other Support Request'));
+ 'Back Office Issue','Email Issue','Other Support Request')) not valid;
 
 -- A client user may read the tickets of their own company, and the replies that are not internal notes. Nothing else.
 drop policy if exists ticket_client_company_read on public.it_tickets;

@@ -22,3 +22,16 @@ test('migrations 0001 and 0004 repair older tables and can be run twice',async()
  const cols=(await db.query(`select column_name from information_schema.columns where table_name='client_campaigns'`)).rows.map(r=>r.column_name);
  assert.ok(cols.includes('archived_at'));
 });
+
+test('migration 0004 keeps old sms_outbox rows with other source types and still guards new ones',async()=>{
+ const db=new PGlite();
+ await db.exec(`create role service_role;create role anon;create role authenticated;
+ create table public.tenants(id uuid primary key);
+ create table public.sms_outbox(id serial primary key,source_type text);
+ insert into public.sms_outbox(source_type) values('legacy_value');`);
+ const m=await readFile(new URL('../supabase/migrations/202611090004_sms_templates.sql',import.meta.url),'utf8');
+ await db.exec(m);await db.exec(m);
+ await db.exec(`insert into public.sms_outbox(source_type) values('template')`);
+ await assert.rejects(db.exec(`insert into public.sms_outbox(source_type) values('bogus')`),/sms_outbox_source_type_check/);
+ assert.equal((await db.query(`select count(*)::int n from public.sms_outbox where source_type='legacy_value'`)).rows[0].n,1);
+});
