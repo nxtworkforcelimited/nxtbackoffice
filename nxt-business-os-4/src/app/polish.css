@@ -402,3 +402,19 @@ select.cell-input{min-width:110px;cursor:pointer;appearance:none;-webkit-appeara
 .my-profile-progress{padding:22px;display:grid;gap:10px}
 .build-portal-toggle{display:flex!important;gap:10px;align-items:flex-start}.build-portal-toggle input{margin-top:3px;flex:none}
 .payroll-context{padding:16px 20px;display:grid;gap:6px;margin-bottom:14px}.payroll-context p{margin:0}
+.accounting-ask,.accounting-ledger{display:grid;gap:14px;padding:22px}.accounting-ask h2,.accounting-ledger h2{display:flex;gap:10px;align-items:center;margin:0}.accounting-ask p,.accounting-ledger p{margin:0}
+.accounting-ask-form{display:flex;gap:10px;flex-wrap:wrap}.accounting-ask-form input{flex:1 1 320px;min-width:0;padding:14px 16px;border-radius:14px;border:1px solid #d9cff3;background:rgba(255,255,255,.85);font:inherit}
+.accounting-ask-chips{display:flex;flex-wrap:wrap;gap:8px}.accounting-ask-chips button{padding:8px 14px;border-radius:999px;border:1px solid #d9cff3;background:#f6f2ff;color:#4f2b92;font:inherit;font-size:13px;cursor:pointer}
+.accounting-ask-list{display:grid;gap:12px}.accounting-ask-item{display:grid;gap:8px;padding:16px 18px;border-radius:16px;border:1px solid #e3dcf5;background:rgba(255,255,255,.8)}.accounting-ask-item.error{border-color:#e8b4b4;background:#fff5f5}
+.accounting-ask-q{font-size:13px;opacity:.7}.accounting-ask-a{font-size:18px;font-weight:600;line-height:1.4}.accounting-ask-item ul{margin:0;padding-left:20px;display:grid;gap:4px}
+.accounting-ask-foot{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between;font-size:12px;opacity:.85}.accounting-ask-foot button{padding:6px 12px;border-radius:999px;border:1px solid #d9cff3;background:#fff;cursor:pointer;font:inherit;font-size:12px}
+.accounting-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}.accounting-metrics div{display:grid;gap:4px;padding:14px 16px;border-radius:14px;background:#f6f2ff}.accounting-metrics span{font-size:12px;opacity:.7}.accounting-metrics strong{font-size:20px}
+.accounting-entry-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr));gap:16px;align-items:start}.accounting-entry-grid textarea{width:100%;font:13px ui-monospace,Menlo,monospace;padding:12px;border-radius:12px;border:1px solid #d9cff3;resize:vertical}
+.accounting-entry-preview{padding:12px 14px;border-radius:12px;background:#f6f2ff;line-height:1.6}
+.accounting-fill{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.accounting-fill span{flex:1 1 320px}
+.accounting-suggestion{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 12px;border-radius:12px;background:#f6f2ff;font-size:14px}.accounting-suggestion button{padding:6px 12px;border-radius:999px;border:1px solid #b9a0f0;background:#fff;cursor:pointer}
+html[data-theme="dark"] .accounting-ask-item,html[data-theme="dark"] .accounting-metrics div,html[data-theme="dark"] .accounting-entry-preview,html[data-theme="dark"] .accounting-suggestion{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.14)}
+html[data-theme="dark"] .accounting-ask-form input,html[data-theme="dark"] .accounting-entry-grid textarea{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.18);color:inherit}
+html[data-theme="dark"] .accounting-ask-chips button,html[data-theme="dark"] .accounting-ask-foot button,html[data-theme="dark"] .accounting-suggestion button{background:rgba(255,255,255,.08);color:inherit;border-color:rgba(255,255,255,.2)}
+.accounting-ledger .action-row button,.accounting-entry-grid .action-row button{display:inline-flex;gap:6px;align-items:center;padding:8px 14px;border-radius:999px;border:1px solid #d9cff3;background:#fff;cursor:pointer;font:inherit;font-size:13px}
+html[data-theme="dark"] .accounting-ledger .action-row button,html[data-theme="dark"] .accounting-entry-grid .action-row button{background:rgba(255,255,255,.08);color:inherit;border-color:rgba(255,255,255,.2)}
