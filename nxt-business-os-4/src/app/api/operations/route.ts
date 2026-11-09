@@ -19,9 +19,9 @@ const update=z.discriminatedUnion('action',[
  z.object({action:z.literal('delete'),module:z.enum(['clients','projects','tasks']),id}),
  z.object({action:z.literal('archive'),module:z.enum(['clients','projects','tasks']),id,archived:z.boolean()}),
  z.object({action:z.literal('task_status'),id,status:z.enum(['todo','in_progress','done'])}),
- z.object({action:z.literal('ticket'),backoffice_id:nullableId.optional(),device_id:nullableId.optional(),requested_for_id:nullableId.optional(),assignee_id:nullableId.optional(),title:text.min(1).max(160),description:text.min(1).max(5000),device:text.max(300),category:z.enum(['General IT','Back Office / System','CRM / Pipeline','Projects / Tasks','Finance / Expenses','Accounting','Payroll','Leave / Loans','Tickets / IT Support','SMS / Messaging','Phone / Calling','Marketing / Social','Documents / Files','Account / Login Access','Hardware / Device','Network / Connectivity','Website / Domain','Other']),priority:z.enum(['Low','Normal','High','Urgent']),due_date:z.iso.date().nullable().optional()}),
- z.object({action:z.literal('ticket_update'),id,backoffice_id:nullableId.optional(),device_id:nullableId.optional(),requested_for_id:nullableId.optional(),status:z.enum(['New','Assigned','In progress','Waiting','Resolved','Closed']),assignee_id:nullableId,resolution:text.max(5000),priority:z.enum(['Low','Normal','High','Urgent']),due_date:z.iso.date().nullable().optional()}),
- z.object({action:z.literal('comment'),ticket_id:id,body:text.min(1).max(5000)})]);
+ z.object({action:z.literal('ticket'),backoffice_id:nullableId.optional(),device_id:nullableId.optional(),requested_for_id:nullableId.optional(),assignee_id:nullableId.optional(),title:text.min(1).max(160),description:text.min(1).max(5000),device:text.max(300),category:z.enum(['General IT','Back Office / System','CRM / Pipeline','Projects / Tasks','Finance / Expenses','Accounting','Payroll','Leave / Loans','Tickets / IT Support','SMS / Messaging','Phone / Calling','Marketing / Social','Documents / Files','Account / Login Access','Hardware / Device','Network / Connectivity','Website / Domain','Other','Website Change','Website Bug','Content Update','Hosting / DNS','Billing Query']),client_id:nullableId.optional(),priority:z.enum(['Low','Normal','High','Urgent']),due_date:z.iso.date().nullable().optional()}),
+ z.object({action:z.literal('ticket_update'),id,backoffice_id:nullableId.optional(),device_id:nullableId.optional(),requested_for_id:nullableId.optional(),status:z.enum(['New','Assigned','In progress','Waiting','Resolved','Closed']),client_id:nullableId.optional(),assignee_id:nullableId,resolution:text.max(5000),priority:z.enum(['Low','Normal','High','Urgent']),due_date:z.iso.date().nullable().optional()}),
+ z.object({action:z.literal('comment'),ticket_id:id,body:text.min(1).max(5000),internal:z.boolean().optional(),minutes:z.number().int().min(1).max(1440).nullable().optional()})]);
 export async function GET(req:NextRequest){
  const c=await context(req.nextUrl.searchParams.get('workspace'));
  if(!c?.workspace||c.workspace.role==='client')return NextResponse.json({error:'Staff access required'},{status:403});
@@ -29,7 +29,14 @@ export async function GET(req:NextRequest){
  const tables=['staff_directory','clients','projects','tasks','it_tickets','it_ticket_comments','cold_call_prospects','cold_call_activities','documents'];
  const results=await Promise.all(tables.map(table=>c.db.from(table).select('*').eq('tenant_id',c.workspace!.id)));
  for(let i=0;i<tables.length;i++){if(results[i].error)return NextResponse.json({error:'Install upgrade-team-operations.sql before opening Operations.'},{status:400});out[tables[i]]=results[i].data??[];}
+ out.ticket_manager_ids=await ticketManagerIds(c);
  return NextResponse.json(out,{headers:{'Cache-Control':'private, no-store'}});
+}
+/** People who can be given a ticket: the workspace owner and anyone holding the tickets capability. */
+async function ticketManagerIds(c:NonNullable<Awaited<ReturnType<typeof context>>>){
+ const t=c.workspace!.id;
+ const [owners,grants]=await Promise.all([c.db.from('memberships').select('user_id').eq('tenant_id',t).eq('role','owner'),c.db.from('member_permissions').select('user_id').eq('tenant_id',t).eq('capability','tickets')]);
+ return [...new Set([...(owners.data??[]),...(grants.data??[])].map(r=>r.user_id as string))];
 }
 export async function POST(req:NextRequest){
  if(req.headers.get('origin')!==req.nextUrl.origin)return NextResponse.json({error:'Forbidden'},{status:403});
@@ -58,16 +65,25 @@ export async function POST(req:NextRequest){
  r=await c.db.from(v.module).update({archived_at:v.archived?new Date().toISOString():null}).eq('tenant_id',tenant_id).eq('id',v.id).select().single();
  }else if(v.action==='task_status')r=await c.db.from('tasks').update({status:v.status}).eq('tenant_id',tenant_id).eq('id',v.id).select().single();
  else if(v.action==='ticket'){
- const allowedAssignees=['3c5d23a8-6fea-48ca-a630-37124a10d1db','76e3f054-7bdf-4670-800e-c54329dfa4dd'];
- if(v.assignee_id&&!allowedAssignees.includes(v.assignee_id))return NextResponse.json({error:'Tickets can currently be assigned only to Nyasha Kamupira or Adrian Chaperuka.'},{status:400});
+ if(v.assignee_id&&!(await ticketManagerIds(c)).includes(v.assignee_id))return NextResponse.json({error:'Choose a ticket manager to assign this to.'},{status:400});
  const {action,...fields}=v;
- r=await c.db.from('it_tickets').insert({...fields,tenant_id,status:v.assignee_id?'Assigned':'New'}).select().single();
+ const create=(f:Record<string,unknown>)=>c.db.from('it_tickets').insert({...f,tenant_id,status:v.assignee_id?'Assigned':'New'}).select().single();
+ r=await create(fields);
+ if(r.error&&/client_id/.test(r.error.message)){const {client_id:_c,...rest}=fields;r=await create(rest);} // upgrade 202611090006 not applied yet
 }
  else if(v.action==='ticket_update'){
  if(!can('tickets'))return NextResponse.json({error:'IT ticket manager access required'},{status:403});
- const allowedAssignees=['3c5d23a8-6fea-48ca-a630-37124a10d1db','76e3f054-7bdf-4670-800e-c54329dfa4dd'];
- if(v.assignee_id&&!allowedAssignees.includes(v.assignee_id))return NextResponse.json({error:'Assigned to must be Nyasha Kamupira or Adrian Chaperuka.'},{status:400});
- const {action,id,...fields}=v;r=await c.db.from('it_tickets').update(fields).eq('tenant_id',tenant_id).eq('id',id).select().single();
- }else {const {action,...fields}=v;r=await c.db.from('it_ticket_comments').insert({...fields,tenant_id}).select().single();}
+ if(v.assignee_id&&!(await ticketManagerIds(c)).includes(v.assignee_id))return NextResponse.json({error:'Assigned to must be a ticket manager.'},{status:400});
+ const {action,id,...fields}=v;
+ const save=(f:Record<string,unknown>)=>c.db.from('it_tickets').update(f).eq('tenant_id',tenant_id).eq('id',id).select().single();
+ r=await save(fields);
+ if(r.error&&/client_id/.test(r.error.message)){const {client_id:_c,...rest}=fields;r=await save(rest);}
+ }else {
+ const {action,internal,minutes,...fields}=v;
+ // Internal notes and time are for ticket managers only. They are never quietly sent as a normal reply.
+ if((internal||minutes)&&!can('tickets'))return NextResponse.json({error:'Only ticket managers can add internal notes or log time.'},{status:403});
+ r=await c.db.from('it_ticket_comments').insert({...fields,tenant_id,...(internal||minutes?{internal:Boolean(internal),minutes:minutes??null}:{})}).select().single();
+ if(r.error&&(internal||minutes)&&/internal|minutes/.test(r.error.message))return NextResponse.json({error:'Internal notes and time logging need the tickets upgrade (202611090006) to be applied first.'},{status:400});
+}
  return NextResponse.json(r.error?{error:r.error.message}:r.data,{status:r.error?400:200});
 }

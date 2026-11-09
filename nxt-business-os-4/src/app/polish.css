@@ -280,3 +280,16 @@ select.cell-input{min-width:110px;cursor:pointer;appearance:none;-webkit-appeara
 .builds-archived{display:flex;align-items:center;gap:8px;font-size:13px}
 .builds-archived input{width:auto}
 [data-theme="dark"] .site-check{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.12)}
+
+/* Tickets: deadlines and internal notes */
+.sla-pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap;background:rgba(15,23,42,.06)}
+.sla-pill.met{background:rgba(22,163,74,.12);color:#166534}
+.sla-pill.soon{background:rgba(217,119,6,.15);color:#92400e}
+.sla-pill.overdue{background:rgba(220,38,38,.14);color:#991b1b}
+.ticket-sla-row{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 12px}
+.ticket-note-internal{border-left:3px solid #d97706;padding-left:10px;background:rgba(217,119,6,.06);border-radius:8px}
+.sla-overdue-count b{color:#b91c1c}
+.ticket-list-table td small{display:block;opacity:.7}
+[data-theme="dark"] .sla-pill.met{color:#86efac}
+[data-theme="dark"] .sla-pill.soon{color:#fcd34d}
+[data-theme="dark"] .sla-pill.overdue{color:#fca5a5}
