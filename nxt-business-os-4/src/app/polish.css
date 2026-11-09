@@ -377,3 +377,28 @@ select.cell-input{min-width:110px;cursor:pointer;appearance:none;-webkit-appeara
 @media(max-width:760px){.build-integration-row{grid-template-columns:1fr}}
 .nxt-os-banner{grid-column:1/-1;width:100%}
 .nxt-os-banner h2,.nxt-os-banner p,.nxt-os-banner strong,.nxt-os-banner-days span{color:#fff!important}.nxt-os-banner .eyebrow{color:#d9c8ff!important}
+
+/* Staff: My Profile, Overtime, Staff Profiles, Access Control */
+.my-profile-checks{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:6px}
+.my-profile-checks li{display:grid;grid-template-columns:auto auto 1fr;gap:8px;align-items:center;font-size:14px;color:#8a5a00}.my-profile-checks li.done{color:#1b6b3a}.my-profile-checks li small{opacity:.8;color:inherit}
+.my-docs{display:grid;gap:10px;margin-top:8px}
+.my-doc-row{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;padding:12px 14px;border:1px solid #eee8fb;border-radius:14px;background:#fff}
+.my-doc-row small{display:block;opacity:.7}.my-doc-row input[type=file]{display:none}
+@media(max-width:700px){.my-doc-row{grid-template-columns:1fr}}
+.overtime-decide{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.overtime-decide input{min-width:170px}
+.staff-board-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px}
+.staff-board-card{display:grid;gap:10px;padding:20px}.staff-board-card header{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.staff-board-card h3{margin:0}
+.staff-missing{display:flex;flex-wrap:wrap;gap:6px;margin:0}
+.staff-range{display:grid;gap:8px;border-top:1px solid #eee8fb;padding-top:10px}
+.access-list{display:grid;gap:12px}.access-card{padding:0;overflow:hidden}
+.access-head{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;width:100%;padding:16px 18px;background:transparent;border:0;text-align:left;cursor:pointer}
+.access-head small{display:block;opacity:.7}
+.access-avatar{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:#eee8fb;color:#4f2b92;font-weight:700}
+.access-group{padding:4px 18px 16px}.access-group h4{margin:10px 0 8px;font-size:13px;opacity:.75;text-transform:uppercase;letter-spacing:.06em}
+.access-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+.access-switch{display:flex;gap:10px;align-items:center;padding:10px 12px;border:1px solid #e3dcf5;border-radius:12px;cursor:pointer;background:#fff}
+.access-switch.on{background:#f3edff;border-color:#b9a0f0;font-weight:600}
+.access-search{display:grid;gap:6px;max-width:340px;margin-top:10px}
+.my-profile-progress{padding:22px;display:grid;gap:10px}
+.build-portal-toggle{display:flex!important;gap:10px;align-items:flex-start}.build-portal-toggle input{margin-top:3px;flex:none}
+.payroll-context{padding:16px 20px;display:grid;gap:6px;margin-bottom:14px}.payroll-context p{margin:0}

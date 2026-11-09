@@ -2,6 +2,7 @@ import {NextRequest,NextResponse} from 'next/server';
 import {createClient} from '@supabase/supabase-js';
 import {processFinanceOnboarding} from '@/lib/server/staff-onboarding';
 import {processStaffPasswordReset} from '@/lib/server/staff-password-reset';
+import {enqueueStaffReminders} from '@/lib/server/staff-reminders';
 export const dynamic='force-dynamic';
 export const maxDuration=60;
 export async function GET(req:NextRequest){
@@ -16,6 +17,7 @@ export async function GET(req:NextRequest){
  };
  const passwordReset=await processStaffPasswordReset(db,app,send);
  const onboarding=await processFinanceOnboarding(db,app,send);
+ const profileReminders=await enqueueStaffReminders(db,app).catch(()=>({queued:0,skipped:0,error:true}));
  const {data,error}=await db.from('notification_outbox').select('*').is('sent_at',null).lt('attempts',5).order('created_at').limit(25);
  if(error)return NextResponse.json({error:'Queue unavailable',onboarding,passwordReset},{status:500});
  let sent=0;
@@ -27,5 +29,5 @@ export async function GET(req:NextRequest){
    if(saved.error)throw new Error('Delivery status could not be saved');sent++;
   }catch(e){await db.from('notification_outbox').update({attempts:n.attempts+1,last_error:(e as Error).message}).eq('id',n.id).is('sent_at',null);}
  }
- return NextResponse.json({sent,checked:data?.length??0,onboarding,passwordReset});
+ return NextResponse.json({sent,checked:data?.length??0,onboarding,passwordReset,profileReminders});
 }
