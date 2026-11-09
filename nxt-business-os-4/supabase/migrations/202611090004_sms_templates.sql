@@ -14,6 +14,7 @@ create table if not exists public.sms_templates(
  archived_at timestamptz,
  unique(tenant_id,id)
 );
+alter table public.sms_templates add column if not exists archived_at timestamptz;
 create index if not exists sms_templates_tenant_idx on public.sms_templates(tenant_id,archived_at,name);
 alter table public.sms_templates enable row level security;
 revoke all on public.sms_templates from anon,authenticated;

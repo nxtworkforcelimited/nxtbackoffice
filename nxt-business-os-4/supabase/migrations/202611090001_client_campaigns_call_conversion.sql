@@ -40,6 +40,15 @@ create table if not exists public.client_campaigns(
  foreign key(tenant_id,client_id) references public.clients(tenant_id,id),
  check(end_date is null or start_date is null or end_date>=start_date)
 );
+-- If an older client_campaigns table already exists, bring it up to this shape (no-op when the columns are there).
+alter table public.client_campaigns
+ add column if not exists name text,add column if not exists objective text not null default '',add column if not exists channel text not null default '',
+ add column if not exists status text not null default 'planned',add column if not exists start_date date,add column if not exists end_date date,
+ add column if not exists budget numeric(14,2) not null default 0,add column if not exists currency text not null default 'USD',
+ add column if not exists target_leads integer,add column if not exists utm_campaign text not null default '',add column if not exists call_campaign text not null default '',
+ add column if not exists client_summary text not null default '',add column if not exists internal_notes text not null default '',
+ add column if not exists client_visible boolean not null default false,add column if not exists archived_at timestamptz,
+ add column if not exists created_by uuid,add column if not exists created_at timestamptz not null default now(),add column if not exists updated_at timestamptz not null default now();
 create index if not exists client_campaigns_client_idx on public.client_campaigns(tenant_id,client_id,created_at desc);
 alter table public.client_campaigns enable row level security;
 drop policy if exists client_campaigns_staff_read on public.client_campaigns;
