@@ -216,7 +216,7 @@ aside.studio-side.reference-side .reference-logo img{filter:none!important;backg
 .nxt-sheet-bar p{margin:0;font-size:13px;color:#777384}
 .nxt-sheet-tools{display:flex;gap:8px;align-items:center}
 .nxt-grid-wrap{max-height:62vh;overflow:auto;border-top:1px solid #e3e0ea;border-bottom:1px solid #e3e0ea;border-radius:0!important}
-.nxt-grid{border-collapse:separate;border-spacing:0;font-size:13px;min-width:2300px}
+.nxt-grid{border-collapse:separate;border-spacing:0;font-size:13px;min-width:2900px}
 .nxt-grid th,.nxt-grid td{border-right:1px solid #e3e0ea;border-bottom:1px solid #e3e0ea;padding:0;white-space:nowrap}
 .nxt-grid thead th{position:sticky;background:#f6f5fa;color:#5d5a6b;font-weight:600;font-size:12px;text-align:left;padding:7px 10px;z-index:2}
 .nxt-grid thead tr.nxt-letters th{top:0;text-align:center;font-size:11px;color:#8a8696;padding:3px 10px;background:#efedf6}
@@ -232,7 +232,9 @@ select.cell-input{min-width:110px;cursor:pointer;appearance:none;-webkit-appeara
 .nxt-grid td:nth-child(3) .cell-input{min-width:200px;font-weight:600}
 .nxt-grid td:nth-child(5) .cell-input{min-width:200px}
 .nxt-grid td:nth-child(6) .cell-input{min-width:170px}
-.nxt-grid td:nth-child(18) .cell-input{min-width:280px}
+.nxt-grid td:nth-child(20) .cell-input{min-width:280px}
+.nxt-grid td:nth-child(7) .cell-input,.nxt-grid td:nth-child(11) .cell-input{min-width:170px}
+.nxt-grid td:nth-child(8) .cell-input,.nxt-grid td:nth-child(12) .cell-input{min-width:200px}
 .nxt-grid-empty{padding:28px!important;text-align:center;color:#777384}
 .nxt-add-row td{border-bottom:0}
 .nxt-add-row button{margin:6px 8px;padding:5px 10px;border:1px dashed #c9c4de;border-radius:8px;background:transparent;color:#5b4fc7;font-size:12px;font-weight:600}
@@ -418,3 +420,5 @@ html[data-theme="dark"] .accounting-ask-form input,html[data-theme="dark"] .acco
 html[data-theme="dark"] .accounting-ask-chips button,html[data-theme="dark"] .accounting-ask-foot button,html[data-theme="dark"] .accounting-suggestion button{background:rgba(255,255,255,.08);color:inherit;border-color:rgba(255,255,255,.2)}
 .accounting-ledger .action-row button,.accounting-entry-grid .action-row button{display:inline-flex;gap:6px;align-items:center;padding:8px 14px;border-radius:999px;border:1px solid #d9cff3;background:#fff;cursor:pointer;font:inherit;font-size:13px}
 html[data-theme="dark"] .accounting-ledger .action-row button,html[data-theme="dark"] .accounting-entry-grid .action-row button{background:rgba(255,255,255,.08);color:inherit;border-color:rgba(255,255,255,.2)}
+
+.removed-businesses .panel-head{align-items:center}.removed-businesses table{width:100%}
