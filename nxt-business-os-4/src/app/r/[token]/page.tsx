@@ -29,7 +29,7 @@ export default async function ReceiptPage({params}:{params:Promise<{token:string
  const {token}=await params;
  const r=await find(token);
  const shell:React.CSSProperties={maxWidth:520,margin:'0 auto',padding:'48px 24px',fontFamily:'Montserrat,system-ui,sans-serif',color:'#0f172a'};
- if(!r)return <main style={{background:'#fff',minHeight:'100vh'}}><div style={shell}><h1 style={{fontSize:22}}>Receipt not found</h1><p>This link is not valid. Please contact NXT Workforce at hello@nxt-workforce.com and we will resend your receipt.</p></div></main>;
+ if(!r)return <main style={{background:'#fff',minHeight:'100vh'}}><div style={shell}><h1 style={{fontSize:22}}>Receipt not found</h1><p>This link is not valid. Please contact NXT Workforce at support@nxt-workforce.com and we will resend your receipt.</p></div></main>;
  const balance=Math.max(0,Math.round((Number(r.inv.total)-Number(r.inv.paid))*100)/100);
  const row:React.CSSProperties={display:'flex',justifyContent:'space-between',gap:16,padding:'12px 0',borderBottom:'1px solid #e2e8f0'};
  return <main style={{background:'#fff',minHeight:'100vh'}}><div style={shell}>
@@ -44,6 +44,6 @@ export default async function ReceiptPage({params}:{params:Promise<{token:string
   <div style={row}><span>Invoice total</span><span>{money(r.inv.currency,Number(r.inv.total))}</span></div>
   <div style={row}><span>Balance remaining</span><strong>{money(r.inv.currency,balance)}</strong></div>
   <p style={{marginTop:28}}>Thank you for your payment.</p>
-  <footer style={{fontSize:11,marginTop:56,opacity:.7,textAlign:'center'}}>{r.company} · hello@nxt-workforce.com · www.nxt-workforce.com</footer>
+  <footer style={{fontSize:11,marginTop:56,opacity:.7,textAlign:'center'}}>{r.company} · support@nxt-workforce.com · www.nxt-workforce.com</footer>
  </div></main>;
 }

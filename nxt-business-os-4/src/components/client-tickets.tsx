@@ -21,7 +21,7 @@ export default function ClientTickets({workspace,demo=false}:{workspace:Workspac
  }
  if(error&&!state)return <p className="notice error" role="alert">{error}</p>;
  if(!state)return <section className="panel"><p>Loading your support tickets…</p></section>;
- if(!state.enabled)return <section className="panel"><h2>Support tickets</h2><p>Support tickets are not switched on for your account yet. If you would like help with your website, hosting or email, contact NXT Workforce at hello@nxt-workforce.com.</p></section>;
+ if(!state.enabled)return <section className="panel"><h2>Support tickets</h2><p>Support tickets are not switched on for your account yet. If you would like help with your website, hosting or email, contact NXT Workforce at support@nxt-workforce.com.</p></section>;
  const current=state.tickets.find(t=>t.id===open);
  const thread=state.comments.filter(c=>c.ticket_id===open);
  const when=(v:string)=>new Date(v).toLocaleString('en-GB',{timeZone:'Africa/Harare',day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
