@@ -161,16 +161,23 @@ export async function POST(req:NextRequest){
    // One cell edited in the sheet view. Only these columns can be changed this way; status cannot be set to converted here
    // (converting is done by logging a call, which also creates the CRM deal).
    const textFields=['business_id','category','location_address','website_source','existing_system','contact_name','contact_method','person_spoken_to','interest_level','registration_status','integration_needed','follow_up_method','next_action','email','alt_phone'] as const;
-   const p=z.object({id,field:z.enum(['company','phone','status',...textFields]),value:z.string().max(5000)}).parse(b);
+   const p=z.object({id,field:z.enum(['company','phone','status','owner_id',...textFields]),value:z.string().max(5000)}).parse(b);
    let value:any=p.value.trim();
    if(p.field==='company'){if(!value)return reply({error:'Business name cannot be empty.'},400);if(value.length>200)return reply({error:'Business name is too long.'},400);}
    else if(p.field==='phone'){const n=normalisePhone(value);if(!(n.e164??value))return reply({error:'Contact number cannot be empty.'},400);value=n.e164??value;}
    else if(p.field==='status'){if(!statuses.includes(value as any)||value==='converted')return reply({error:'Choose a status. To convert a prospect, log the call as Converted.'},400);}
+   else if(p.field==='owner_id'){value=value||null;if(value&&!id.safeParse(value).success)return reply({error:'Choose a team member.'},400);}
    else if(p.field==='email'&&value&&!z.email().safeParse(value).success)return reply({error:'Enter a valid email address, or leave it blank.'},400);
    else if(p.field==='alt_phone'&&value.length>80)return reply({error:'The alternative number is too long.'},400);
    else if(value.length>500&&p.field!=='next_action')return reply({error:'That entry is too long.'},400);
    const upd:any={[p.field]:value};if(p.field==='next_action')upd.notes=value;
    const r=await c.db.from('cold_call_prospects').update(upd).eq('tenant_id',t).eq('id',p.id).select().single();if(r.error)throw r.error;return reply(r.data);
+  }
+  if(action==='mark_message_sent'){
+   // Records that a sign-up message went to this business, on which channel and when. It does not send anything.
+   const p=z.object({id,channel:z.enum(['whatsapp','sms','email'])}).parse(b);
+   const r=await c.db.from('cold_call_prospects').update({message_sent_at:new Date().toISOString(),message_channel:p.channel}).eq('tenant_id',t).eq('id',p.id).is('archived_at',null).select().maybeSingle();
+   if(r.error)throw r.error;if(!r.data)return reply({error:'That business was not found.'},404);return reply(r.data);
   }
   if(action==='archive_prospect'){
    // Removing hides a business from every list and queue. The record, its call history and its Business ID are kept and can be restored.

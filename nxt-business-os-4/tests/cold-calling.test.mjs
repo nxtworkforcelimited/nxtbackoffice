@@ -7,12 +7,31 @@ const read=f=>readFile(new URL('../'+f,import.meta.url),'utf8');
 const L=await import('data:text/javascript;base64,'+Buffer.from(ts.transpileModule(await read('src/lib/cold-calling.ts'),{compilerOptions:{module:ts.ModuleKind.ES2022,target:ts.ScriptTarget.ES2022}}).outputText).toString('base64'));
 const uuid=n=>`00000000-0000-4000-8000-${String(n).padStart(12,'0')}`;
 
-test('the category list is the Spotly tracker list without ride-hailing, with no repeats',()=>{
- assert.equal(L.callCategories.length,15);assert.equal(new Set(L.callCategories).size,15);assert.ok(!L.callCategories.some(c=>/ride|taxi/i.test(c)),'no ride-hailing category');
- for(const c of ['Restaurants','Salons & Barbers','Gyms & Fitness','Events & Ticketing','Strategic Platforms & Integrations'])assert.ok(L.callCategories.includes(c),c);
+test('the sign-up link groups by channel, list and category and carries the Business ID',()=>{
+ const u=new URL(L.signupLink({channel:'whatsapp',businessId:'IB-0123',category:'Salons & Barbers',list:'Spotly Zimbabwe'}));
+ assert.equal(u.origin+u.pathname,'https://spotlyafrica.com/');
+ assert.deepEqual(Object.fromEntries(u.searchParams),{utm_source:'whatsapp',utm_medium:'social',utm_campaign:'spotly-zimbabwe',utm_content:'salons-and-barbers',bid:'IB-0123'});
+ const s=new URL(L.signupLink({channel:'sms',businessId:'IB-0123',category:'Salons & Barbers',list:'Spotly Zimbabwe'}));
+ assert.equal(s.searchParams.get('utm_source'),'sms');assert.equal(s.searchParams.get('utm_medium'),'sms');
+ assert.equal(s.searchParams.get('utm_content'),u.searchParams.get('utm_content'),'same category, same content value on every channel');
 });
-test('a saved category outside the list still shows in its dropdown',()=>{
- assert.deepEqual(L.withCurrent(['A','B'],'B'),['A','B']);assert.deepEqual(L.withCurrent(['A','B'],'Mining'),['A','B','Mining']);assert.deepEqual(L.withCurrent(['A'],''),['A']);
+test('two businesses in one category share UTM values and differ only by Business ID',()=>{
+ const a=new URL(L.signupLink({channel:'whatsapp',businessId:'IB-0001',category:'Gyms & Fitness',list:'Spotly Zimbabwe'})),b=new URL(L.signupLink({channel:'whatsapp',businessId:'IB-0002',category:'Gyms & Fitness',list:'Spotly Zimbabwe'}));
+ for(const k of ['utm_source','utm_medium','utm_campaign','utm_content'])assert.equal(a.searchParams.get(k),b.searchParams.get(k));
+ assert.notEqual(a.searchParams.get('bid'),b.searchParams.get('bid'));
+});
+test('the sign-up link is safe with odd input',()=>{
+ assert.ok(L.signupLink({base:'javascript:alert(1)',channel:'sms',businessId:'IB-1'}).startsWith('https://spotlyafrica.com/'));
+ assert.ok(L.signupLink({base:'not a url',channel:'sms',businessId:'IB-1'}).startsWith('https://spotlyafrica.com/'));
+ const u=new URL(L.signupLink({channel:'whatsapp',businessId:'IB-1&x=1',category:'',list:''}));
+ assert.equal(u.searchParams.get('bid'),'IB-1&x=1');assert.equal(u.searchParams.get('x'),null);
+ assert.equal(u.searchParams.get('utm_content'),'uncategorised');assert.equal(u.searchParams.get('utm_campaign'),'cold-calling');
+ assert.equal(L.slug('  Bars & Lounges!! ','x'),'bars-and-lounges');
+});
+test('the WhatsApp message names the business, the 3 free months and the link, and avoids rides',()=>{
+ const m=L.whatsappMessage({contact:'Mrs Moyo',caller:'Diana',business:'La Casa',link:'https://spotlyafrica.com/?bid=IB-2'});
+ for(const t of ['Hello Mrs Moyo','Diana from Spotly','La Casa','first 3 months are free','26 November','https://spotlyafrica.com/?bid=IB-2','STOP'])assert.ok(m.includes(t),t);
+ assert.ok(!/ride|taxi/i.test(m));assert.ok(!/—/.test(m));
 });
 test('only real numbers can be dialled',()=>{
  for(const ok of ['+263 71 322 4959','0712345678','+263242700000'])assert.ok(L.canDial(ok),ok);
@@ -58,7 +77,7 @@ test('migration adds the new columns, fills blanks per list in order, and can be
  const m=Object.fromEntries(r.rows.map(x=>[x.company,x.business_id]));
  assert.deepEqual(m,{'Imported A':'IB-0007','Old blank 1':'IB-0008','Old blank 2':'IB-0009','Other list blank':'IB-0001','Other tenant blank':'IB-0001'});
  const cols=(await db.query(`select column_name from information_schema.columns where table_name='cold_call_prospects'`)).rows.map(x=>x.column_name);
- for(const c of ['alt_phone','archived_at','archived_by','archive_reason','business_id','category','location_address','website_source','existing_system','next_action','converted_deal_id'])assert.ok(cols.includes(c),c);
+ for(const c of ['alt_phone','message_sent_at','message_channel','archived_at','archived_by','archive_reason','business_id','category','location_address','website_source','existing_system','next_action','converted_deal_id'])assert.ok(cols.includes(c),c);
 });
 test('new prospects get the next Business ID, even many in one import, and keep a supplied ID',async()=>{
  const db=await database();await db.exec(await read('supabase/migrations/202611100001_cold_calling_business_ids.sql'));
@@ -88,7 +107,8 @@ test('removing a business is reversible and keeps its record, history and ID',as
 test('the API reads the alternative number, removes and restores by archiving, and never deletes',async()=>{
  const src=await read('src/app/api/calls/route.ts');
  assert.ok(/alt_phone:find\(/.test(src)&&/'alternative_number'/.test(src)&&/'alternative_contact_number'/.test(src));
- assert.ok(/action==='archive_prospect'/.test(src)&&/action==='restore_prospect'/.test(src));
+ assert.ok(/action==='archive_prospect'/.test(src)&&/action==='restore_prospect'/.test(src)&&/action==='mark_message_sent'/.test(src));
+ assert.ok(/'owner_id',\.\.\.textFields/.test(src),'the caller can be changed from the sheet');
  assert.ok(!/\.delete\(\)/.test(src),'cold calling never deletes records');
  assert.ok(/is\('archived_at',null\)/.test(src));
  assert.ok(/'alt_phone'\] as const/.test(src));

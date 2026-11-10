@@ -422,3 +422,4 @@ html[data-theme="dark"] .accounting-ask-chips button,html[data-theme="dark"] .ac
 html[data-theme="dark"] .accounting-ledger .action-row button,html[data-theme="dark"] .accounting-entry-grid .action-row button{background:rgba(255,255,255,.08);color:inherit;border-color:rgba(255,255,255,.2)}
 
 .removed-businesses .panel-head{align-items:center}.removed-businesses table{width:100%}
+.signup-message{display:grid;gap:10px;margin:14px 0;padding:16px;border:1px solid #e3e0ea;border-radius:14px}.signup-message textarea{width:100%;resize:vertical}.signup-message label{display:grid;gap:4px}[data-theme="dark"] .signup-message{border-color:rgba(175,169,236,.18)}

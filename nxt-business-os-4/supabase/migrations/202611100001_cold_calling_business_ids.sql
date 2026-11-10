@@ -1,4 +1,4 @@
--- Cold Calling: automatic Business IDs, alternative number, and remove-with-restore.
+-- Cold Calling: automatic Business IDs, alternative number, message-sent tracking, and remove-with-restore.
 -- Safe to run more than once. Nothing is deleted. Existing rows keep their values.
 begin;
 
@@ -19,9 +19,11 @@ alter table public.cold_call_prospects
  add column if not exists converted_deal_id uuid,
  add column if not exists converted_at timestamptz;
 
--- New: alternative contact number, and removal that can be undone.
+-- New: alternative contact number, which message was sent and when, and removal that can be undone.
 alter table public.cold_call_prospects
  add column if not exists alt_phone text not null default '' check(length(alt_phone)<=80),
+ add column if not exists message_sent_at timestamptz,
+ add column if not exists message_channel text not null default '' check(length(message_channel)<=20),
  add column if not exists archived_at timestamptz,
  add column if not exists archived_by uuid,
  add column if not exists archive_reason text not null default '' check(length(archive_reason)<=500);
