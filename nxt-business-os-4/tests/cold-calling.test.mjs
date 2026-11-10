@@ -107,9 +107,33 @@ test('removing a business is reversible and keeps its record, history and ID',as
 test('the API reads the alternative number, removes and restores by archiving, and never deletes',async()=>{
  const src=await read('src/app/api/calls/route.ts');
  assert.ok(/alt_phone:find\(/.test(src)&&/'alternative_number'/.test(src)&&/'alternative_contact_number'/.test(src));
- assert.ok(/action==='archive_prospect'/.test(src)&&/action==='restore_prospect'/.test(src)&&/action==='mark_message_sent'/.test(src));
+ assert.ok(/action==='archive_prospect'/.test(src)&&/action==='restore_prospect'/.test(src)&&/action==='mark_message_sent'/.test(src)&&/action==='archive_list'/.test(src)&&/action==='restore_list'/.test(src));
  assert.ok(/'owner_id',\.\.\.textFields/.test(src),'the caller can be changed from the sheet');
  assert.ok(!/\.delete\(\)/.test(src),'cold calling never deletes records');
  assert.ok(/is\('archived_at',null\)/.test(src));
  assert.ok(/'alt_phone'\] as const/.test(src));
+});
+
+test('archiving and restoring a whole list touches only that client and list',async()=>{
+ const db=await database();await db.exec(await read('supabase/migrations/202611100001_cold_calling_business_ids.sql'));
+ await db.exec(`insert into clients(id,tenant_id,title) values('${uuid(20)}','${uuid(10)}','Client A')`);
+ await db.exec(`insert into cold_call_prospects(tenant_id,campaign,company,phone,target_type,client_id) values
+  ('${uuid(10)}','Kaguvi Go','K1','+263 71 000 0001','nxt',null),('${uuid(10)}','Kaguvi Go','K2','+263 71 000 0002','nxt',null),
+  ('${uuid(10)}','Kaguvi Go','C1','+263 71 000 0003','client','${uuid(20)}'),('${uuid(10)}','Spotly Zimbabwe','S1','+263 71 000 0004','client','${uuid(20)}')`);
+ const hide=`update cold_call_prospects set archived_at=now() where tenant_id='${uuid(10)}' and target_type='nxt' and campaign='Kaguvi Go' and client_id is null and archived_at is null`;
+ await db.exec(hide);
+ const live=(await db.query(`select company from cold_call_prospects where archived_at is null order by company`)).rows.map(r=>r.company);
+ assert.deepEqual(live,['C1','S1'],'same list name for another client is untouched');
+ await db.exec(`update cold_call_prospects set archived_at=null where tenant_id='${uuid(10)}' and target_type='nxt' and campaign='Kaguvi Go' and client_id is null and archived_at is not null`);
+ assert.equal((await db.query(`select count(*)::int c from cold_call_prospects where archived_at is null`)).rows[0].c,4);
+});
+test('the sheet shows one client at a time, with a tab per client and uploads aimed at that client',async()=>{
+ const ui=await read('src/components/cold-calling.tsx');
+ assert.ok(/client-switcher/.test(ui)&&/openClient/.test(ui));
+ assert.ok(!/useState\('all'\),\[campaignFilter/.test(ui),'it no longer opens on every client mixed together');
+ assert.ok(/Upload CSV for /.test(ui));
+ assert.ok(/lists\.filter\(l=>l\.client===clientFilter\)/.test(ui),'list tabs belong to the chosen client');
+});
+test('long lists are read in pages so none are cut off at 1,000 rows',async()=>{
+ const src=await read('src/app/api/calls/route.ts');assert.ok(/pageProspects/.test(src)&&/range\(from,from\+999\)/.test(src));
 });

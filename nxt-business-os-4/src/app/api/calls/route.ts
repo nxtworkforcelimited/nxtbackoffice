@@ -105,6 +105,16 @@ async function insertWithoutDuplicates(c:any,t:string,rows:any[]){
  const r=await c.db.from('cold_call_prospects').insert(fresh).select('id');if(r.error)throw r.error;
  return {imported:r.data.length,duplicates,duplicates_in_file:duplicatesInFile};
 }
+// The database returns at most 1,000 rows per request, so lists are read in pages. Without this a long list would silently lose rows.
+async function pageProspects(c:any,t:string){
+ const all:any[]=[];
+ for(let from=0;from<5000;from+=1000){
+  const r=await c.db.from('cold_call_prospects').select('*').eq('tenant_id',t).is('archived_at',null).order('updated_at',{ascending:false}).order('id').range(from,from+999);
+  if(r.error)return {data:null,error:r.error};
+  all.push(...r.data);if(r.data.length<1000)break;
+ }
+ return {data:all,error:null};
+}
 export async function GET(req:NextRequest){
  try{
   const c=await context(req.nextUrl.searchParams.get('workspace'));if(!c?.workspace||c.workspace.role==='client')return reply({error:'Staff access required'},403);
@@ -112,8 +122,8 @@ export async function GET(req:NextRequest){
   const start=new Date(date+'T00:00:00.000Z');start.setUTCMinutes(start.getUTCMinutes()-offset);
   const end=new Date(start);end.setUTCDate(end.getUTCDate()+1);
   const [prospects,removed,activities,recentActivities,clients,staff]=await Promise.all([
-   c.db.from('cold_call_prospects').select('*').eq('tenant_id',t).is('archived_at',null).order('updated_at',{ascending:false}).limit(1000),
-   c.db.from('cold_call_prospects').select('id,business_id,company,category,phone,campaign,target_type,client_id,archived_at,archive_reason').eq('tenant_id',t).not('archived_at','is',null).order('archived_at',{ascending:false}).limit(200),
+   pageProspects(c,t),
+   c.db.from('cold_call_prospects').select('id,business_id,company,category,phone,campaign,target_type,client_id,archived_at,archive_reason').eq('tenant_id',t).not('archived_at','is',null).order('archived_at',{ascending:false}).limit(1000),
    c.db.from('cold_call_activities').select('*').eq('tenant_id',t).gte('called_at',start.toISOString()).lt('called_at',end.toISOString()).order('called_at',{ascending:false}).limit(2000),
    c.db.from('cold_call_activities').select('*').eq('tenant_id',t).order('called_at',{ascending:false}).limit(5000),
    c.db.from('clients').select('id,title').eq('tenant_id',t).is('archived_at',null).order('title'),
@@ -178,6 +188,16 @@ export async function POST(req:NextRequest){
    const p=z.object({id,channel:z.enum(['whatsapp','sms','email'])}).parse(b);
    const r=await c.db.from('cold_call_prospects').update({message_sent_at:new Date().toISOString(),message_channel:p.channel}).eq('tenant_id',t).eq('id',p.id).is('archived_at',null).select().maybeSingle();
    if(r.error)throw r.error;if(!r.data)return reply({error:'That business was not found.'},404);return reply(r.data);
+  }
+  if(action==='archive_list'||action==='restore_list'){
+   // A whole list (one client or NXT, one list name) is hidden or brought back in one step. Nothing is deleted.
+   const p=z.object({target_type:z.enum(['nxt','client']),client_id:id.nullable().optional(),campaign:z.string().max(160).default('')}).parse(b);
+   if(p.target_type==='client'&&!p.client_id)return reply({error:'Choose the client for this list.'},400);
+   const archiving=action==='archive_list';
+   let q=c.db.from('cold_call_prospects').update(archiving?{archived_at:new Date().toISOString(),archived_by:c.user.id,archive_reason:'List removed'}:{archived_at:null,archived_by:null,archive_reason:''}).eq('tenant_id',t).eq('target_type',p.target_type).eq('campaign',p.campaign);
+   q=p.target_type==='client'?q.eq('client_id',p.client_id):q.is('client_id',null);
+   q=archiving?q.is('archived_at',null):q.not('archived_at','is',null);
+   const r=await q.select('id');if(r.error)throw r.error;return reply({count:r.data.length});
   }
   if(action==='archive_prospect'){
    // Removing hides a business from every list and queue. The record, its call history and its Business ID are kept and can be restored.
