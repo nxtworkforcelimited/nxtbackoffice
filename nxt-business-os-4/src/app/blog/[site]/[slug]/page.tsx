@@ -29,7 +29,7 @@ export default async function BlogPost({params}:P){
    <p style={{opacity:.65,margin:'0 0 28px',fontSize:14}}>{[post.author,date].filter(Boolean).join(' · ')}</p>
    {post.image&&<img src={post.image} alt={post.image_alt} style={{width:'100%',height:'auto',borderRadius:16,margin:'0 0 32px'}}/>}
    <div className="blog-body" dangerouslySetInnerHTML={{__html:post.html}}/>
-   <footer style={{fontSize:12,opacity:.6,marginTop:64,borderTop:'1px solid #e2e8f0',paddingTop:16}}>{s.name} · hello@nxt-workforce.com · www.nxt-workforce.com</footer>
+   <footer style={{fontSize:12,opacity:.6,marginTop:64,borderTop:'1px solid #e2e8f0',paddingTop:16}}>{s.name} · support@nxt-workforce.com · www.nxt-workforce.com</footer>
   </article>
  </main>;
 }

@@ -27,6 +27,6 @@ export default function LoginForm({ready,error}:{ready:boolean;error?:string}) {
       </label>
       <button className={styles.submit}>Sign in</button>
     </form>
-    <a className={styles.forgot} href="mailto:hello@nxt-workforce.com?subject=NXT%20Business%20OS%20password%20reset">Forgot password?</a>
+    <a className={styles.forgot} href="mailto:support@nxt-workforce.com?subject=NXT%20Business%20OS%20password%20reset">Forgot password?</a>
   </>;
 }
