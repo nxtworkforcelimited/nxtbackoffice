@@ -63,7 +63,8 @@ export async function POST(req:NextRequest){
  const mine=await db.from('employees').select('id').eq('tenant_id',t).eq('user_id',c.user.id).maybeSingle();
  if(raw?.action==='save'){
   const p=save.safeParse(raw);if(!p.success)return reply({error:'Check the details you entered.'},400);
-  const {employee_id,licence_expiry,...rest}=p.data;
+  // "action" is the request type, not an employees column: leaving it in the update makes PostgREST reject the save (PGRST204).
+  const {action:_action,employee_id,licence_expiry,...rest}=p.data;
   const target=employee_id??mine.data?.id;
   if(!target)return reply({error:'Your staff record is not set up yet. Ask NXT management to add you under Staff.'},400);
   if(target!==mine.data?.id&&!hr)return reply({error:'You can only update your own profile.'},403);
