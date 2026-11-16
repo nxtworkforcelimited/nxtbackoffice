@@ -2,7 +2,7 @@ import {NextRequest} from 'next/server';
 import {z} from 'zod';
 import {context} from '@/lib/context';
 import {trustedRequest} from '@/lib/request-origin';
-import {sopPlanSchema,validateSopPlan} from '@/lib/sop-workflow';
+import {sopPlanSchema,validateSopPlan,sopValidationMessage} from '@/lib/sop-workflow';
 import {previewToken,verifyPreview} from '@/lib/server/tracker-preview';
 export const dynamic='force-dynamic';
 const reply=(v:unknown,status=200)=>Response.json(v,{status,headers:{'Cache-Control':'private, no-store',Vary:'Cookie'}});
@@ -28,5 +28,5 @@ export async function POST(req:NextRequest){
    const r=await c.db.rpc('archive_tracker_records',{t,records:rows,restore:b.action==='restore'});return reply(r.error?{error:r.error.message}:r.data,r.error?409:200);
   }
   return reply({error:'Unknown workflow action.'},422);
- }catch(e){return reply({error:e instanceof Error?e.message:'Workflow request failed.'},422);}
+ }catch(e){return reply({error:sopValidationMessage(e)},422);}
 }
