@@ -6,6 +6,8 @@ import {z} from 'zod';
 import type {TrackerSnapshot,TrackerProject} from '@/lib/master-tracker';
 import {masterTrackerResponse,masterTrackerWrite} from '@/lib/server/master-tracker';
 
+import {sopSnapshot} from '@/lib/server/sop-workflow';
+
 export const dynamic = 'force-dynamic';
 export async function GET(request: NextRequest) {
   if (!configured()) return Response.json({error: 'Workspace connection is unavailable.'}, {status: 503, headers: {'Cache-Control': 'private, no-store'}});
@@ -22,7 +24,9 @@ export async function GET(request: NextRequest) {
     let snapshot:TrackerSnapshot;
     if(response.ok)snapshot=await response.json();
     else snapshot={version:1,checkedAt:new Date().toISOString(),complete:false,projects:c.workspace.id===process.env.MASTER_TRACKER_WORKSPACE_ID?['Pack Easy','Kavi.R','Digital Safety Nest'].map((name,i)=>({id:['packeasy','kavir','cyber'][i],name,available:false,checkedAt:null,error:'Source tracker could not refresh.'})):[]};
-    snapshot.projects.push(...native.data as TrackerProject[]);snapshot.complete=snapshot.projects.every(p=>p.available);
+    const sop=await sopSnapshot(c);snapshot.sop={staff:sop.staff,currentUserId:sop.currentUserId,canManage:sop.canManage,archives:sop.archives};snapshot.projects.push(...sop.projects);
+    snapshot.projects.push(...native.data as TrackerProject[]);
+    snapshot.projects=snapshot.projects.map(p=>({...p,data:p.data?{...p.data,tasks:p.data.tasks.map(r=>({...r,archivedAt:sop.archives.find(a=>a.project===p.id&&a.id===r.id)?.archivedAt}))}:p.data}));snapshot.complete=snapshot.projects.every(p=>p.available);
     return Response.json(snapshot,{headers:{'Cache-Control':'private, no-store',Vary:'Cookie'}});
   } catch {
     return Response.json({error: 'Access could not be verified. Please retry.'}, {status: 503, headers: {'Cache-Control': 'private, no-store'}});

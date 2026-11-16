@@ -1,0 +1,37 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises';import {PGlite} from '@electric-sql/pglite';import {randomUUID} from 'node:crypto';import ts from 'typescript';
+const id=n=>`00000000-0000-4000-8000-${String(n).padStart(12,'0')}`;
+test('SOP lifecycle enforces ownership, approval, dependencies and tenant isolation',async()=>{const db=new PGlite();try{
+ await db.exec(`create role service_role;create role anon;create role authenticated;create schema auth;create schema storage;create table auth.users(id uuid primary key,email text);create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;grant usage on schema auth,public,storage to authenticated,service_role;grant execute on function auth.uid() to authenticated,service_role;create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);create table storage.objects(id uuid default gen_random_uuid(),bucket_id text,name text);alter table storage.objects enable row level security;grant select,insert,delete on storage.objects to authenticated;`);
+ for(const p of ['migrations/202610140001_foundation.sql','migrations/202610160001_business_workspace.sql','migrations/202610180001_collaboration.sql','migrations/202610200001_people_messages.sql','upgrade-team-operations.sql','upgrade-finance-access.sql','upgrade-project-task-files.sql','migrations/202610210002_payroll_periods_admin.sql','migrations/202610210004_workflow.sql','migrations/202610220003_direct_task_kanban.sql','migrations/202610220007_direct_projects_no_approval.sql'])await db.exec((await readFile(new URL('../supabase/'+p,import.meta.url),'utf8')).replace('create extension if not exists pgcrypto;',''));
+ await db.exec(`alter table public.deals add column lead_source text;alter table public.clients add column phone text;insert into auth.users values('${id(1)}','owner@test.invalid'),('${id(2)}','staff@test.invalid'),('${id(3)}','client@test.invalid'),('${id(4)}','other@test.invalid');insert into tenants(id,name,slug) values('${id(10)}','A','a'),('${id(11)}','B','b');insert into clients(id,tenant_id,title) values('${id(20)}','${id(10)}','Existing client');insert into memberships(tenant_id,user_id,role,client_id) values('${id(10)}','${id(1)}','owner',null),('${id(10)}','${id(2)}','staff',null),('${id(10)}','${id(3)}','client','${id(20)}'),('${id(11)}','${id(4)}','owner',null);insert into staff_directory(tenant_id,user_id,name,email) values('${id(10)}','${id(1)}','Owner','owner@test.invalid'),('${id(10)}','${id(2)}','Staff','staff@test.invalid');`);
+ await db.exec(await readFile(new URL('../supabase/upgrade-sop-workflow.sql',import.meta.url),'utf8'));
+ const as=async n=>db.exec(`reset role;set role authenticated;select set_config('request.jwt.claim.sub','${id(n)}',false);`);
+ await db.exec([5,6,7,8].map(n=>`insert into auth.users values('${id(n)}','staff${n}@test.invalid');insert into memberships(tenant_id,user_id,role) values('${id(10)}','${id(n)}','staff');insert into staff_directory(tenant_id,user_id,name,email) values('${id(10)}','${id(n)}','Staff ${n}','staff${n}@test.invalid');`).join(''));
+ const roles={nyasha:id(1),kristian:id(8),bridget:id(5),adrian:id(6),tatenda:id(7),michael:id(2)};
+ // Finance tasks need a distinct reviewer; all template owner/reviewer pairs stay independent.
+ const source=(await readFile(new URL('../src/lib/sop-workflow.ts',import.meta.url),'utf8')).replace("import {z} from 'zod';",'').split('export const sopStatuses')[0];
+ const {sopSteps}=await import('data:text/javascript;base64,'+Buffer.from(ts.transpileModule(source,{compilerOptions:{module:99}}).outputText).toString('base64'));
+ const plan={clientId:null,clientName:'SOP client',clientPhone:'+263770000000',clientEmail:'',brief:'Client requires a website and backoffice.',leadSource:'Referral',service:'web',roles,dates:Object.fromEntries(sopSteps.map(s=>[s.key,{due:'2026-12-01',clientDue:null}]))};
+ const create=(v=plan,key=randomUUID())=>db.query('select create_sop_workflow($1,$2,$3) r',[id(10),key,JSON.stringify(v)]).then(x=>x.rows[0].r);
+ await as(1);const request=randomUUID();const saved=await create(plan,request);assert.equal((await create(plan,request)).run_id,saved.run_id);await assert.rejects(create(),/already has/);
+ let rows=(await db.query('select * from sop_tasks where run_id=$1',[saved.run_id])).rows;assert.equal(rows.length,19);assert.ok(rows.every(r=>r.status==='Not Started'));assert.equal(rows.find(r=>r.key==='quote').owner_id,id(8));
+ const intake=rows.find(r=>r.key==='intake'),research=rows.find(r=>r.key==='research');
+ const update=async(task,changes)=>{let v=(await db.query('select version from sop_tasks where id=$1',[task.id])).rows[0].version;return db.query('select update_sop_task($1,$2,$3,$4)',[id(10),task.id,v,JSON.stringify(changes)]);};
+ await assert.rejects(update(research,{status:'In Progress'}),/prerequisite/);
+ await assert.rejects(update(intake,{status:'Waiting on Client',followUp:'',nextAction:''}),/follow-up/);
+ await assert.rejects(update(intake,{status:'Blocked',blocker:'Missing asset',nextAction:'',followUp:''}),/next action/);
+ await update(intake,{status:'Waiting on Client',nextAction:'Request client details',followUp:'2026-11-20'});
+ await update(intake,{status:'In Progress'});await update(intake,{status:'Under Review'});
+ await assert.rejects(update(intake,{status:'Completed',approvalEvidence:'Reviewed'}),/independent reviewer/);
+ await as(2);await assert.rejects(update(intake,{status:'Completed',approvalEvidence:'Reviewed'}),/acceptance checks/);
+ await update(intake,{status:'Completed',checks:intake.checks.map(c=>({...c,done:true})),evidence:'CRM and meeting notes',approvalEvidence:'Michael reviewed record'});
+ assert.equal((await db.query('select approved_by from sop_tasks where id=$1',[intake.id])).rows[0].approved_by,id(2));
+ await as(1);await update(research,{status:'In Progress'});await assert.rejects(update(intake,{status:'Not Started',notes:'Reopen'}),/dependent work/);
+ await assert.rejects(db.query('select update_sop_task($1,$2,1,$3)',[id(10),intake.id,JSON.stringify({notes:'stale'})]),/Task changed/);
+ await assert.rejects(update(research,{due:'2026-12-02'}),/reason/);
+ await db.query('select archive_tracker_records($1,$2)',[id(10),JSON.stringify([{project:'sop:'+saved.run_id,id:intake.id}])]);assert.equal((await db.query('select * from tracker_archives')).rows.length,1);assert.equal((await db.query('select * from sop_tasks')).rows.length,19);
+ await db.query('select archive_tracker_records($1,$2,true)',[id(10),JSON.stringify([{project:'sop:'+saved.run_id,id:intake.id}])]);assert.equal((await db.query('select * from tracker_archives')).rows.length,0);
+ await as(3);for(const table of ['sop_runs','sop_tasks','tracker_archives'])assert.equal((await db.query('select * from '+table)).rows.length,0);await assert.rejects(create(),/management access/);
+ await as(4);assert.equal((await db.query('select * from sop_tasks')).rows.length,0);await assert.rejects(create(),/management access/);
+ await as(2);await assert.rejects(create({...plan,clientName:'Unauthorised'}),/management access/);
+ }finally{await db.close();}});
