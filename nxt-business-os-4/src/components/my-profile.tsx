@@ -39,7 +39,8 @@ export default function MyProfile({workspace,demo=false,onChanged}:{workspace:Wo
    if(file.size===0||file.size>max)throw Error('Choose a file up to '+Math.round(max/1048576)+' MB.');
    const peopleBase='/api/people?workspace='+workspace.id+'&area=employees';
    const own=await fetch(peopleBase,{cache:'no-store'}),ob=await own.json();
-   const me=(ob.employees??[])[0];if(!own.ok||!me)throw Error('Your staff record could not be found.');
+   // People admins receive every employee here, so pick the signed-in person's own record rather than the first row.
+   const me=((ob.employees??[]) as {id:string;user_id?:string|null}[]).find(e=>e.user_id===ob.user_id);if(!own.ok||!me)throw Error('Your staff record could not be found.');
    const res=await fetch(peopleBase,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'file',employee_id:me.id,name:file.name.slice(0,200),category})}),row=await res.json();
    if(!res.ok)throw Error(row.error||'Could not prepare the upload.');
    const db=createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!,process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!);
