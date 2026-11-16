@@ -53,6 +53,21 @@ test('server rules: who may log, approve, set ranges, remind and change menus',a
  assert.match(d,/v==='access_control'\?workspace\.role==='owner'/);assert.match(d,/!hiddenApps\.includes\(v\)/);assert.match(d,/staff_profiles:'hr'/);
  assert.match(n,/enqueueStaffReminders/);
 });
+test('profile save only sends real employees columns to the database',async()=>{
+ const sp=await read('src/app/api/staff-profile/route.ts');
+ const cols=new Set(sp.match(/const profileCols='([^']*)'/)[1].split(','));
+ const keys=[...sp.match(/const save=z\.object\(\{(.*?)\}\)\.strict\(\)/)[1].matchAll(/(\w+):(?:z\.|text\()/g)].map(m=>m[1]);
+ const stripped=sp.match(/const \{([^}]*?)\.\.\.rest\}=p\.data/)[1].split(',').map(s=>s.split(':')[0].trim()).filter(Boolean);
+ assert.ok(stripped.includes('action'),'"action" must be removed before the update');
+ for(const k of keys)if(!stripped.includes(k))assert.ok(cols.has(k),k+' would be sent to employees but is not a profile column');
+});
+test('every document type the app offers is allowed by the employee_files check',async()=>{
+ const people=await read('src/app/api/people/route.ts'),mine=await read('src/components/my-profile.tsx');
+ const fix=await read('supabase/migrations/202611160001_employee_files_app_categories.sql');
+ const allowed=new Set([...fix.match(/category in \(([^)]*)\)/)[1].matchAll(/'([^']+)'/g)].map(m=>m[1]));
+ const sent=[...people.match(/category:z\.enum\(\[([^\]]*)\]\)/)[1].matchAll(/'([^']+)'/g),...mine.matchAll(/\{category:'([^']+)'/g)].map(m=>m[1]);
+ for(const c of sent)assert.ok(allowed.has(c),c+' is offered in the app but rejected by the database');
+});
 test('reminders: one per person per week, none when complete, paused or without an email',async()=>{
  const R=await import(await js('src/lib/server/staff-reminders.ts',{"'@/lib/staff-profile'":`'${await js('src/lib/staff-profile.ts')}'`}));
  const tables={
