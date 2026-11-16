@@ -31,3 +31,17 @@ export type SopPlan=z.infer<typeof sopPlanSchema>;
 export function stepsFor(service:string){const steps=sopSteps.filter(s=>!s.service||s.service===service);const keys=new Set(steps.map(s=>s.key));return steps.map(s=>({...s,after:s.after.filter(k=>keys.has(k))}));}
 export function businessDayAfter(start:string,count:number){const d=new Date(start+'T12:00:00Z');while(count>0){d.setUTCDate(d.getUTCDate()+1);if(![0,6].includes(d.getUTCDay()))count--;}return d.toISOString().slice(0,10);}
 export function validateSopPlan(plan:SopPlan){const steps=stepsFor(plan.service);if(!plan.clientId&&plan.clientPhone.replace(/\D/g,'').length<6)throw Error('Enter a company phone number with at least six digits for a new client.');for(const s of steps){const dates=plan.dates[s.key];if(!dates)throw Error('Set a deadline for '+s.title);if(dates.clientDue&&dates.due>dates.clientDue)throw Error('Internal deadline must be on or before client deadline.');if(plan.roles[s.owner]===plan.roles[s.reviewer])throw Error('Task owner and reviewer must be different people.');for(const k of s.after){if(plan.dates[k]?.due>dates.due)throw Error('A dependency deadline falls after '+s.title);}}return steps;}
+
+export function sopValidationMessage(error:unknown):string {
+ if(!(error instanceof z.ZodError))return error instanceof Error?error.message:'Check the workflow and try again.';
+ return [...new Set(error.issues.map(issue=>{
+ const [field,key]=issue.path;
+ if(field==='brief')return 'Describe the client’s needs in at least 10 characters in Client mention / confirmed brief.';
+ if(field==='clientName')return 'Enter the potential client name or select an existing client.';
+ if(field==='clientEmail')return 'Enter a valid company email or leave it blank.';
+ if(field==='leadSource')return 'Enter a lead source.';
+ if(field==='roles')return 'Choose a staff account for '+(sopRoles[key as SopRole]||'every team role')+'.';
+ if(field==='dates')return 'Set a valid internal deadline for '+(sopSteps.find(s=>s.key===key)?.title||'each task')+'; use Suggest working-day deadlines to fill the plan.';
+ return 'Check the workflow fields and try again.';
+ }))].join(' ');
+}
