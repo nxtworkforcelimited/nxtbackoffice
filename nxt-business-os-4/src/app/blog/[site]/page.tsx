@@ -12,7 +12,7 @@ export async function generateMetadata({params}:P):Promise<Metadata>{
 export default async function BlogIndex({params}:P){
  const {site}=await params,r=await listPosts(site,null,1,30);
  if('error' in r)notFound();
- return <main style={{background:'#fff',minHeight:'100vh',color:'#0f172a',fontFamily:'Montserrat,system-ui,sans-serif'}}>
+ return <main style={{background:'#fff',minHeight:'100vh',color:'#0f172a',fontFamily:"'Montserrat Variable',Montserrat,system-ui,sans-serif"}}>
   <section style={{maxWidth:760,margin:'0 auto',padding:'48px 20px 72px'}}>
    <h1 style={{fontSize:'clamp(28px,5vw,40px)',margin:'0 0 28px'}}>{r.site.name} Blog</h1>
    {r.posts.map(p=><article key={p.slug} style={{margin:'0 0 32px'}}>
