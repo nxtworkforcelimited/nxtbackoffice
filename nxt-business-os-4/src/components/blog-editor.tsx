@@ -10,6 +10,8 @@ type Post=PostLike&{
  status:'draft'|'review'|'published'|'archived';publish_at:string|null;published_at?:string|null;updated_at?:string;
 };
 type Client={id:string;title:string};
+const checkField:Record<string,string>={title:'meta_title',kw_title:'meta_title',description:'meta_description',kw_desc:'meta_description',h1:'h1',kw_h1:'h1',slug:'slug',kw_slug:'slug',excerpt:'excerpt',keyword:'focus_keyword',canonical:'canonical_url'};
+function jumpTo(field:string){const el=document.getElementById('blog-f-'+field);if(!el)return;el.scrollIntoView({behavior:'smooth',block:'center'});window.setTimeout(()=>(el as HTMLElement).focus({preventScroll:true}),350);}
 const blank:Post={title:'',slug:'',h1:'',excerpt:'',body:'',focus_keyword:'',hero_path:null,hero_alt:'',og_image_path:null,meta_title:'',meta_description:'',canonical_url:'',client_id:null,category:'',tags:[],author_name:'',status:'draft',publish_at:null};
 const sample:Post[]=[{...blank,id:'s1',title:'Why every Zimbabwean business needs a website',slug:'why-zimbabwean-business-needs-website',excerpt:'Customers search online first. Here is how a website wins them.',body:'## Customers search first\n\nMost buyers look online before they call.\n\n### Trust\n\nA clear website builds trust.\n\n## What to do next\n\nStart with a simple page.',focus_keyword:'business website',meta_title:'Why Every Zimbabwean Business Needs a Website',meta_description:'Customers search online first. Learn how a simple website builds trust and brings new customers to your Zimbabwean business.',status:'draft'}];
 
@@ -104,9 +106,9 @@ export default function BlogEditor({workspace,demo=false}:{workspace:Workspace;d
     <div className="blog-main">
      <fieldset disabled={busy||demo} className="panel">
       <label>Title<input required maxLength={160} value={sel.title} onChange={e=>setTitle(e.target.value)} placeholder="The headline readers see"/></label>
-      <label>URL slug<input required value={sel.slug} onChange={e=>{setSlugTouched(true);up('slug',slugify(e.target.value,90));}} placeholder="why-your-business-needs-a-website"/><small>{live?'Address: '+live:'The address of this post'}{sel.status==='published'?'. This post is live. Changing the slug breaks links people already have.':''}</small></label>
-      <label>H1 heading (optional)<input maxLength={160} value={sel.h1} onChange={e=>up('h1',e.target.value)} placeholder={sel.title||'Leave empty to use the title'}/><small>The main heading on the page. One per page. Defaults to the title.</small></label>
-      <label>Short summary<textarea rows={2} maxLength={400} value={sel.excerpt} onChange={e=>up('excerpt',e.target.value)} placeholder="One or two sentences for blog lists"/></label>
+      <label>URL slug<input id="blog-f-slug" required value={sel.slug} onChange={e=>{setSlugTouched(true);up('slug',slugify(e.target.value,90));}} placeholder="why-your-business-needs-a-website"/><small>{live?'Address: '+live:'The address of this post'}{sel.status==='published'?'. This post is live. Changing the slug breaks links people already have.':''}</small></label>
+      <label>H1 heading (optional)<input id="blog-f-h1" maxLength={160} value={sel.h1} onChange={e=>up('h1',e.target.value)} placeholder={sel.title||'Leave empty to use the title'}/><small>The main heading on the page. One per page. Defaults to the title.</small></label>
+      <label>Short summary<textarea id="blog-f-excerpt" rows={2} maxLength={400} value={sel.excerpt} onChange={e=>up('excerpt',e.target.value)} placeholder="One or two sentences for blog lists"/></label>
       <div className="form-grid">
        <label>Category<input maxLength={60} value={sel.category} onChange={e=>up('category',e.target.value)} placeholder="e.g. Websites"/></label>
        <label>Tags (comma separated)<input value={sel.tags.join(', ')} onChange={e=>up('tags',e.target.value.split(',').map(t=>t.trim()).filter(Boolean).slice(0,15))} placeholder="seo, hosting"/></label>
@@ -145,10 +147,10 @@ export default function BlogEditor({workspace,demo=false}:{workspace:Workspace;d
 
      <fieldset disabled={busy||demo} className="panel">
       <span className="eyebrow">SEARCH APPEARANCE</span><h3>Meta tags</h3>
-      <label>Focus keyword<input maxLength={80} value={sel.focus_keyword} onChange={e=>up('focus_keyword',e.target.value)} placeholder="The phrase people would search for"/></label>
-      <label>Meta title <span className={'blog-count '+(metaTitle.length>60?'over':'')}>{metaTitle.length}/60</span><input maxLength={120} value={sel.meta_title} onChange={e=>up('meta_title',e.target.value)} placeholder={sel.title||'Defaults to the title'}/></label>
-      <label>Meta description <span className={'blog-count '+(desc.length>160?'over':'')}>{desc.length}/160</span><textarea rows={3} maxLength={320} value={sel.meta_description} onChange={e=>up('meta_description',e.target.value)} placeholder="The text shown under your title in Google"/></label>
-      <label>Canonical address (optional)<input value={sel.canonical_url} onChange={e=>up('canonical_url',e.target.value.trim())} placeholder="https://www.nxt-workforce.com/blog/your-post"/><small>Set this to the page address on your own website so Google counts that page as the original.</small></label>
+      <label>Focus keyword<input id="blog-f-focus_keyword" maxLength={80} value={sel.focus_keyword} onChange={e=>up('focus_keyword',e.target.value)} placeholder="The phrase people would search for"/></label>
+      <label>Meta title <span className={'blog-count '+(metaTitle.length>60?'over':'')}>{metaTitle.length}/60</span><input id="blog-f-meta_title" maxLength={120} value={sel.meta_title} onChange={e=>up('meta_title',e.target.value)} placeholder={sel.title||'Defaults to the title'}/></label>
+      <label>Meta description <span className={'blog-count '+(desc.length>160?'over':'')}>{desc.length}/160</span><textarea id="blog-f-meta_description" rows={3} maxLength={320} value={sel.meta_description} onChange={e=>up('meta_description',e.target.value)} placeholder="The text shown under your title in Google"/></label>
+      <label>Canonical address (optional)<input id="blog-f-canonical_url" value={sel.canonical_url} onChange={e=>up('canonical_url',e.target.value.trim())} placeholder="https://www.nxt-workforce.com/blog/your-post"/><small>Set this to the page address on your own website so Google counts that page as the original.</small></label>
       <div className="blog-serp" aria-label="Google preview"><span className="blog-serp-url">{(live||'https://yoursite.com/blog/post').replace(/^https?:\/\//,'')}</span><strong>{snip.title||'Your meta title'}</strong><p>{snip.description||'Your meta description appears here.'}</p></div>
       <div className="blog-share" aria-label="Social card preview">{(sel.og_image_path||sel.hero_path)?<img src={img(sel.og_image_path||sel.hero_path)} alt=""/>:<div className="blog-share-empty">No share image</div>}<div><small>{(live||'yoursite.com').replace(/^https?:\/\//,'').split('/')[0]}</small><strong>{metaTitle||'Title'}</strong><p>{desc||sel.excerpt}</p></div></div>
       <div className="action-row"><label className="secondary logo-upload-button">{sel.og_image_path?'Replace share image':'Upload a separate share image'}<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={e=>{const f=e.target.files?.[0];e.target.value='';if(f)void run(async()=>{up('og_image_path',await upload(f));});}}/></label>{sel.og_image_path&&<button type="button" className="secondary" onClick={()=>up('og_image_path',null)}>Use main image</button>}</div>
@@ -174,7 +176,7 @@ export default function BlogEditor({workspace,demo=false}:{workspace:Workspace;d
 
      <section className="panel blog-seo">
       <div className="build-section-head"><div><span className="eyebrow">SEO CHECKLIST</span><h3>Search score</h3></div><span className={'sla-pill '+pill(score)}>{score}%</span></div>
-      <div className="build-checks">{checks.map(c=><article key={c.key} className={'site-check '+c.state}><strong>{c.state==='pass'?'Pass':c.state==='warn'?'Review':'Fix'} · {c.label}</strong><small>{c.detail}</small></article>)}</div>
+      <div className="build-checks">{checks.map(c=>{const target=checkField[c.key];return <article key={c.key} className={'site-check '+c.state}><strong>{c.state==='pass'?'Pass':c.state==='warn'?'Review':'Fix'} · {c.label}</strong><small>{c.detail}</small>{target&&c.state!=='pass'&&<button type="button" className="secondary check-jump" onClick={()=>jumpTo(target)}>Go to this field</button>}</article>;})}</div>
      </section>
 
      <section className="panel blog-outline">
